@@ -1,0 +1,349 @@
+🚀 COPIER-COLLER: COMMANDES DE LANCEMENT RAPIDE
+================================================
+
+Utilisez ces commandes exactement pour lancer le déploiement!
+
+
+1️⃣ LANCEMENT COMPLET EN 1 LIGNE (Recommandé)
+===============================================
+
+Ouvrir PowerShell Admin et exécuter:
+
+```powershell
+cd c:\AKIG; .\PRE_LAUNCH_VALIDATION.ps1; .\DEPLOYMENT_PROGRESSIVE.ps1 -Phase all; .\HEALTH_CHECK.ps1
+```
+
+Puis ouvrir navigateur: http://localhost:3000
+
+
+2️⃣ DÉPLOIEMENT ÉTAPE PAR ÉTAPE (Si problème)
+==============================================
+
+Terminal PowerShell Admin:
+
+```powershell
+# Étape 1: Vérifier l'environnement
+cd c:\AKIG
+.\PRE_LAUNCH_VALIDATION.ps1
+# Attendu: 🟢 VALIDATION RÉUSSIE
+```
+
+```powershell
+# Étape 2: Configuration
+cd c:\AKIG\backend
+npm run migrate
+npm run seed
+cd c:\AKIG
+```
+
+```powershell
+# Étape 3: Tester
+npm run smoke
+```
+
+```powershell
+# Étape 4: Déployer (Phase 1)
+.\DEPLOYMENT_PROGRESSIVE.ps1 -Phase canary
+# Attendu: ✓ Phase canary complète
+```
+
+```powershell
+# Étape 5: Déployer (Phase 2)
+.\DEPLOYMENT_PROGRESSIVE.ps1 -Phase phase2
+# Attendu: ✓ Phase 2 complète
+```
+
+```powershell
+# Étape 6: Déployer (Phase 3)
+.\DEPLOYMENT_PROGRESSIVE.ps1 -Phase full
+# Attendu: ✓ Déploiement complet terminé
+```
+
+```powershell
+# Étape 7: Vérifier
+.\HEALTH_CHECK.ps1
+# Attendu: 🟢 STATUT GLOBAL: SAIN
+```
+
+
+3️⃣ MODE DÉVELOPPEMENT (Pas d'orchestration)
+=============================================
+
+Terminal 1 - Backend:
+```powershell
+cd c:\AKIG
+npm run start:api
+# Attendu: Server listening on port 4000
+```
+
+Terminal 2 - Frontend:
+```powershell
+cd c:\AKIG
+npm run start:web
+# Attendu: webpack compiled successfully
+```
+
+Terminal 3 - Monitoring:
+```powershell
+cd c:\AKIG
+.\HEALTH_CHECK.ps1
+```
+
+Navigateur: http://localhost:3000
+
+
+4️⃣ SI PROBLÈME: TESTS DE DIAGNOSTIC
+====================================
+
+Vérifier ports:
+```powershell
+netstat -ano | findstr "4000 3000 5432"
+# Si "LISTENING": port est utilisé (tuer le process)
+```
+
+Vérifier PostgreSQL:
+```powershell
+psql -h localhost -U postgres -d postgres -c "SELECT 1;"
+# Si erreur: démarrer PostgreSQL service
+net start postgresql-x64-15
+```
+
+Tuer les processus Node:
+```powershell
+Get-Process | Where-Object {$_.Name -eq "node"} | Stop-Process -Force
+```
+
+Nettoyer et réinstaller:
+```powershell
+cd c:\AKIG
+npm run clean
+npm run bootstrap
+npm run smoke
+```
+
+
+5️⃣ ROLLBACK EN CAS DE PROBLÈME
+===============================
+
+Arrêter tous les services:
+```powershell
+Get-Process | Where-Object {$_.Name -in "node"} | Stop-Process -Force
+```
+
+Rollback du déploiement:
+```powershell
+cd c:\AKIG
+.\DEPLOYMENT_PROGRESSIVE.ps1 -Phase rollback
+```
+
+Réinitialiser la base:
+```powershell
+npm --prefix backend run db:reset
+```
+
+
+6️⃣ ACCÈS AU SYSTÈME UNE FOIS DÉMARRÉ
+======================================
+
+Interface Web:
+  URL: http://localhost:3000
+  Email: test@akig.com
+  Password: password123
+
+API Health:
+  URL: http://localhost:4000/api/health
+  → Devrait retourner 200 OK
+
+Swagger API Docs:
+  URL: http://localhost:4000/api/docs
+  (si configuré dans backend)
+
+
+7️⃣ CONSULTER LES LOGS
+======================
+
+Logs du déploiement:
+```powershell
+Get-Content c:\AKIG\deployment-logs\*.log -Tail 50
+```
+
+Logs du backend (temps réel):
+```powershell
+Get-Content c:\AKIG\backend\logs\*.log -Tail 50 -Wait
+```
+
+Erreurs seulement:
+```powershell
+Get-Content c:\AKIG\deployment-logs\*.log | Select-String "ERROR"
+```
+
+Alertes P1 seulement:
+```powershell
+Get-Content c:\AKIG\deployment-logs\*.log | Select-String "P1"
+```
+
+
+8️⃣ TESTS APRÈS LANCEMENT
+==========================
+
+Smoke tests (rapide):
+```powershell
+cd c:\AKIG
+npm run smoke
+```
+
+E2E tests (complet, 5-10 min):
+```powershell
+cd c:\AKIG
+npm run test:notice-system
+```
+
+Performance baseline:
+```powershell
+cd c:\AKIG
+npm run perf:baseline
+```
+
+
+9️⃣ COMMANDES UTILES QUOTIDIENNES
+=================================
+
+Redémarrer les services:
+```powershell
+# Arrêter
+Get-Process | Where-Object {$_.Name -eq "node"} | Stop-Process
+
+# Redémarrer
+cd c:\AKIG
+npm start
+```
+
+Vérifier santé:
+```powershell
+cd c:\AKIG
+.\HEALTH_CHECK.ps1
+```
+
+Consulter metrics:
+```powershell
+# Depuis le dashboard
+http://localhost:3000
+# Onglet "Aperçu"
+```
+
+Exporter les données:
+```
+Dashboard → Filtres → "Exporter PDF" ou "Exporter Excel"
+```
+
+
+🔟 MISE À JOUR / MAINTENANCE
+=============================
+
+Mettre à jour les dépendances:
+```powershell
+cd c:\AKIG
+npm run bootstrap
+```
+
+Appliquer migrations nouvelles:
+```powershell
+npm --prefix backend run migrate
+```
+
+Charger nouvelles données:
+```powershell
+npm --prefix backend run seed
+```
+
+Nettoyer les anciens logs:
+```powershell
+Remove-Item c:\AKIG\deployment-logs\*.log -Force
+```
+
+
+📋 MODÈLES DE COMMANDES FRÉQUENTES
+====================================
+
+# Démarrer rapidement
+cd c:\AKIG; npm start
+
+# Tester
+npm run test:notice-system
+
+# Vérifier santé
+.\HEALTH_CHECK.ps1
+
+# Voir les logs
+Get-Content c:\AKIG\backend\logs\error.log -Tail 20
+
+# Redémarrer base
+npm --prefix backend run db:reset
+
+# Arrêter tout
+Stop-Process -Name node -Force
+
+
+⚠️ ERREURS COURANTES & SOLUTIONS
+==================================
+
+Erreur: "Port 4000 is already in use"
+Solution:
+  taskkill /F /IM node.exe
+  OU éditer .env: PORT=5000
+
+Erreur: "Cannot connect to PostgreSQL"
+Solution:
+  net start postgresql-x64-15
+  Vérifier DATABASE_URL dans .env
+
+Erreur: "npm: command not found"
+Solution:
+  Installer Node.js depuis nodejs.org
+  Redémarrer PowerShell
+
+Erreur: "Build failed"
+Solution:
+  npm run clean
+  npm run bootstrap
+  npm run build
+
+Erreur: "Tests failed"
+Solution:
+  npm --prefix backend run seed
+  npm run test:notice-system -- --reporter=verbose
+
+
+🟢 SI TOUT EST OK
+==================
+
+Vous verrez:
+  ✓ PRE_LAUNCH_VALIDATION: 🟢 VALIDATION RÉUSSIE
+  ✓ DEPLOYMENT_PROGRESSIVE: ✓ Déploiement complet terminé
+  ✓ HEALTH_CHECK: 🟢 STATUT GLOBAL: SAIN
+  ✓ Dashboard: http://localhost:3000 (accessible)
+  ✓ API: http://localhost:4000/api/health (200 OK)
+
+Félicitations! 🎉 Système en production!
+
+
+📞 BESOIN D'AIDE?
+=================
+
+1. Consulter la doc:
+   cat c:\AKIG\QUICK_START_DEPLOYMENT.md
+
+2. Lancer le diagnostic:
+   .\PRE_LAUNCH_VALIDATION.ps1
+
+3. Vérifier la santé:
+   .\HEALTH_CHECK.ps1
+
+4. Contacter le support:
+   ops@akig.com
+
+
+---
+
+Généré: 2024
+Quick Reference v1.0

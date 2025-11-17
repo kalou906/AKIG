@@ -1,0 +1,204 @@
+# docker-compose.traefik.yml
+# Traefik Reverse Proxy avec SSL auto (Let's Encrypt)
+version: '3.8'
+
+services:
+  traefik:
+    image: traefik:v3.0
+    container_name: akig-traefik
+    command:
+      # API et dashboard
+      - "--api.insecure=true"
+      - "--api.dashboard=true"
+
+      # Provider Docker
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=akig-network"
+
+      # Entrypoints
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+
+      # Redirection HTTP -> HTTPS
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+
+      # Let's Encrypt
+      - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.email=admin@akig.com"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+      # Pour dev: utiliser staging
+      # - "--certificatesresolvers.letsencrypt.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+
+      # Logs
+      - "--log.level=INFO"
+      - "--accesslog=true"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080" # Dashboard Traefik
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/letsencrypt:/letsencrypt
+      - ./traefik/logs:/var/log/traefik
+    networks:
+      - akig-network
+    labels:
+      - "traefik.enable=true"
+
+      # Dashboard Traefik
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.akig.local`)"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.entrypoints=websecure"
+      - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
+    restart: unless-stopped
+
+  # API Backend Node.js
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: akig-api
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=${DATABASE_URL}
+      - JWT_SECRET=${JWT_SECRET}
+      - ML_SERVICE_URL=http://ml-api:8001
+    networks:
+      - akig-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=Host(`api.akig.local`)"
+      - "traefik.http.routers.api.entrypoints=websecure"
+      - "traefik.http.routers.api.tls.certresolver=letsencrypt"
+      - "traefik.http.services.api.loadbalancer.server.port=8000"
+
+      # CORS headers
+      - "traefik.http.middlewares.api-cors.headers.accesscontrolallowmethods=GET,POST,PUT,DELETE,OPTIONS"
+      - "traefik.http.middlewares.api-cors.headers.accesscontrolalloworigin=*"
+      - "traefik.http.middlewares.api-cors.headers.accesscontrolmaxage=100"
+      - "traefik.http.middlewares.api-cors.headers.addvaryheader=true"
+      - "traefik.http.routers.api.middlewares=api-cors"
+    depends_on:
+      - postgres
+      - redis
+
+  # ML Service Python
+  ml-api:
+    build:
+      context: ./ml-service
+      dockerfile: Dockerfile
+    container_name: akig-ml-api
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - akig-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ml-api.rule=Host(`ml.akig.local`)"
+      - "traefik.http.routers.ml-api.entrypoints=websecure"
+      - "traefik.http.routers.ml-api.tls.certresolver=letsencrypt"
+      - "traefik.http.services.ml-api.loadbalancer.server.port=8001"
+    depends_on:
+      - postgres
+      - redis
+
+  # Frontend React
+  frontend:
+    build:
+      context: ./frontend-react
+      dockerfile: Dockerfile
+    container_name: akig-frontend
+    environment:
+      - VITE_API_URL=https://api.akig.local
+      - VITE_ML_API_URL=https://ml.akig.local
+    networks:
+      - akig-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`dashboard.akig.local`) || Host(`akig.local`)"
+      - "traefik.http.routers.frontend.entrypoints=websecure"
+      - "traefik.http.routers.frontend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.frontend.loadbalancer.server.port=80"
+
+      # Compression
+      - "traefik.http.middlewares.frontend-compress.compress=true"
+      - "traefik.http.routers.frontend.middlewares=frontend-compress"
+
+  # PostgreSQL
+  postgres:
+    image: timescale/timescaledb:latest-pg15
+    container_name: akig-postgres
+    environment:
+      POSTGRES_DB: solvency_dev
+      POSTGRES_USER: ${POSTGRES_USER:-user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pass}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - akig-network
+    restart: unless-stopped
+
+  # Redis
+  redis:
+    image: redis:7-alpine
+    container_name: akig-redis
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    networks:
+      - akig-network
+    restart: unless-stopped
+
+  # Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: akig-prometheus
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    networks:
+      - akig-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.prometheus.rule=Host(`prometheus.akig.local`)"
+      - "traefik.http.routers.prometheus.entrypoints=websecure"
+      - "traefik.http.routers.prometheus.tls.certresolver=letsencrypt"
+      - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
+    restart: unless-stopped
+
+  # Grafana
+  grafana:
+    image: grafana/grafana:latest
+    container_name: akig-grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_SERVER_ROOT_URL=https://grafana.akig.local
+    volumes:
+      - grafana-data:/var/lib/grafana
+    networks:
+      - akig-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.grafana.rule=Host(`grafana.akig.local`)"
+      - "traefik.http.routers.grafana.entrypoints=websecure"
+      - "traefik.http.routers.grafana.tls.certresolver=letsencrypt"
+      - "traefik.http.services.grafana.loadbalancer.server.port=3000"
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+networks:
+  akig-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  redis-data:
+  prometheus-data:
+  grafana-data:

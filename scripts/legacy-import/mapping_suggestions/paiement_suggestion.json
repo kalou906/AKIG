@@ -1,0 +1,60 @@
+{
+  "legacy_table": "paiement",
+  "target_table": "TODO_remplacer_par_nom_table_cible",
+  "enabled": false,
+  "comment": "Validez et activez ce mapping après vérification",
+  "columns": {
+    "legacy_columns": [
+      "p_id",
+      "orig",
+      "locataire_id",
+      "contrat_id",
+      "local_id",
+      "grc_encaissement",
+      "reglement_mode",
+      "reglement_detail"
+    ],
+    "samples": [
+      {
+        "p_id": "1027",
+        "orig": "locataire",
+        "locataire_id": "198",
+        "contrat_id": "212",
+        "local_id": "222",
+        "grc_encaissement": "NULL",
+        "reglement_mode": "1",
+        "reglement_detail": "NULL"
+      },
+      {
+        "p_id": "1032",
+        "orig": "locataire",
+        "locataire_id": "199",
+        "contrat_id": "213",
+        "local_id": "226",
+        "grc_encaissement": "NULL",
+        "reglement_mode": "1",
+        "reglement_detail": "NULL"
+      },
+      {
+        "p_id": "1038",
+        "orig": "locataire",
+        "locataire_id": "43",
+        "contrat_id": "46",
+        "local_id": "33",
+        "grc_encaissement": "NULL",
+        "reglement_mode": "1",
+        "reglement_detail": "NULL"
+      }
+    ]
+  },
+  "field_mapping": {
+    "p_id": "target_p_id",
+    "orig": "target_orig",
+    "locataire_id": "target_locataire_id",
+    "contrat_id": "target_contrat_id",
+    "local_id": "target_local_id",
+    "grc_encaissement": "target_grc_encaissement",
+    "reglement_mode": "target_reglement_mode",
+    "reglement_detail": "target_reglement_detail"
+  }
+}

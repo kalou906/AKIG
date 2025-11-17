@@ -1,0 +1,329 @@
+name: Template - [Your Workflow Name]
+
+# Workflow Trigger Configuration
+on:
+  schedule:
+    - cron: '0 0 * * *'      # Daily at 00:00 UTC - MODIFY AS NEEDED
+  workflow_dispatch:          # Allow manual trigger
+  pull_request:               # OPTIONAL: Trigger on PR
+    paths:
+      - 'src/path/**'         # MODIFY: Watch specific files
+
+env:
+  NODE_ENV: test
+  LOG_LEVEL: info
+  # Add your environment variables here
+
+jobs:
+  # ============================================================================
+  # SECTION 1: Setup Job (usually first)
+  # ============================================================================
+  setup:
+    name: 🔧 Setup Environment
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    services:
+      # Database service if needed
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_pass
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🗄️ Wait for database
+        if: ${{ job.services.postgres }}
+        run: |
+          until pg_isready -h localhost -p 5432; do
+            echo "Waiting for PostgreSQL..."
+            sleep 2
+          done
+
+      - name: 🚀 Run migrations
+        env:
+          DATABASE_URL: postgresql://test_user:test_pass@localhost:5432/test_db
+        run: |
+          # Your migration command
+          echo "✓ Setup completed"
+
+  # ============================================================================
+  # SECTION 2: Main Test Job
+  # ============================================================================
+  main-tests:
+    name: 🧪 Main Tests
+    runs-on: ubuntu-latest
+    needs: setup  # Wait for setup job
+    timeout-minutes: 30
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🧪 Run tests
+        run: |
+          npm test
+          echo "✓ Tests completed"
+
+      - name: 📊 Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage/lcov.info
+          flags: main-tests
+
+  # ============================================================================
+  # SECTION 3: Integration Tests
+  # ============================================================================
+  integration-tests:
+    name: 🔗 Integration Tests
+    runs-on: ubuntu-latest
+    needs: main-tests
+    timeout-minutes: 30
+    
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_pass
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🧪 Run integration tests
+        env:
+          DATABASE_URL: postgresql://test_user:test_pass@localhost:5432/test_db
+        run: |
+          npm test -- --integration
+          echo "✓ Integration tests completed"
+
+  # ============================================================================
+  # SECTION 4: Performance Tests (Optional)
+  # ============================================================================
+  performance-tests:
+    name: ⚡ Performance Tests
+    runs-on: ubuntu-latest
+    needs: integration-tests
+    timeout-minutes: 30
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: ⚡ Run perf tests
+        run: |
+          npm run test:perf
+          echo "✓ Performance tests completed"
+
+      - name: 📈 Compare with baseline
+        run: |
+          # Compare current perf with baseline
+          echo "✓ Performance comparison completed"
+
+  # ============================================================================
+  # SECTION 5: Report & Notifications
+  # ============================================================================
+  report:
+    name: 📊 Generate Report
+    runs-on: ubuntu-latest
+    needs: [main-tests, integration-tests, performance-tests]
+    if: always()  # Run even if previous jobs fail
+    timeout-minutes: 10
+    
+    steps:
+      - name: 📝 Create summary
+        run: |
+          cat > $GITHUB_STEP_SUMMARY << EOF
+          # 🧪 Workflow Test Report
+          
+          ## Results
+          
+          | Test | Status |
+          |------|--------|
+          | Main Tests | ${{ needs.main-tests.result }} |
+          | Integration Tests | ${{ needs.integration-tests.result }} |
+          | Performance Tests | ${{ needs.performance-tests.result }} |
+          
+          **Date**: $(date -u +"%Y-%m-%d %H:%M UTC")
+          
+          ## Details
+          - [View full workflow logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          EOF
+
+      - name: 📧 Send email notification
+        if: ${{ failure() && secrets.ALERT_EMAIL != '' }}
+        run: |
+          echo "Would send email to: ${{ secrets.ALERT_EMAIL }}"
+          # Integrate with email service (SendGrid, AWS SES, etc.)
+
+      - name: 🔔 Send Slack notification
+        if: ${{ secrets.SLACK_WEBHOOK != '' }}
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK }}
+          payload: |
+            {
+              "text": "Workflow: ${{ job.status }}",
+              "attachments": [
+                {
+                  "color": "${{ job.status == 'success' && '00aa00' || 'ff0000' }}",
+                  "fields": [
+                    {
+                      "title": "Workflow",
+                      "value": "${{ github.workflow }}"
+                    },
+                    {
+                      "title": "Status",
+                      "value": "${{ job.status }}"
+                    },
+                    {
+                      "title": "Run",
+                      "value": "${{ github.run_id }}"
+                    }
+                  ]
+                }
+              ]
+            }
+
+  # ============================================================================
+  # SECTION 6: Cleanup (Optional)
+  # ============================================================================
+  cleanup:
+    name: 🧹 Cleanup
+    runs-on: ubuntu-latest
+    needs: report
+    if: always()
+    
+    steps:
+      - name: 🧹 Clean up artifacts
+        run: |
+          echo "Cleaning up temporary files..."
+          # Remove test data, temp files, etc.
+          echo "✓ Cleanup completed"
+
+# ============================================================================
+# WORKFLOW STRUCTURE NOTES
+# ============================================================================
+#
+# 1. JOB ORDERING:
+#    - Setup jobs run first (establish environment)
+#    - Test jobs run after setup (use prepared environment)
+#    - Report jobs run last (summarize all results)
+#
+# 2. TIMEOUTS:
+#    - Setup: 10 minutes
+#    - Tests: 30 minutes
+#    - Reports: 10 minutes
+#    - Adjust based on your needs
+#
+# 3. SERVICES:
+#    - Only add services you actually need
+#    - Services run for entire job duration
+#    - Can be expensive resource-wise
+#
+# 4. SECRETS:
+#    - Reference as: ${{ secrets.SECRET_NAME }}
+#    - Define in: Repository Settings → Secrets
+#    - Never commit secrets to git
+#
+# 5. CONDITIONALS:
+#    - if: ${{ success() }} - Run if all previous steps succeed
+#    - if: ${{ failure() }} - Run if any previous step fails
+#    - if: ${{ always() }} - Always run regardless
+#
+# 6. MATRIX TESTING (Optional example):
+#    strategy:
+#      matrix:
+#        node-version: [16, 18, 20]
+#    then use: node-version: ${{ matrix.node-version }}
+#
+# ============================================================================
+
+# ============================================================================
+# COMMON ACTIONS REFERENCE
+# ============================================================================
+#
+# Checkout Code:
+#   uses: actions/checkout@v4
+#
+# Setup Node.js:
+#   uses: actions/setup-node@v4
+#   with:
+#     node-version: '18'
+#
+# Setup Python:
+#   uses: actions/setup-python@v4
+#   with:
+#     python-version: '3.11'
+#
+# Cache NPM:
+#   cache: 'npm'
+#   cache-dependency-path: package-lock.json
+#
+# Upload Artifacts:
+#   uses: actions/upload-artifact@v3
+#   with:
+#     name: test-results
+#     path: ./coverage/
+#
+# Download Artifacts:
+#   uses: actions/download-artifact@v3
+#   with:
+#     name: test-results
+#
+# Create Release:
+#   uses: actions/create-release@v1
+#   env:
+#     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#
+# ============================================================================

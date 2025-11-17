@@ -1,0 +1,6 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: solvency-ai
+  labels:
+    app: solvency-api

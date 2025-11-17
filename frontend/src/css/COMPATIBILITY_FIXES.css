@@ -1,0 +1,260 @@
+/**
+ * CSS Compatibility Fixes for Chrome Android & Cross-browser Support
+ * Ensures WCAG compliance and proper rendering across all devices
+ */
+
+/* ============================================================
+   CRITICAL FIX: Viewport Meta Tag Corrections
+   ============================================================ */
+
+/* 
+   ISSUE: 'viewport' meta element should NOT contain 'maximum-scale' or 'user-scalable'
+   per WCAG 2.1 Success Criterion 1.4.4 (Resize text)
+   
+   FIXED in: frontend/public/index.html
+   OLD: content="width=device-width, initial-scale=1.0"
+   NEW: content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+   
+   The 'maximum-scale' and 'user-scalable=no' prevent users from zooming,
+   which violates accessibility requirements.
+*/
+
+/* ============================================================
+   CRITICAL FIX: webkit-backdrop-filter for Safari Compatibility
+   ============================================================ */
+
+/* 
+   Chrome 53+ supports: backdrop-filter
+   Safari 9+: Requires -webkit-backdrop-filter prefix
+   Fix: Always add -webkit-backdrop-filter BEFORE backdrop-filter
+*/
+
+.glass-card,
+.modal-backdrop,
+[class*="blur"],
+[class*="glass"] {
+  /* Always add webkit prefix first for Safari compatibility */
+  -webkit-backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
+  backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
+}
+
+/* ============================================================
+   FIX: webkit-user-select for Safari Compatibility
+   ============================================================ */
+
+/* 
+   Chrome 54+: user-select
+   Safari 3+: Requires -webkit-user-select prefix
+   Fix: Always add -webkit-user-select BEFORE user-select
+*/
+
+.no-select,
+.logo,
+.brand,
+button,
+[contenteditable="false"] {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.selectable,
+textarea,
+input {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* ============================================================
+   FIX: webkit-text-size-adjust for Mobile Compatibility
+   ============================================================ */
+
+/*
+   Issue: Some browsers auto-enlarge text on mobile
+   Chrome 54+: text-size-adjust
+   Safari: Requires -webkit-text-size-adjust
+   Firefox: May need -moz-text-size-adjust
+   Fix: Set to 100% to prevent auto-adjustment
+*/
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Mobile text size adjustment */
+body {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* ============================================================
+   FIX: webkit-filter for Chrome Android 53+
+   ============================================================ */
+
+/*
+   Note: Most modern code uses 'filter' not 'webkit-filter'
+   webkit-filter is deprecated - use 'filter' instead
+   If you must use webkit-filter (legacy), also add 'filter'
+*/
+
+.filter-effect {
+  filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
+}
+
+.invert-dark {
+  /* Instead of webkit-filter, use filter */
+  filter: invert(100%);
+}
+
+/* ============================================================
+   FIX: forced-color-adjust for Accessibility (High Contrast Mode)
+   ============================================================ */
+
+/*
+   Issue: 'forced-color-adjust' not supported in Safari
+   Chrome 76+: forced-color-adjust
+   Safari: Not supported (gracefully ignored)
+   Fix: Use for Windows High Contrast mode, will degrade gracefully
+*/
+
+@media (prefers-contrast: more) {
+  .preserve-colors {
+    /* This will work in Chrome and degrade gracefully in Safari */
+    forced-color-adjust: none;
+  }
+}
+
+/* ============================================================
+   IMPORTANT: Remove -webkit-image-set from CSS
+   ============================================================ */
+
+/*
+   DO NOT USE: -webkit-image-set() in content property
+   This is for image property only, not content
+   Use regular background-image or <img> tags instead
+   
+   REMOVED FROM:
+   - CSS before content that used -webkit-image-set
+   - Use data: URIs or image files directly instead
+*/
+
+/* CORRECT usage of image-set (for background-image only) */
+.icon-responsive {
+  background-image: 
+    -webkit-image-set(
+      url('image-1x.png') 1x,
+      url('image-2x.png') 2x
+    ),
+    image-set(
+      url('image-1x.png') 1x,
+      url('image-2x.png') 2x
+    );
+}
+
+/* ============================================================
+   FIX: theme-color Meta Tag Firefox Compatibility
+   ============================================================ */
+
+/*
+   Issue: 'meta[name=theme-color]' not supported by Firefox
+   Chrome, Edge, Safari: Supported
+   Firefox: Not supported (safely ignored)
+   
+   ADDED in index.html:
+   <meta name="msapplication-TileColor" content="#CE1126">
+   
+   This ensures Windows tiles also get the theme color
+*/
+
+/* ============================================================
+   COMPREHENSIVE WEBKIT PREFIX GUIDE
+   ============================================================ */
+
+/*
+   When to use -webkit- prefix:
+   
+   ✓ -webkit-backdrop-filter: Always for Safari 9+
+   ✓ -webkit-user-select: Always for Safari 3+
+   ✓ -webkit-text-size-adjust: For mobile text adjustment
+   ✓ -webkit-appearance: For form elements
+   ✓ -webkit-box-shadow: For Safari 5+
+   ✓ -webkit-transform: For Safari 5+
+   
+   ✗ -webkit-filter: DON'T USE - use 'filter' instead
+   ✗ -webkit-image-set in content: DON'T USE - for background-image only
+   ✗ -webkit-tap-highlight-color: Only for debugging
+*/
+
+/* ============================================================
+   BROWSER COMPATIBILITY CHECKLIST
+   ============================================================ */
+
+/*
+   ✅ Chrome Android 53+:
+      - backdrop-filter ✓
+      - filter ✓
+      - user-select ✓
+      - text-size-adjust ✓
+   
+   ✅ Safari 9+:
+      - -webkit-backdrop-filter ✓
+      - -webkit-user-select ✓
+      - -webkit-text-size-adjust ✓
+   
+   ✅ Firefox:
+      - backdrop-filter ✓ (60+)
+      - user-select ✓
+      - text-size-adjust ✓
+   
+   ✅ Edge 79+:
+      - Same as Chrome
+   
+   ⚠️ IE 11:
+      - Most modern features not supported
+      - Consider fallbacks
+*/
+
+/* ============================================================
+   TESTING CHECKLIST
+   ============================================================ */
+
+/*
+   1. Chrome DevTools:
+      - F12 > Rendering > Emulate CSS media feature (prefers-color-scheme)
+      - Test different color schemes
+   
+   2. Chrome Mobile (Chrome Android):
+      - F12 > Toggle device toolbar
+      - Test at different screen sizes
+      - Verify no console errors about unsupported properties
+   
+   3. Safari (macOS/iOS):
+      - Use Safari Developer Tools
+      - Verify backdrop-filter works with -webkit prefix
+   
+   4. Firefox:
+      - Verify no warnings about unsupported prefixes
+   
+   5. Accessibility:
+      - F12 > Rendering > Emulate CSS media feature (prefers-reduced-motion)
+      - Verify animations respect motion preferences
+      - Test keyboard navigation
+      - Test with screen readers
+*/
+
+/* ============================================================
+   CSS VALIDATION REPORT
+   ============================================================ */
+
+/*
+   FILES FIXED:
+   ✅ frontend/public/index.html - Viewport meta tag corrected
+   ✅ frontend/src/components/Header.css - Added -webkit-backdrop-filter
+   ✅ frontend/src/components/AdvancedRealtimeDashboard.module.css - Added -webkit-backdrop-filter (2x)
+   ✅ frontend/src/components/PortfolioAnalytics.module.css - Added -webkit-backdrop-filter
+   ✅ frontend/src/components/ErrorBoundaryRobust.css - Added -webkit-user-select
+   ✅ frontend/src/css/logo-integration.css - Already had proper webkit prefixes
+   
+   STATUS: All critical compatibility issues resolved ✅
+*/

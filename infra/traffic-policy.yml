@@ -1,0 +1,6 @@
+origin_servers:
+  - eu-west.akig.example.com
+  - af-west.akig.example.com
+health_check:
+  path: /api/health
+failover: automatic

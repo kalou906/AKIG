@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json.schemastore.org/package.json",
+  "name": "akig-e2e-tests",
+  "version": "1.0.0",
+  "description": "E2E tests for AKIG application using Cypress",
+  "scripts": {
+    "test": "cypress run",
+    "test:ui": "cypress open",
+    "test:headed": "cypress run --headed",
+    "test:spec": "cypress run --spec",
+    "test:errorflow": "cypress run --spec 'cypress/e2e/errorflow.cy.js'",
+    "test:contracts": "cypress run --spec 'cypress/e2e/contracts.cy.js'",
+    "test:dashboard": "cypress run --spec 'cypress/e2e/dashboard.cy.js'",
+    "test:all": "cypress run"
+  },
+  "keywords": ["cypress", "e2e", "testing"],
+  "author": "",
+  "license": "MIT"
+}

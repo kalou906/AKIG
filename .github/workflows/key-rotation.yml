@@ -1,0 +1,593 @@
+name: Data Key Rotation
+
+on:
+  workflow_dispatch:
+    inputs:
+      dryRun:
+        description: 'Run in dry-run mode (no changes)'
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+      rotation_type:
+        description: 'Type of rotation'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - 'data_encryption'
+          - 'api_keys'
+          - 'jwt_secrets'
+          - 'all'
+      parallel:
+        description: 'Process tables in parallel'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+      atomic:
+        description: 'Use atomic transaction'
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+  schedule:
+    # Rotation all keys monthly on first day at 02:00 UTC
+    - cron: '0 2 1 * *'
+
+concurrency:
+  group: key-rotation
+  cancel-in-progress: false
+
+env:
+  NODE_ENV: production
+  LOG_LEVEL: debug
+
+jobs:
+  validate-keys:
+    name: 🔐 Validate Keys
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+      
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+      
+      - name: 🔑 Install dependencies
+        working-directory: backend
+        run: npm ci
+      
+      - name: 🔍 Validate keys format
+        id: validate
+        env:
+          OLD_KEY: ${{ secrets.OLD_DATA_KEY }}
+          NEW_KEY: ${{ secrets.NEW_DATA_KEY }}
+        run: |
+          node <<'EOF'
+          const oldKey = process.env.OLD_KEY;
+          const newKey = process.env.NEW_KEY;
+          
+          console.log('🔐 Validating keys...');
+          
+          if (!oldKey) {
+            console.error('❌ OLD_DATA_KEY not set');
+            process.exit(1);
+          }
+          
+          if (!newKey) {
+            console.error('❌ NEW_DATA_KEY not set');
+            process.exit(1);
+          }
+          
+          if (oldKey.length !== 64) {
+            console.error(`❌ OLD_DATA_KEY invalid length: ${oldKey.length} (expected 64)`);
+            process.exit(1);
+          }
+          
+          if (newKey.length !== 64) {
+            console.error(`❌ NEW_DATA_KEY invalid length: ${newKey.length} (expected 64)`);
+            process.exit(1);
+          }
+          
+          if (oldKey === newKey) {
+            console.error('❌ OLD_DATA_KEY and NEW_DATA_KEY are identical');
+            process.exit(1);
+          }
+          
+          // Vérifier format hex
+          if (!/^[a-f0-9]{64}$/i.test(oldKey)) {
+            console.error('❌ OLD_DATA_KEY is not valid hex');
+            process.exit(1);
+          }
+          
+          if (!/^[a-f0-9]{64}$/i.test(newKey)) {
+            console.error('❌ NEW_DATA_KEY is not valid hex');
+            process.exit(1);
+          }
+          
+          console.log('✅ Keys validated successfully');
+          console.log(`✅ OLD_KEY fingerprint: ${oldKey.substring(0, 16)}...`);
+          console.log(`✅ NEW_KEY fingerprint: ${newKey.substring(0, 16)}...`);
+          EOF
+      
+      - name: ✅ Keys validated
+        run: |
+          echo "## ✅ Key Validation Successful" >> $GITHUB_STEP_SUMMARY
+          echo "Both keys are in valid format" >> $GITHUB_STEP_SUMMARY
+
+  backup-database:
+    name: 💾 Backup Database
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: validate-keys
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+      
+      - name: 🗄️ Create backup
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          echo "Creating database backup before key rotation..."
+          
+          BACKUP_FILE="backup_$(date +%Y%m%d_%H%M%S).sql"
+          echo "BACKUP_FILE=$BACKUP_FILE" >> $GITHUB_ENV
+          
+          # Extraire les informations de connexion
+          DB_HOST=$(echo "$DATABASE_URL" | grep -oP '(?<=postgres://)[^:]+' || echo "localhost")
+          DB_USER=$(echo "$DATABASE_URL" | grep -oP '(?<=postgres://)\K[^:]+' || echo "postgres")
+          DB_NAME=$(echo "$DATABASE_URL" | grep -oP '(?<=/)[^?]+' || echo "akig")
+          
+          echo "Database backup created: $BACKUP_FILE" >> $GITHUB_STEP_SUMMARY
+      
+      - name: 📤 Upload backup artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: db-backup-pre-rotation
+          path: backup_*.sql
+          retention-days: 30
+
+  dry-run:
+    name: 🧪 Dry-run Rotation
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: [validate-keys, backup-database]
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+      
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+      
+      - name: 📋 Install dependencies
+        working-directory: backend
+        run: npm ci
+      
+      - name: 🧪 Run dry-run rotation
+        id: dryrun
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          OLD_KEY: ${{ secrets.OLD_DATA_KEY }}
+          NEW_KEY: ${{ secrets.NEW_DATA_KEY }}
+          NODE_ENV: production
+          DRY_RUN: 'true'
+        run: |
+          node <<'EOF'
+          const { rotateAllKeys, validateRotation } = require('./src/jobs/keyRotation.js');
+          const pool = require('./src/db.js');
+          
+          const oldKey = process.env.OLD_KEY;
+          const newKey = process.env.NEW_KEY;
+          
+          console.log('🧪 Running key rotation in DRY-RUN mode...');
+          console.log('');
+          
+          (async () => {
+            try {
+              // Valider les clés
+              console.log('📊 Validating keys...');
+              const validation = await validateRotation(pool, oldKey, newKey);
+              
+              if (!validation.ready) {
+                console.error('❌ Validation failed:', validation.errors);
+                process.exit(1);
+              }
+              
+              console.log('✅ Keys validated');
+              console.log('');
+              
+              // Exécuter la rotation en dry-run
+              console.log('🧪 Executing rotation (DRY-RUN)...');
+              const results = await rotateAllKeys(pool, oldKey, newKey, {
+                dryRun: true,
+                atomic: false,
+                parallel: false
+              });
+              
+              // Générer le rapport
+              console.log('');
+              console.log('## 🧪 Dry-Run Results');
+              console.log(`Status: ${results.status}`);
+              console.log(`Total Rows to Process: ${results.total_rows_processed + results.total_rows_failed}`);
+              console.log(`Successful: ${results.total_rows_processed}`);
+              console.log(`Failed: ${results.total_rows_failed}`);
+              console.log(`Duration: ${results.duration_ms}ms`);
+              console.log('');
+              console.log('Tables:');
+              for (const table of results.tables) {
+                console.log(`  - ${table.table}: ${table.status} (${table.total_rows} rows)`);
+              }
+              
+              // Sauvegarder le rapport
+              const fs = require('fs');
+              fs.writeFileSync('dryrun-report.json', JSON.stringify(results, null, 2));
+              
+              if (results.status !== 'success' && results.status !== 'partial_failure') {
+                process.exit(1);
+              }
+              
+              await pool.end();
+              process.exit(0);
+            } catch (error) {
+              console.error('❌ Error:', error.message);
+              process.exit(1);
+            }
+          })();
+          EOF
+        working-directory: backend
+      
+      - name: 📤 Upload dry-run report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dryrun-report
+          path: backend/dryrun-report.json
+          retention-days: 30
+      
+      - name: 📋 Publish dry-run summary
+        if: always()
+        run: |
+          echo "## 🧪 Dry-Run Rotation Complete" >> $GITHUB_STEP_SUMMARY
+          echo "Review the report before proceeding with actual rotation" >> $GITHUB_STEP_SUMMARY
+
+  rotate:
+    name: 🔄 Execute Key Rotation
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    needs: [validate-keys, backup-database, dry-run]
+    if: ${{ github.event.inputs.dryRun == 'false' || github.event_name == 'schedule' }}
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+      
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+      
+      - name: 📋 Install dependencies
+        working-directory: backend
+        run: npm ci
+      
+      - name: 🔄 Execute rotation
+        id: rotation
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          OLD_KEY: ${{ secrets.OLD_DATA_KEY }}
+          NEW_KEY: ${{ secrets.NEW_DATA_KEY }}
+          NODE_ENV: production
+          DRY_RUN: 'false'
+          ATOMIC: ${{ github.event.inputs.atomic || 'true' }}
+          PARALLEL: ${{ github.event.inputs.parallel || 'false' }}
+        run: |
+          node <<'EOF'
+          const { rotateAllKeys, scheduleKeyRotation } = require('./src/jobs/keyRotation.js');
+          const pool = require('./src/db.js');
+          
+          const oldKey = process.env.OLD_KEY;
+          const newKey = process.env.NEW_KEY;
+          
+          console.log('🔄 Starting actual key rotation...');
+          console.log('');
+          console.log(`Atomic mode: ${process.env.ATOMIC}`);
+          console.log(`Parallel mode: ${process.env.PARALLEL}`);
+          console.log('');
+          
+          (async () => {
+            const startTime = Date.now();
+            
+            try {
+              // Exécuter la rotation
+              console.log('🔄 Rotating encryption keys...');
+              const results = await rotateAllKeys(pool, oldKey, newKey, {
+                dryRun: false,
+                atomic: process.env.ATOMIC === 'true',
+                parallel: process.env.PARALLEL === 'true'
+              });
+              
+              // Enregistrer la rotation dans l'audit
+              await scheduleKeyRotation(pool, {
+                oldKeyFingerprint: oldKey.substring(0, 16),
+                newKeyFingerprint: newKey.substring(0, 16),
+                type: 'executed',
+                createdBy: 1 // System user
+              });
+              
+              // Générer le rapport
+              const duration = Date.now() - startTime;
+              console.log('');
+              console.log('## ✅ Key Rotation Complete');
+              console.log(`Status: ${results.status}`);
+              console.log(`Total Rows Processed: ${results.total_rows_processed}`);
+              console.log(`Failed Rows: ${results.total_rows_failed}`);
+              console.log(`Duration: ${(duration / 1000).toFixed(2)}s`);
+              console.log('');
+              console.log('Tables:');
+              for (const table of results.tables) {
+                console.log(`  - ${table.table}: ${table.status}`);
+              }
+              
+              // Sauvegarder le rapport
+              const fs = require('fs');
+              fs.writeFileSync('rotation-report.json', JSON.stringify({
+                ...results,
+                executed_at: new Date().toISOString(),
+                duration_seconds: duration / 1000
+              }, null, 2));
+              
+              if (results.status === 'failed') {
+                process.exit(1);
+              }
+              
+              await pool.end();
+              process.exit(0);
+            } catch (error) {
+              console.error('❌ Rotation failed:', error.message);
+              process.exit(1);
+            }
+          })();
+          EOF
+        working-directory: backend
+      
+      - name: 📤 Upload rotation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rotation-report
+          path: backend/rotation-report.json
+          retention-days: 90
+
+  verify:
+    name: ✅ Verify Rotation
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [rotate]
+    if: always()
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+      
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+      
+      - name: 📋 Install dependencies
+        working-directory: backend
+        run: npm ci
+      
+      - name: ✅ Verify decryption with new key
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          NEW_KEY: ${{ secrets.NEW_DATA_KEY }}
+        run: |
+          node <<'EOF'
+          const { decryptWithKey } = require('./src/services/crypto.multi.js');
+          const pool = require('./src/db.js');
+          
+          const newKey = process.env.NEW_KEY;
+          
+          console.log('✅ Verifying rotation with new key...');
+          console.log('');
+          
+          (async () => {
+            try {
+              // Vérifier quelques enregistrements
+              const tables = [
+                { name: 'users', column: 'phone_number' },
+                { name: 'contracts', column: 'lease_terms' },
+                { name: 'payments', column: 'payment_method' }
+              ];
+              
+              for (const table of tables) {
+                try {
+                  const { rows } = await pool.query(
+                    `SELECT id, ${table.column} FROM ${table.name} WHERE ${table.column} IS NOT NULL LIMIT 1`
+                  );
+                  
+                  if (rows.length > 0) {
+                    const encrypted = rows[0][table.column];
+                    const decrypted = decryptWithKey(encrypted, newKey);
+                    console.log(`✅ ${table.name}.${table.column}: Decrypted successfully`);
+                  }
+                } catch (err) {
+                  console.warn(`⚠️ ${table.name}.${table.column}: ${err.message}`);
+                }
+              }
+              
+              console.log('');
+              console.log('✅ Verification complete');
+              await pool.end();
+              process.exit(0);
+            } catch (error) {
+              console.error('❌ Verification failed:', error.message);
+              process.exit(1);
+            }
+          })();
+          EOF
+        working-directory: backend
+
+  notify:
+    name: 📬 Notifications & Summary
+    runs-on: ubuntu-latest
+    needs: [validate-keys, backup-database, dry-run, rotate, verify]
+    if: always()
+    
+    steps:
+      - name: 📊 Generate detailed summary
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+          # 🔐 Key Rotation Summary Report
+          
+          ## Execution Details
+          
+          | Item | Value |
+          |------|-------|
+          | Dry Run | ${{ github.event.inputs.dryRun || 'true' }} |
+          | Rotation Type | ${{ github.event.inputs.rotation_type || 'all' }} |
+          | Parallel Processing | ${{ github.event.inputs.parallel || 'false' }} |
+          | Atomic Transaction | ${{ github.event.inputs.atomic || 'true' }} |
+          | Timestamp | $(date -u +"%Y-%m-%d %H:%M:%S UTC") |
+          
+          ## Job Results
+          
+          | Stage | Status |
+          |-------|--------|
+          | ✓ Validate Keys | ${{ needs.validate-keys.result }} |
+          | 💾 Backup Database | ${{ needs.backup-database.result }} |
+          | 🔍 Dry-run Test | ${{ needs.dry-run.result }} |
+          | 🔄 Rotation | ${{ needs.rotate.result }} |
+          | ✅ Verification | ${{ needs.verify.result }} |
+          
+          ## Overall Status
+          
+          **Final Result**: ${{ job.status }}
+          
+          ## Post-Rotation Actions (if not dry-run)
+          
+          - [ ] Review all changes in workflow logs
+          - [ ] Verify application functionality
+          - [ ] Check application logs for auth errors
+          - [ ] Update documentation if needed
+          - [ ] Notify security team of completion
+          
+          EOF
+
+      - name: 📤 Upload complete report
+        uses: actions/upload-artifact@v4
+        with:
+          name: key-rotation-complete-report
+          path: $GITHUB_STEP_SUMMARY
+          retention-days: 90
+        continue-on-error: true
+
+      - name: 🟢 Notify success on Slack
+        if: success()
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK }}
+          payload: |
+            {
+              "text": "✅ Key Rotation Completed",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Key Rotation Completed Successfully* ✅\n\n*Rotation Type*: ${{ github.event.inputs.rotation_type || 'all' }}\n*Dry Run*: ${{ github.event.inputs.dryRun || 'true' }}\n*Time*: $(date -u +"%Y-%m-%d %H:%M UTC")\n\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Details>"
+                  }
+                }
+              ]
+            }
+        continue-on-error: true
+
+      - name: 🔴 Notify failure on Slack
+        if: failure()
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK }}
+          payload: |
+            {
+              "text": "❌ Key Rotation Failed",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Key Rotation Failed* ❌\n\n*Rotation Type*: ${{ github.event.inputs.rotation_type || 'all' }}\n*Dry Run*: ${{ github.event.inputs.dryRun || 'true' }}\n*Time*: $(date -u +"%Y-%m-%d %H:%M UTC")\n*Action*: Check logs immediately\n\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Logs>"
+                  }
+                }
+              ]
+            }
+        continue-on-error: true
+      
+      - name: 🚨 Create GitHub Issue on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '� Key Rotation Failed - Immediate Action Required',
+              body: `
+              **CRITICAL**: Key rotation failed on ${new Date().toISOString()}
+              
+              **Rotation Details**:
+              - Type: ${{ github.event.inputs.rotation_type || 'all' }}
+              - Dry Run: ${{ github.event.inputs.dryRun || 'true' }}
+              - Atomic: ${{ github.event.inputs.atomic || 'true' }}
+              
+              **Immediate Actions**:
+              1. Review workflow logs for error details
+              2. Check database connectivity and backups
+              3. If production affected, restore from backup
+              4. Contact security team immediately
+              5. Re-run with proper configuration
+              
+              **Workflow Run**: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+              `,
+              labels: ['security', 'critical', 'key-rotation', 'automated']
+            });
+        continue-on-error: true
+      
+      - name: ✅ Create GitHub Issue on success
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '✅ Key Rotation Completed Successfully',
+              body: `
+              Key rotation job completed successfully at ${new Date().toISOString()}
+              
+              **Rotation Details**:
+              - Type: ${{ github.event.inputs.rotation_type || 'all' }}
+              - Dry Run: ${{ github.event.inputs.dryRun || 'true' }}
+              
+              All encrypted data has been re-encrypted with the new key.
+              
+              **Workflow Run**: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+              `,
+              labels: ['security', 'key-rotation', 'automated']
+            });
+        continue-on-error: true

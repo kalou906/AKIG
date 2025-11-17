@@ -1,0 +1,11 @@
+{
+  "name": "AKIG",
+  "description": "Agence Immobilière Guinéenne",
+  "brandingColors": "Bleu/Blanc/Rouge",
+  "locale": "fr_GN",
+  "timezone": "Africa/Conakry",
+  "currency": "GNF",
+  "market": "Guinée - Conakry",
+  "generatedAt": "2025-10-28T10:03:15.628Z",
+  "version": "1.0"
+}

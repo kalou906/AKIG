@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Hexagone externe - Bleu -->
+  <polygon points="100,20 170,55 170,145 100,180 30,145 30,55"
+           fill="#001F3F" stroke="#CC0000" stroke-width="2"/>
+  
+  <!-- Hexagone interne - Blanc -->
+  <polygon points="100,40 155,70 155,130 100,160 45,130 45,70"
+           fill="#FFFFFF"/>
+  
+  <!-- Maison en centre -->
+  <g transform="translate(100, 100)">
+    <!-- Toit - Rouge -->
+    <polygon points="0,-18 -15,-5 15,-5" fill="#CC0000"/>
+    
+    <!-- Corps - Bleu -->
+    <rect x="-12" y="-5" width="24" height="20" fill="#0056B3"/>
+    
+    <!-- Porte - Or -->
+    <rect x="-4" y="5" width="8" height="10" fill="#FFD700"/>
+    
+    <!-- Fenêtres -->
+    <rect x="-9" y="0" width="5" height="5" fill="#4DAAFF"/>
+    <rect x="4" y="0" width="5" height="5" fill="#4DAAFF"/>
+  </g>
+  
+  <!-- Texte AKIG -->
+  <text x="100" y="190" font-family="Arial, sans-serif" font-size="14" font-weight="bold"
+        text-anchor="middle" fill="#001F3F">AKIG</text>
+</svg>

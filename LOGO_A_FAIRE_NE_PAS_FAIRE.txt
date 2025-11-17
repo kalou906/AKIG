@@ -1,0 +1,211 @@
+📌 QUOI FAIRE? QUOI NE PAS FAIRE?
+═══════════════════════════════════════════════════════════════════════════════════
+
+
+✅ À FAIRE
+═══════════════════════════════════════════════════════════════════════════════════
+
+ÉTAPE 1: PRÉPARER LE LOGO
+
+✅ FAIRE:
+   • Utiliser une image PNG, JPG ou SVG
+   • Image CARRÉE (200x200, 512x512, etc.)
+   • Moins de 500 KB de taille
+   • Exemple: MonLogo.png
+
+❌ NE PAS FAIRE:
+   • Image rectangulaire (300x200)
+   • Format BMP ou TIFF
+   • Image de 10 MB
+   • Format inconnu
+
+
+ÉTAPE 2: PLACER LE FICHIER
+
+✅ FAIRE:
+   1. Ouvrir Explorateur: Win+E
+   2. Naviguer: C:\AKIG\frontend\public\assets\logos
+   3. Copier logo ici
+   4. Renommer: logo.png
+   5. RÉSULTAT: C:\AKIG\frontend\public\assets\logos\logo.png
+
+❌ NE PAS FAIRE:
+   ✗ Placer dans: C:\AKIG\logos (mauvais endroit!)
+   ✗ Placer dans: C:\AKIG\frontend (trop haut)
+   ✗ Placer dans: C:\AKIG\frontend\public (faux dossier)
+   ✗ Nommer: Logo.png (majuscule)
+   ✗ Nommer: mon-logo.png (sans raison)
+   ✗ Nommer: logo (sans extension)
+   ✗ Nommer: Mon Logo.png (espace!)
+   ✗ Nommer: Mön Lögö.png (accents!)
+
+
+ÉTAPE 3: MODIFIER LE CODE
+
+✅ FAIRE:
+   1. Ouvrir: C:\AKIG\frontend\src\pages\Login.jsx
+   2. Trouver les 3 lignes avec <div className="w-14 h-14 bg-gradient...
+   3. Remplacer par:
+      <img 
+          src="/assets/logos/logo.png" 
+          alt="Logo" 
+          className="w-14 h-14 object-contain drop-shadow-lg rounded-xl"
+      />
+   4. Sauvegarder: Ctrl+S
+
+✅ LES CHEMINS CORRECTS:
+   • /assets/logos/logo.png       ✓ CORRECT
+   • src="/assets/logos/logo.png"  ✓ CORRECT
+
+❌ NE PAS FAIRE:
+   ✗ src="C:\AKIG\frontend\public\assets\logos\logo.png" (chemin Windows)
+   ✗ src="assets/logos/logo.png"  (pas le /)
+   ✗ src="/assets/logos/Logo.png" (majuscule)
+   ✗ src="/assets\logos\logo.png" (backslash au lieu de /)
+   ✗ src='/assets/logos/logo.png'  (guillemets simples OK mais pas cohérent)
+   ✗ Oublier le / au début
+
+
+ÉTAPE 4: REDÉMARRER SERVEUR
+
+✅ FAIRE:
+   1. Ouvrir PowerShell
+   2. Taper: cd C:\AKIG\frontend
+   3. Taper: npm start
+   4. Attendre 2-3 minutes
+   5. Voir: "Compiled successfully"
+
+❌ NE PAS FAIRE:
+   ✗ Taper autre chose que "npm start"
+   ✗ Ne pas vérifier le dossier (C:\AKIG\frontend)
+   ✗ Fermer PowerShell tout de suite
+   ✗ Ouvrir le navigateur AVANT "Compiled successfully"
+
+
+ÉTAPE 5: VÉRIFIER RÉSULTAT
+
+✅ FAIRE:
+   1. Ouvrir: http://localhost:3000/login
+   2. Vérifier: Logo apparaît
+   3. Connexion: demo@akig.com / demo1234
+   4. Accès dashboard: OK
+
+✅ POUR VIDER LE CACHE:
+   • Ctrl+Shift+R (la bonne méthode)
+   • OU: F12 → Cache → Supprimer
+
+❌ NE PAS FAIRE:
+   ✗ F5 seulement (pas assez)
+   ✗ Ctrl+R (seulement recharge)
+   ✗ Ouvrir navigateur AVANT serveur prêt
+
+
+═══════════════════════════════════════════════════════════════════════════════════
+🎨 EXEMPLES DE CODE
+═══════════════════════════════════════════════════════════════════════════════════
+
+
+EXEMPLE 1: REMPLACEMENT SIMPLE
+────────────────────────────────
+
+AVANT (Le code actuel):
+   <div className="w-14 h-14 bg-gradient-to-br from-white to-blue-100 rounded-xl flex items-center justify-center shadow-lg">
+       <span className="text-2xl font-bold text-blue-600">A</span>
+   </div>
+
+APRÈS (Le nouveau code):
+   <img 
+       src="/assets/logos/logo.png" 
+       alt="Logo" 
+       className="w-14 h-14 object-contain drop-shadow-lg rounded-xl"
+   />
+
+
+EXEMPLE 2: SI LE LOGO EST PETIT
+────────────────────────────────
+
+Augmenter la taille: w-14 h-14 → w-24 h-24
+
+   <img 
+       src="/assets/logos/logo.png" 
+       alt="Logo" 
+       className="w-24 h-24 object-contain drop-shadow-lg rounded-xl"
+   />
+
+
+EXEMPLE 3: SI LE LOGO A BESOIN DE FOND
+───────────────────────────────────────
+
+   <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center shadow-lg">
+       <img 
+           src="/assets/logos/logo.png" 
+           alt="Logo" 
+           className="w-12 h-12 object-contain"
+       />
+   </div>
+
+
+═══════════════════════════════════════════════════════════════════════════════════
+🎯 RACCOURCIS CLAVIER À RETENIR
+═══════════════════════════════════════════════════════════════════════════════════
+
+Ctrl+C        = Arrêter le serveur PowerShell
+Ctrl+S        = Sauvegarder le fichier
+Ctrl+H        = Trouver et remplacer
+Ctrl+Shift+R  = Recharger page + vider cache (navigateur)
+Win+E         = Ouvrir Explorateur
+npm start     = Démarrer le serveur
+
+
+═══════════════════════════════════════════════════════════════════════════════════
+📝 VÉRIFIER VOTRE TRAVAIL
+═══════════════════════════════════════════════════════════════════════════════════
+
+Avant de dire "c'est fini", vérifier que:
+
+FICHIER ✓
+   □ C:\AKIG\frontend\public\assets\logos\logo.png EXISTE
+   □ Nommé EXACTEMENT "logo.png"
+
+CODE ✓
+   □ Login.jsx contient: src="/assets/logos/logo.png"
+   □ PAS de majuscules dans "logo"
+   □ PAS de caractères bizarres
+
+SERVEUR ✓
+   □ PowerShell affiche: "Compiled successfully"
+   □ http://localhost:3000/login marche
+   □ Logo visible sur la page
+
+RÉSULTAT ✓
+   □ Boîte bleue avec "A" → DISPARUE
+   □ Votre logo → VISIBLE
+   □ Connexion → FONCTIONNE
+   □ Dashboard → ACCESSIBLE
+
+
+═══════════════════════════════════════════════════════════════════════════════════
+💡 CONSEIL PRO
+═══════════════════════════════════════════════════════════════════════════════════
+
+SI VOUS AVEZ UN LOGO SANS FOND:
+  • PNG avec transparence = PARFAIT
+  • L'image s'adaptera à tous les fonds
+  • Ajouter drop-shadow pour bien voir
+
+SI VOUS AVEZ UN LOGO AVEC FOND:
+  • JPG normal
+  • Assurez-vous qu'il soit CARRÉ
+  • Si fond coloré, l'adapter au bleu
+
+SI VOUS AVEZ UN LOGO SVG:
+  • Fonctionnera parfaitement
+  • Restera net à toutes les tailles
+  • RECOMMANDÉ pour les logos vecteur
+
+
+═══════════════════════════════════════════════════════════════════════════════════
+
+Vous êtes prêt! Commencez par l'ÉTAPE 1 et suivez les points ✅ !
+
+═══════════════════════════════════════════════════════════════════════════════════

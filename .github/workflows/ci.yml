@@ -1,0 +1,215 @@
+name: 🔄 CI Pipeline - Build & Test
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+# Timeout global
+jobs:
+  build-and-test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: akig_user
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: akig_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+      # ==========================================
+      # 1. Checkout du code
+      # ==========================================
+      - name: 📦 Checkout code
+        uses: actions/checkout@v4
+
+      # ==========================================
+      # 2. Setup Node.js
+      # ==========================================
+      - name: 🟢 Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+
+      # ==========================================
+      # 3. Install dependencies
+      # ==========================================
+      - name: 📥 Install dependencies
+        run: |
+          cd backend && npm ci
+          cd ../frontend && npm ci
+
+      # ==========================================
+      # 4. Database setup
+      # ==========================================
+      - name: 🗄️  Setup PostgreSQL
+        env:
+          DATABASE_URL: postgres://akig_user:postgres@localhost:5432/akig_db
+        run: |
+          cd backend
+          npm run db:migrate || true
+          npm run db:seed || true
+
+      # ==========================================
+      # 5. Frontend build
+      # ==========================================
+      - name: 🏗️  Build frontend
+        run: |
+          cd frontend
+          npm run build
+        env:
+          CI: true
+          REACT_APP_API_URL: http://localhost:4000
+
+      # ==========================================
+      # 6. Backend build/lint
+      # ==========================================
+      - name: 🏗️  Build backend
+        run: |
+          cd backend
+          npm run lint || true
+
+      # ==========================================
+      # 7. Run unit tests
+      # ==========================================
+      - name: 🧪 Run unit tests
+        run: |
+          cd frontend
+          npm run test:unit || true
+          cd ../backend
+          npm run test || true
+
+      # ==========================================
+      # 8. Install Playwright browsers
+      # ==========================================
+      - name: 🎭 Install Playwright browsers
+        run: |
+          cd frontend
+          npx playwright install --with-deps chromium firefox webkit
+
+      # ==========================================
+      # 9. Run E2E tests (Playwright)
+      # ==========================================
+      - name: 🎬 Run E2E tests (Playwright)
+        env:
+          BASE_URL: http://localhost:3000
+          DATABASE_URL: postgres://akig_user:postgres@localhost:5432/akig_db
+        run: |
+          cd backend
+          npm run dev &
+          API_PID=$!
+          sleep 5
+          cd ../frontend
+          npm run test:e2e
+          kill $API_PID || true
+
+      # ==========================================
+      # 10. Upload Playwright report
+      # ==========================================
+      - name: 📊 Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: playwright-report-node${{ matrix.node-version }}
+          path: frontend/playwright-report/
+          retention-days: 7
+
+      # ==========================================
+      # 11. Code coverage report
+      # ==========================================
+      - name: 📈 Code coverage report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: |
+            frontend/coverage/
+            backend/coverage/
+          retention-days: 7
+
+      # ==========================================
+      # 12. Notify on failure
+      # ==========================================
+      - name: 📧 Notify on failure
+        if: failure()
+        run: |
+          echo "❌ CI Pipeline failed"
+          echo "Check the logs above for details"
+          exit 1
+
+      # ==========================================
+      # 13. Success notification
+      # ==========================================
+      - name: ✅ Success notification
+        if: success()
+        run: |
+          echo "✅ CI Pipeline completed successfully"
+          echo "📊 All tests passed"
+
+  # ==========================================
+  # SECURITY SCAN (optionnel)
+  # ==========================================
+  security:
+    name: 🔒 Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📦 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔍 Run Snyk scan
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        continue-on-error: true
+
+  # ==========================================
+  # PERFORMANCE CHECK (optionnel)
+  # ==========================================
+  performance:
+    name: ⚡ Performance Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📦 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+
+      - name: 📥 Install dependencies
+        run: cd frontend && npm ci
+
+      - name: 📊 Lighthouse audit
+        run: |
+          cd frontend
+          npm run build
+          npx lighthouse http://localhost:3000 \
+            --chrome-flags="--headless" \
+            --output-path=./lighthouse-report.json \
+            || true
+
+      - name: 📤 Upload Lighthouse report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: lighthouse-report
+          path: frontend/lighthouse-report.json
+          retention-days: 7

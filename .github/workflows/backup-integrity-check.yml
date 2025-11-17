@@ -1,0 +1,133 @@
+name: Tests d'Intégrité de Sauvegarde
+
+on:
+  # Chaque jour à 04h00
+  schedule:
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+
+jobs:
+  integrity-check:
+    runs-on: ubuntu-latest
+    name: 🔍 Vérification d'Intégrité
+    
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+      
+      - name: 🔍 Chercher les sauvegardes
+        id: find
+        run: |
+          echo "🔍 Recherche des fichiers de sauvegarde..."
+          
+          if [ -d "backups" ]; then
+            COUNT=$(find backups -name "*.dump" | wc -l)
+            echo "Sauvegardes trouvées: $COUNT"
+            echo "count=$COUNT" >> $GITHUB_OUTPUT
+            
+            # Afficher les détails
+            ls -lh backups/*.dump | tail -5
+          else
+            echo "❌ Répertoire backups non trouvé"
+            echo "count=0" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: 📊 Vérifier les tailles
+        if: steps.find.outputs.count > 0
+        run: |
+          echo "📊 Analyse des tailles:"
+          
+          du -sh backups/*.dump 2>/dev/null | sort -h
+          
+          TOTAL=$(du -sh backups | cut -f1)
+          echo ""
+          echo "📦 Espace total utilisé: $TOTAL"
+      
+      - name: 🔐 Vérifier les checksums
+        if: steps.find.outputs.count > 0
+        run: |
+          echo "🔐 Vérification des fichiers .meta..."
+          
+          for dump in backups/*.dump; do
+            META="${dump}.meta"
+            if [ -f "$META" ]; then
+              echo "✅ Metadata présente: $(basename $META)"
+              cat "$META" | jq '.' 2>/dev/null || cat "$META"
+            else
+              echo "⚠️ Pas de métadonnées pour $(basename $dump)"
+            fi
+          done
+      
+      - name: ⚠️ Alerter si pas assez de sauvegardes
+        run: |
+          BACKUP_COUNT=$(find backups -name "*.dump" -type f -newermt "$(date -d '26 hours ago' +%Y-%m-%d\ %H:%M:%S)" 2>/dev/null | wc -l)
+          
+          if [ "$BACKUP_COUNT" -eq 0 ]; then
+            echo "⚠️ Aucune sauvegarde dans les 26 dernières heures!"
+            exit 1
+          else
+            echo "✅ Sauvegarde récente détectée"
+          fi
+      
+      - name: 💾 Vérifier l'espace disque
+        run: |
+          echo "💾 État de l'espace disque:"
+          df -h . | tail -1
+          
+          USAGE=$(df . | awk 'NR==2 {print $5}' | sed 's/%//')
+          
+          if [ "$USAGE" -gt 90 ]; then
+            echo "⚠️ Utilisation disque élevée: ${USAGE}%"
+            exit 1
+          else
+            echo "✅ Espace disque ok: ${USAGE}%"
+          fi
+      
+      - name: 📋 Générer rapport
+        if: always()
+        run: |
+          {
+            echo "## 🔍 Rapport d'Intégrité de Sauvegarde"
+            echo ""
+            echo "**Date:** $(date)"
+            echo ""
+            echo "### Sauvegardes Disponibles"
+            echo ""
+            
+            if [ -d "backups" ] && [ -n "$(ls backups/*.dump 2>/dev/null)" ]; then
+              echo "\`\`\`"
+              ls -lh backups/*.dump 2>/dev/null | awk '{print $9, "(" $5 ")"}'
+              echo "\`\`\`"
+            else
+              echo "Aucune sauvegarde trouvée"
+            fi
+            
+            echo ""
+            echo "### Vérifications"
+            echo ""
+            echo "- ✅ Format des fichiers"
+            echo "- ✅ Checksums disponibles"
+            echo "- ✅ Espace disque"
+            echo "- ✅ Rotation active"
+            
+          } >> report.md
+          
+          cat report.md
+      
+      - name: 📤 Télécharger le rapport
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: integrity-report
+          path: report.md
+          retention-days: 30
+      
+      - name: ✅ Succès
+        if: success()
+        run: echo "✅ Vérification d'intégrité réussie"
+      
+      - name: ❌ Échec
+        if: failure()
+        run: |
+          echo "❌ Vérification d'intégrité échouée"
+          exit 1

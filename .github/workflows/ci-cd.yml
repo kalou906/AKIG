@@ -1,0 +1,276 @@
+name: AKIG CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # ============================================================
+  # Backend Tests
+  # ============================================================
+  backend-tests:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: akig_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: akig_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: 'backend/package-lock.json'
+
+    - name: Install Dependencies
+      working-directory: ./backend
+      run: npm ci
+
+    - name: Run Linter
+      working-directory: ./backend
+      run: npm run lint --if-present
+
+    - name: Run Tests
+      working-directory: ./backend
+      env:
+        DATABASE_URL: postgres://akig_user:test_password@localhost:5432/akig_test
+        JWT_SECRET: test_secret_key
+      run: npm test --if-present
+
+    - name: Upload Coverage
+      uses: codecov/codecov-action@v3
+      with:
+        files: ./backend/coverage/coverage-final.json
+        flags: backend
+        name: backend-coverage
+
+  # ============================================================
+  # Frontend Tests
+  # ============================================================
+  frontend-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: 'frontend/package-lock.json'
+
+    - name: Install Dependencies
+      working-directory: ./frontend
+      run: npm ci
+
+    - name: Run Linter
+      working-directory: ./frontend
+      run: npm run lint --if-present
+
+    - name: Run Tests
+      working-directory: ./frontend
+      run: npm test --if-present -- --coverage --watchAll=false
+
+    - name: Build
+      working-directory: ./frontend
+      run: npm run build
+
+    - name: Upload Coverage
+      uses: codecov/codecov-action@v3
+      with:
+        files: ./frontend/coverage/coverage-final.json
+        flags: frontend
+        name: frontend-coverage
+
+  # ============================================================
+  # Build Docker Images
+  # ============================================================
+  build-images:
+    needs: [backend-tests, frontend-tests]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Login to Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract Metadata
+      id: meta
+      uses: docker/metadata-action@v4
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=ref,event=branch
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=sha
+
+    - name: Build and Push Backend
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        file: ./Dockerfile
+        target: backend
+        push: ${{ github.event_name != 'pull_request' }}
+        tags: ${{ steps.meta.outputs.tags }}-backend
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Build and Push Frontend
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        file: ./Dockerfile
+        target: frontend
+        push: ${{ github.event_name != 'pull_request' }}
+        tags: ${{ steps.meta.outputs.tags }}-frontend
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  # ============================================================
+  # Security Scanning
+  # ============================================================
+  security-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Run Trivy Vulnerability Scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+
+    - name: Upload Trivy Results
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: 'trivy-results.sarif'
+
+    - name: Run Dependency Check
+      uses: dependency-check/Dependency-Check_Action@main
+      with:
+        project: 'AKIG'
+        path: '.'
+        format: 'JSON'
+
+  # ============================================================
+  # Deploy to Staging
+  # ============================================================
+  deploy-staging:
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+    needs: [build-images, security-scan]
+    runs-on: ubuntu-latest
+    environment: staging
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Deploy to Staging
+      env:
+        DEPLOY_KEY: ${{ secrets.STAGING_DEPLOY_KEY }}
+        DEPLOY_HOST: ${{ secrets.STAGING_HOST }}
+        DEPLOY_USER: ${{ secrets.STAGING_USER }}
+      run: |
+        mkdir -p ~/.ssh
+        echo "$DEPLOY_KEY" > ~/.ssh/deploy_key
+        chmod 600 ~/.ssh/deploy_key
+        ssh-keyscan -H $DEPLOY_HOST >> ~/.ssh/known_hosts
+        ssh -i ~/.ssh/deploy_key $DEPLOY_USER@$DEPLOY_HOST "cd /apps/akig && docker compose pull && docker compose up -d"
+
+    - name: Run Health Checks
+      run: |
+        echo "Running health checks..."
+        sleep 10
+        curl -f http://${{ secrets.STAGING_HOST }}:4000/api/health || exit 1
+
+  # ============================================================
+  # Deploy to Production
+  # ============================================================
+  deploy-production:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: [build-images, security-scan]
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Create Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ github.run_number }}
+        release_name: Release v${{ github.run_number }}
+        body: |
+          Production release automatically deployed
+
+    - name: Deploy to Production
+      env:
+        DEPLOY_KEY: ${{ secrets.PROD_DEPLOY_KEY }}
+        DEPLOY_HOST: ${{ secrets.PROD_HOST }}
+        DEPLOY_USER: ${{ secrets.PROD_USER }}
+      run: |
+        mkdir -p ~/.ssh
+        echo "$DEPLOY_KEY" > ~/.ssh/deploy_key
+        chmod 600 ~/.ssh/deploy_key
+        ssh-keyscan -H $DEPLOY_HOST >> ~/.ssh/known_hosts
+        ssh -i ~/.ssh/deploy_key $DEPLOY_USER@$DEPLOY_HOST "cd /apps/akig && docker compose pull && docker compose up -d && docker compose exec -T api npm run migrate"
+
+    - name: Run Production Health Checks
+      run: |
+        echo "Running production health checks..."
+        sleep 10
+        curl -f https://api.akig.gn/health || exit 1
+
+    - name: Notify Success
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        text: 'Production deployment successful!'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+      if: success()
+
+    - name: Notify Failure
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        text: 'Production deployment failed!'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+      if: failure()

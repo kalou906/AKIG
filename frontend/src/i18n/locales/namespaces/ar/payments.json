@@ -1,0 +1,86 @@
+{
+  "title": "المدفوعات",
+  "subtitle": "إدارة المدفوعات والإيجارات",
+  "list": {
+    "title": "قائمة المدفوعات",
+    "columns": {
+      "id": "رقم التعريف",
+      "tenant": "المستأجر",
+      "property": "الممتلك",
+      "amount": "المبلغ",
+      "due_date": "تاريخ الاستحقاق",
+      "paid_date": "تاريخ الدفع",
+      "method": "الطريقة",
+      "status": "الحالة",
+      "reference": "المرجع"
+    },
+    "actions": {
+      "view_details": "عرض التفاصيل",
+      "download_receipt": "تحميل الإيصال",
+      "send_reminder": "إرسال تذكير",
+      "mark_paid": "وضع علامة كمدفوع",
+      "cancel_payment": "إلغاء الدفع"
+    }
+  },
+  "form": {
+    "title": "دفع جديد",
+    "edit_title": "تحرير الدفع",
+    "tenant_id": "المستأجر",
+    "property_id": "الممتلك",
+    "amount": "المبلغ",
+    "due_date": "تاريخ الاستحقاق",
+    "method": "طريقة الدفع",
+    "reference": "المرجع",
+    "notes": "ملاحظات",
+    "submit": "تسجيل الدفع"
+  },
+  "methods": {
+    "card": "بطاقة ائتمان",
+    "bank_transfer": "تحويل بنكي",
+    "check": "شيك",
+    "cash": "نقد",
+    "mobile": "دفع عبر الهاتف المحمول",
+    "wallet": "محفظة إلكترونية"
+  },
+  "status": {
+    "pending": "قيد الانتظار",
+    "paid": "مدفوع",
+    "overdue": "متأخر عن الموعد",
+    "partial": "دفع جزئي",
+    "cancelled": "ملغى",
+    "refunded": "مستردة"
+  },
+  "receipt": {
+    "title": "إيصال الدفع",
+    "number": "رقم الإيصال",
+    "date": "التاريخ",
+    "tenant": "المستأجر",
+    "property": "الممتلك",
+    "amount": "المبلغ",
+    "method": "طريقة الدفع",
+    "reference": "المرجع",
+    "print": "طباعة",
+    "download": "تحميل (PDF)",
+    "email": "بريد إلكتروني"
+  },
+  "arrears": {
+    "title": "الديون المتأخرة",
+    "total_amount": "إجمالي المبلغ المتأخر",
+    "tenant_name": "المستأجر",
+    "property": "الممتلك",
+    "due_date": "تاريخ الاستحقاق",
+    "days_overdue": "أيام التأخر",
+    "send_notice": "إرسال إشعار",
+    "escalate": "تصعيد",
+    "settle": "تسوية"
+  },
+  "messages": {
+    "payment_recorded": "تم تسجيل الدفع بنجاح",
+    "receipt_sent": "تم إرسال الإيصال بنجاح",
+    "reminder_sent": "تم إرسال التذكير",
+    "payment_cancelled": "تم إلغاء الدفع",
+    "insufficient_amount": "مبلغ غير كافي",
+    "invalid_date": "تاريخ غير صالح",
+    "duplicate_reference": "المرجع موجود بالفعل"
+  }
+}

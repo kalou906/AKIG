@@ -1,0 +1,90 @@
+{
+  "title": "Locataires",
+  "subtitle": "Gestion des locataires",
+  "list": {
+    "title": "Liste des locataires",
+    "columns": {
+      "id": "ID",
+      "name": "Nom",
+      "email": "Email",
+      "phone": "Téléphone",
+      "property": "Propriété",
+      "lease_start": "Début du bail",
+      "lease_end": "Fin du bail",
+      "status": "Statut",
+      "arrears": "Impayés"
+    },
+    "actions": {
+      "view_profile": "Voir le profil",
+      "edit": "Modifier",
+      "view_lease": "Voir le bail",
+      "view_payments": "Voir les paiements",
+      "send_message": "Envoyer un message"
+    }
+  },
+  "form": {
+    "title": "Nouveau locataire",
+    "edit_title": "Modifier le locataire",
+    "first_name": "Prénom",
+    "last_name": "Nom de famille",
+    "email": "Email",
+    "phone": "Téléphone",
+    "address": "Adresse",
+    "id_number": "Numéro d'identification",
+    "national_id": "ID National",
+    "passport": "Passeport",
+    "employer": "Employeur",
+    "occupation": "Profession",
+    "emergency_contact": "Contact d'urgence",
+    "notes": "Notes",
+    "submit": "Créer le locataire"
+  },
+  "profile": {
+    "title": "Profil du locataire",
+    "personal_information": "Informations personnelles",
+    "contact_information": "Informations de contact",
+    "current_lease": "Bail actuel",
+    "payment_history": "Historique des paiements",
+    "documents": "Documents",
+    "activity": "Activité"
+  },
+  "status": {
+    "active": "Actif",
+    "inactive": "Inactif",
+    "new": "Nouveau",
+    "departing": "En cours de départ",
+    "departed": "Parti",
+    "in_default": "En défaut de paiement",
+    "suspended": "Suspendu",
+    "pending_verification": "En attente de vérification"
+  },
+  "communication": {
+    "title": "Communication",
+    "send_email": "Envoyer un email",
+    "send_sms": "Envoyer un SMS",
+    "send_notification": "Envoyer une notification",
+    "message_template": "Modèle de message",
+    "recipient": "Destinataire",
+    "subject": "Objet",
+    "body": "Corps",
+    "send": "Envoyer",
+    "schedule": "Planifier"
+  },
+  "documents": {
+    "title": "Documents",
+    "upload": "Télécharger un document",
+    "id_copy": "Copie d'identification",
+    "proof_of_income": "Justificatif de revenu",
+    "contract": "Contrat",
+    "lease_agreement": "Accord de location",
+    "other": "Autres"
+  },
+  "messages": {
+    "tenant_created": "Locataire créé avec succès",
+    "tenant_updated": "Locataire mis à jour",
+    "tenant_deleted": "Locataire supprimé",
+    "email_sent": "Email envoyé avec succès",
+    "sms_sent": "SMS envoyé avec succès",
+    "confirm_delete": "Êtes-vous sûr de vouloir supprimer ce locataire ?"
+  }
+}

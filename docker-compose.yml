@@ -1,0 +1,73 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: akig_postgres
+    environment:
+      POSTGRES_USER: akig
+      POSTGRES_PASSWORD: akig
+      POSTGRES_DB: akig_db
+      TZ: Africa/Conakry
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/migrations:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: [ 'CMD-SHELL', 'pg_isready -U akig -d akig_db' ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - akig_network
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: akig_api
+    environment:
+      NODE_ENV: development
+      PORT: 4000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+      DATABASE_URL: postgres://akig:akig@postgres:5432/akig_db
+      JWT_SECRET: dev_secret_change_in_prod
+      CORS_ORIGIN: http://localhost:3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - '4000:4000'
+    healthcheck:
+      test: [ 'CMD-SHELL', 'wget -q --spider http://localhost:4000/api/health || exit 1' ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - akig_network
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: akig_frontend
+    environment:
+      REACT_APP_API_URL: http://localhost:4000
+    ports:
+      - '3000:3000'
+    networks:
+      - akig_network
+    restart: unless-stopped
+
+networks:
+  akig_network:
+    driver: bridge
+
+volumes:
+  postgres_data:

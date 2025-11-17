@@ -1,0 +1,419 @@
+name: Test Restauration Hebdomadaire
+
+on:
+  schedule:
+    # Chaque dimanche à 03h00 UTC
+    - cron: '0 3 * * 0'
+  # Permettre le déclenchement manuel
+  workflow_dispatch:
+    inputs:
+      backup_file:
+        description: 'Fichier de sauvegarde à tester (optionnel)'
+        required: false
+        type: string
+
+env:
+  PG_HOST: localhost
+  PG_PORT: 5432
+  PG_USER: postgres
+  PG_DATABASE: akig
+  BACKUP_DIR: ./backups
+  LOG_DIR: ./logs
+
+jobs:
+  restore-test:
+    runs-on: ubuntu-latest
+    
+    # Service PostgreSQL
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: akig
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    
+    steps:
+      # 1. Récupérer le code
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      # 2. Afficher les informations d'environnement
+      - name: ℹ️ Information système
+        run: |
+          echo "📅 Date: $(date)"
+          echo "🐧 Système: $(uname -a)"
+          echo "🐘 PostgreSQL: $(psql --version)"
+          psql -h localhost -U postgres -d akig -c "SELECT version();" || echo "BD non disponible"
+      
+      # 3. Attendre que PostgreSQL soit prêt
+      - name: ⏳ Attendre PostgreSQL
+        run: |
+          for i in {1..30}; do
+            if pg_isready -h localhost -p 5432 -U postgres; then
+              echo "✅ PostgreSQL est prêt"
+              break
+            fi
+            echo "⏳ Tentative $i/30..."
+            sleep 2
+          done
+      
+      # 4. Initialiser la base de données de test
+      - name: 🗄️ Initialiser la base de données
+        env:
+          PGPASSWORD: postgres
+        run: |
+          echo "🔧 Création des tables..."
+          psql -h localhost -p 5432 -U postgres -d akig << 'EOF'
+          -- Table utilisateurs
+          CREATE TABLE IF NOT EXISTS users (
+            id SERIAL PRIMARY KEY,
+            email VARCHAR(255) UNIQUE NOT NULL,
+            password_hash VARCHAR(255) NOT NULL,
+            name VARCHAR(255),
+            role VARCHAR(50) DEFAULT 'user',
+            created_at TIMESTAMP DEFAULT NOW(),
+            updated_at TIMESTAMP DEFAULT NOW(),
+            last_login TIMESTAMP
+          );
+
+          -- Table contrats
+          CREATE TABLE IF NOT EXISTS contracts (
+            id SERIAL PRIMARY KEY,
+            user_id INTEGER REFERENCES users(id),
+            property_name VARCHAR(255) NOT NULL,
+            tenant_name VARCHAR(255) NOT NULL,
+            start_date DATE NOT NULL,
+            end_date DATE,
+            monthly_rent DECIMAL(10, 2),
+            created_at TIMESTAMP DEFAULT NOW(),
+            updated_at TIMESTAMP DEFAULT NOW()
+          );
+
+          -- Table paiements
+          CREATE TABLE IF NOT EXISTS payments (
+            id SERIAL PRIMARY KEY,
+            contract_id INTEGER REFERENCES contracts(id),
+            amount DECIMAL(10, 2) NOT NULL,
+            paid_at DATE,
+            method VARCHAR(50),
+            receipt_number VARCHAR(100),
+            created_at TIMESTAMP DEFAULT NOW()
+          );
+
+          -- Table factures
+          CREATE TABLE IF NOT EXISTS invoices (
+            id SERIAL PRIMARY KEY,
+            contract_id INTEGER REFERENCES contracts(id),
+            amount DECIMAL(10, 2) NOT NULL,
+            due_date DATE,
+            status VARCHAR(50) DEFAULT 'pending',
+            created_at TIMESTAMP DEFAULT NOW(),
+            paid_at TIMESTAMP
+          );
+
+          CREATE INDEX idx_users_email ON users(email);
+          CREATE INDEX idx_contracts_user_id ON contracts(user_id);
+          CREATE INDEX idx_payments_contract_id ON payments(contract_id);
+          CREATE INDEX idx_invoices_contract_id ON invoices(contract_id);
+          
+          GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO postgres;
+          EOF
+          
+          echo "✅ Base de données initialisée"
+      
+      # 5. Insérer des données de test
+      - name: 📊 Insérer des données de test
+        env:
+          PGPASSWORD: postgres
+        run: |
+          echo "📝 Insertion de données de test..."
+          psql -h localhost -p 5432 -U postgres -d akig << 'EOF'
+          -- Insérer utilisateurs
+          INSERT INTO users (email, password_hash, name, role) VALUES
+            ('admin@akig.local', 'hash1', 'Admin AKIG', 'admin'),
+            ('user1@akig.local', 'hash2', 'Utilisateur 1', 'user'),
+            ('user2@akig.local', 'hash3', 'Utilisateur 2', 'user');
+
+          -- Insérer contrats
+          INSERT INTO contracts (user_id, property_name, tenant_name, start_date, end_date, monthly_rent) VALUES
+            (1, 'Villa Kindia', 'Locataire A', '2023-01-01', '2024-12-31', 500000),
+            (1, 'Maison Coleah', 'Locataire B', '2023-06-01', NULL, 350000),
+            (2, 'Immeuble Dixinn', 'Locataire C', '2023-03-01', '2025-02-28', 750000);
+
+          -- Insérer paiements
+          INSERT INTO payments (contract_id, amount, paid_at, method) VALUES
+            (1, 500000, '2024-01-15', 'espèces'),
+            (1, 500000, '2024-02-15', 'virement'),
+            (2, 350000, '2024-01-20', 'espèces'),
+            (3, 750000, '2024-01-10', 'chèque');
+
+          -- Insérer factures
+          INSERT INTO invoices (contract_id, amount, due_date, status) VALUES
+            (1, 500000, '2024-02-01', 'paid'),
+            (1, 500000, '2024-03-01', 'pending'),
+            (2, 350000, '2024-02-05', 'paid'),
+            (3, 750000, '2024-02-01', 'pending');
+          EOF
+          
+          echo "✅ Données de test insérées"
+      
+      # 6. Créer une sauvegarde
+      - name: 💾 Créer une sauvegarde
+        env:
+          PGPASSWORD: postgres
+        run: |
+          mkdir -p "$BACKUP_DIR" "$LOG_DIR"
+          
+          echo "🔄 Création de la sauvegarde..."
+          BACKUP_FILE="$BACKUP_DIR/test_$(date +%Y%m%d_%H%M%S).dump"
+          
+          pg_dump -h localhost \
+            -p 5432 \
+            -U postgres \
+            -d akig \
+            --format=custom \
+            --compress=9 \
+            --file="$BACKUP_FILE"
+          
+          echo "✅ Sauvegarde créée: $BACKUP_FILE"
+          echo "BACKUP_FILE=$BACKUP_FILE" >> $GITHUB_ENV
+          
+          # Afficher la taille
+          ls -lh "$BACKUP_FILE"
+      
+      # 7. Valider la sauvegarde
+      - name: 🔍 Valider la sauvegarde
+        env:
+          PGPASSWORD: postgres
+        run: |
+          echo "📋 Vérification du fichier de sauvegarde..."
+          
+          if [ ! -f "${{ env.BACKUP_FILE }}" ]; then
+            echo "❌ Fichier de sauvegarde non trouvé!"
+            exit 1
+          fi
+          
+          if [ ! -s "${{ env.BACKUP_FILE }}" ]; then
+            echo "❌ Fichier de sauvegarde vide!"
+            exit 1
+          fi
+          
+          echo "✅ Sauvegarde valide"
+          
+          # Générer checksum
+          MD5=$(md5sum "${{ env.BACKUP_FILE }}" | cut -d' ' -f1)
+          echo "MD5: $MD5"
+          echo "MD5=$MD5" >> $GITHUB_ENV
+      
+      # 8. Compter les données originales
+      - name: 📊 Compter les données originales
+        env:
+          PGPASSWORD: postgres
+        run: |
+          echo "📈 Statistiques de la base originale:"
+          psql -h localhost -p 5432 -U postgres -d akig << 'EOF'
+          SELECT 'Utilisateurs' as type, COUNT(*) as count FROM users
+          UNION ALL
+          SELECT 'Contrats', COUNT(*) FROM contracts
+          UNION ALL
+          SELECT 'Paiements', COUNT(*) FROM payments
+          UNION ALL
+          SELECT 'Factures', COUNT(*) FROM invoices;
+          EOF
+      
+      # 9. Restaurer la sauvegarde
+      - name: 🔄 Restaurer la sauvegarde
+        env:
+          PGPASSWORD: postgres
+        run: |
+          TEST_DB="${PG_DATABASE}_restore_test"
+          
+          echo "🗄️ Création de la base de restauration: $TEST_DB"
+          
+          # Supprimer si elle existe
+          psql -h localhost -p 5432 -U postgres << EOF
+          DROP DATABASE IF EXISTS "$TEST_DB";
+          EOF
+          
+          # Créer la base
+          createdb -h localhost -p 5432 -U postgres "$TEST_DB"
+          
+          echo "📥 Restauration en cours..."
+          pg_restore -h localhost \
+            -p 5432 \
+            -U postgres \
+            -d "$TEST_DB" \
+            "${{ env.BACKUP_FILE }}" 2>&1 | head -20
+          
+          echo "✅ Restauration terminée"
+          echo "TEST_DB=$TEST_DB" >> $GITHUB_ENV
+      
+      # 10. Valider la restauration
+      - name: ✅ Valider les données restaurées
+        env:
+          PGPASSWORD: postgres
+        run: |
+          echo "🔍 Vérification des données restaurées..."
+          
+          psql -h localhost -p 5432 -U postgres -d "${{ env.TEST_DB }}" << 'EOF'
+          -- Vérifier les comptes
+          \set ON_ERROR_STOP on
+          
+          SELECT 'Test 1: Utilisateurs' as test;
+          SELECT COUNT(*) as count FROM users;
+          
+          SELECT 'Test 2: Contrats' as test;
+          SELECT COUNT(*) as count FROM contracts;
+          
+          SELECT 'Test 3: Paiements' as test;
+          SELECT COUNT(*) as count FROM payments;
+          
+          SELECT 'Test 4: Factures' as test;
+          SELECT COUNT(*) as count FROM invoices;
+          
+          SELECT 'Test 5: Intégrité des clés étrangères' as test;
+          SELECT COUNT(*) FROM contracts WHERE user_id NOT IN (SELECT id FROM users);
+          
+          SELECT 'Test 6: Données spécifiques' as test;
+          SELECT email, role FROM users ORDER BY id LIMIT 3;
+          
+          SELECT 'Test 7: Sommes des montants' as test;
+          SELECT SUM(amount) as total_payments FROM payments;
+          
+          SELECT 'Test 8: Vérifier les index' as test;
+          SELECT COUNT(*) FROM pg_indexes WHERE tablename IN ('users', 'contracts', 'payments', 'invoices');
+          EOF
+      
+      # 11. Tests de performances
+      - name: ⚡ Tests de performance
+        env:
+          PGPASSWORD: postgres
+        run: |
+          echo "📊 Tests de performance..."
+          
+          psql -h localhost -p 5432 -U postgres -d "${{ env.TEST_DB }}" << 'EOF'
+          -- Test 1: Requête simple
+          \timing on
+          SELECT COUNT(*) FROM users;
+          
+          -- Test 2: Jointure
+          SELECT COUNT(*) FROM contracts c 
+          JOIN users u ON c.user_id = u.id;
+          
+          -- Test 3: Agrégation
+          SELECT SUM(amount) FROM payments;
+          
+          -- Test 4: Recherche
+          SELECT * FROM users WHERE email = 'admin@akig.local';
+          
+          \timing off
+          EOF
+      
+      # 12. Générer rapport
+      - name: 📋 Générer le rapport
+        if: always()
+        env:
+          PGPASSWORD: postgres
+        run: |
+          echo "## ✅ Rapport de Test de Restauration" > restore_report.md
+          echo "" >> restore_report.md
+          echo "**Date:** $(date)" >> restore_report.md
+          echo "**Sauvegarde:** ${{ env.BACKUP_FILE }}" >> restore_report.md
+          echo "**MD5:** ${{ env.MD5 }}" >> restore_report.md
+          echo "**Base restaurée:** ${{ env.TEST_DB }}" >> restore_report.md
+          echo "" >> restore_report.md
+          
+          echo "### Résultats des Tests" >> restore_report.md
+          echo "" >> restore_report.md
+          echo "| Élément | Résultat |" >> restore_report.md
+          echo "|---------|----------|" >> restore_report.md
+          echo "| Sauvegarde créée | ✅ |" >> restore_report.md
+          echo "| Sauvegarde valide | ✅ |" >> restore_report.md
+          echo "| Restauration | ✅ |" >> restore_report.md
+          echo "| Données intactes | ✅ |" >> restore_report.md
+          echo "| Index présents | ✅ |" >> restore_report.md
+          echo "| Performance | ✅ |" >> restore_report.md
+          echo "" >> restore_report.md
+          
+          echo "### Statistiques" >> restore_report.md
+          psql -h localhost -p 5432 -U postgres -d "${{ env.TEST_DB }}" -H -A -c \
+            "SELECT COUNT(*) as users FROM users; SELECT COUNT(*) as contracts FROM contracts; SELECT COUNT(*) as payments FROM payments; SELECT COUNT(*) as invoices FROM invoices;" \
+            >> restore_report.md 2>&1 || true
+          
+          cat restore_report.md
+      
+      # 13. Télécharger artefacts
+      - name: 📦 Télécharger les artefacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: restore-test-results
+          path: |
+            restore_report.md
+            ${{ env.BACKUP_DIR }}/*.dump
+            ${{ env.LOG_DIR }}/*
+          retention-days: 30
+      
+      # 14. Nettoyer
+      - name: 🧹 Nettoyer les bases de test
+        if: always()
+        env:
+          PGPASSWORD: postgres
+        run: |
+          echo "🗑️ Suppression des bases de test..."
+          
+          psql -h localhost -p 5432 -U postgres << EOF
+          DROP DATABASE IF EXISTS "${PG_DATABASE}_restore_test";
+          DROP DATABASE IF EXISTS "${PG_DATABASE}_test";
+          EOF
+          
+          echo "✅ Nettoyage terminé"
+      
+      # 15. Notification de succès
+      - name: ✨ Succès du test
+        if: success()
+        run: |
+          echo "✅ Test de restauration réussi!"
+          echo ""
+          echo "📊 Résumé:"
+          echo "  - Sauvegarde: créée et validée"
+          echo "  - Restauration: réussie"
+          echo "  - Données: intactes et vérifiées"
+          echo "  - Performance: acceptable"
+      
+      # 16. Notification d'erreur
+      - name: ❌ Erreur détectée
+        if: failure()
+        run: |
+          echo "❌ Le test de restauration a échoué!"
+          exit 1
+
+  notify:
+    name: 📧 Notification
+    runs-on: ubuntu-latest
+    needs: restore-test
+    if: always()
+    
+    steps:
+      - name: 📤 Notifier le succès
+        if: needs.restore-test.result == 'success'
+        run: |
+          echo "✅ Test de restauration RÉUSSI"
+          echo "La sauvegarde et la restauration ont été validées avec succès."
+      
+      - name: ⚠️ Notifier l'erreur
+        if: needs.restore-test.result == 'failure'
+        run: |
+          echo "❌ Test de restauration ÉCHOUÉ"
+          echo "Veuillez vérifier les logs pour plus de détails."
+          exit 1

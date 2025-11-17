@@ -1,0 +1,44 @@
+{
+  "name": "akig-suite",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AKIG full-stack workspace orchestrator",
+  "scripts": {
+    "bootstrap": "npm run bootstrap:backend && npm run bootstrap:frontend",
+    "bootstrap:backend": "cd backend && npm ci",
+    "bootstrap:frontend": "cd frontend && npm ci",
+    "start": "npm run start:local",
+    "start:local": "concurrently \"npm run start:api\" \"npm run start:web\"",
+    "start:api": "npm --prefix backend run start:guarded",
+    "start:web": "npm --prefix frontend start",
+    "start:docker": "docker compose up --build",
+    "launch": "node scripts/launch.js",
+    "rollback": "npm --prefix backend run rollback",
+    "smoke": "npm --prefix backend run smoke"
+  },
+  "engines": {
+    "node": "18.20.3",
+    "npm": ">=10.7.0"
+  },
+  "volta": {
+    "node": "18.20.3",
+    "npm": "10.7.0"
+  },
+  "dependencies": {
+    "@emotion/react": "11.14.0",
+    "@emotion/styled": "11.14.1",
+    "@mui/material": "7.3.5",
+    "ajv": "^8.17.1",
+    "lucide-react": "0.552.0",
+    "sequelize": "6.37.7",
+    "umzug": "3.8.2"
+  },
+  "devDependencies": {
+    "@types/jest": "30.0.0",
+    "@types/sequelize": "6.12.0",
+    "@types/umzug": "3.0.0",
+    "concurrently": "^9.2.1",
+    "ts-jest": "29.4.5",
+    "ts-node": "10.9.2"
+  }
+}

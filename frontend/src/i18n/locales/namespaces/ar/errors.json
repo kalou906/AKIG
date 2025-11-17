@@ -1,0 +1,82 @@
+{
+  "title": "الأخطاء",
+  "http_errors": {
+    "400": "طلب غير صحيح",
+    "401": "غير مصرح",
+    "403": "محظور",
+    "404": "غير موجود",
+    "409": "تضارب",
+    "422": "كيان غير قابل للمعالجة",
+    "429": "طلبات كثيرة جداً",
+    "500": "خطأ في الخادم",
+    "502": "بوابة سيئة",
+    "503": "الخدمة غير متاحة",
+    "504": "انتهت مهلة الانتظار"
+  },
+  "validation": {
+    "required": "هذا الحقل مطلوب",
+    "email": "يرجى إدخال عنوان بريد إلكتروني صحيح",
+    "phone": "يرجى إدخال رقم هاتف صحيح",
+    "url": "يرجى إدخال عنوان URL صحيح",
+    "number": "يرجى إدخال رقم صحيح",
+    "integer": "يرجى إدخال عدد صحيح",
+    "positive": "يجب أن يكون الرقم موجباً",
+    "min": "القيمة الدنيا {{min}}",
+    "max": "القيمة العليا {{max}}",
+    "min_length": "الحد الأدنى {{min}} أحرف",
+    "max_length": "الحد الأقصى {{max}} أحرف",
+    "pattern": "الصيغة غير صحيحة",
+    "match": "الحقول غير متطابقة",
+    "unique": "هذه القيمة موجودة بالفعل",
+    "date": "يرجى إدخال تاريخ صحيح",
+    "date_range": "يجب أن يكون تاريخ النهاية بعد تاريخ البداية"
+  },
+  "authentication": {
+    "invalid_credentials": "بيانات اعتماد غير صحيحة",
+    "session_expired": "انتهت جلستك",
+    "unauthorized": "أنت غير مصرح بالوصول إلى هذا المورد",
+    "permission_denied": "إذن مرفوض",
+    "account_locked": "حسابك مقفول",
+    "account_disabled": "حسابك معطل",
+    "account_not_verified": "لم يتم التحقق من حسابك",
+    "password_reset_required": "إعادة تعيين كلمة المرور مطلوبة"
+  },
+  "payment": {
+    "insufficient_funds": "أموال غير كافية",
+    "invalid_card": "بطاقة غير صحيحة",
+    "card_expired": "البطاقة منتهية الصلاحية",
+    "cvv_invalid": "CVV غير صحيح",
+    "transaction_failed": "فشلت المعاملة",
+    "transaction_declined": "تم رفض المعاملة",
+    "duplicate_transaction": "تم اكتشاف معاملة مكررة",
+    "amount_exceeds_limit": "المبلغ يتجاوز الحد"
+  },
+  "contract": {
+    "contract_not_found": "العقد غير موجود",
+    "contract_expired": "انتهت صلاحية العقد",
+    "cannot_renew": "لا يمكن تجديد هذا العقد",
+    "cannot_terminate": "لا يمكن إنهاء هذا العقد",
+    "invalid_dates": "التواريخ غير صحيحة",
+    "tenant_not_assigned": "لم يتم تعيين أي مستأجر"
+  },
+  "tenant": {
+    "tenant_not_found": "المستأجر غير موجود",
+    "duplicate_tenant": "هذا المستأجر موجود بالفعل",
+    "invalid_document": "وثيقة غير صحيحة",
+    "document_upload_failed": "فشل رفع الوثيقة"
+  },
+  "property": {
+    "property_not_found": "الممتلك غير موجود",
+    "property_unavailable": "الممتلك غير متاح",
+    "occupancy_limit_reached": "تم الوصول إلى حد الإشغال"
+  },
+  "general": {
+    "something_went_wrong": "حدث خطأ ما",
+    "operation_failed": "فشلت العملية",
+    "please_try_again": "يرجى المحاولة مرة أخرى",
+    "contact_support": "يرجى الاتصال بالدعم",
+    "network_error": "خطأ في الشبكة. يرجى التحقق من اتصالك",
+    "timeout": "انتهت مهلة الانتظار",
+    "server_error": "خطأ في الخادم. يرجى المحاولة لاحقاً"
+  }
+}

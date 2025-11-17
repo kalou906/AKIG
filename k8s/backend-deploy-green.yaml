@@ -1,0 +1,257 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: akig-backend-green
+  namespace: akig
+  labels:
+    app: akig-backend
+    color: green
+    version: v1
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: akig-backend
+      color: green
+  template:
+    metadata:
+      labels:
+        app: akig-backend
+        color: green
+        version: v1
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "4002"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: akig-backend
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      
+      containers:
+        - name: backend
+          image: registry.akig.local/akig/backend:green
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 4002
+              protocol: TCP
+            - name: metrics
+              containerPort: 9090
+              protocol: TCP
+          
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: PORT
+              value: "4002"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: akig-db-secret
+                  key: connection-url
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: akig-jwt-secret
+                  key: secret
+            - name: REDIS_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: akig-backend-config
+                  key: redis-url
+            - name: LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: akig-backend-config
+                  key: log-level
+            - name: OTEL_TRACES_EXPORTER
+              value: "jaeger"
+            - name: OTEL_EXPORTER_JAEGER_AGENT_HOST
+              value: "jaeger-agent.monitoring.svc.cluster.local"
+            - name: OTEL_EXPORTER_JAEGER_AGENT_PORT
+              value: "6831"
+          
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 2
+          
+          startupProbe:
+            httpGet:
+              path: /api/health
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 2
+            timeoutSeconds: 3
+            failureThreshold: 15
+          
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: cache
+              mountPath: /app/.cache
+          
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "sleep 15"]
+      
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: cache
+          emptyDir: {}
+      
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - akig-backend
+                topologyKey: kubernetes.io/hostname
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: akig-backend-svc
+  namespace: akig
+  labels:
+    app: akig-backend
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+spec:
+  type: ClusterIP
+  selector:
+    app: akig-backend
+    color: green
+  ports:
+    - name: http
+      port: 80
+      targetPort: 4002
+      protocol: TCP
+    - name: metrics
+      port: 9090
+      targetPort: 9090
+      protocol: TCP
+  sessionAffinity: None
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: akig-backend-green-pdb
+  namespace: akig
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: akig-backend
+      color: green
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: akig-backend-green-hpa
+  namespace: akig
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: akig-backend-green
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Percent
+          value: 50
+          periodSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 30
+        - type: Pods
+          value: 2
+          periodSeconds: 60
+      selectPolicy: Max
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: akig-backend-green
+  namespace: akig
+  labels:
+    app: akig-backend
+spec:
+  selector:
+    matchLabels:
+      app: akig-backend
+  endpoints:
+    - port: metrics
+      interval: 30s
+      path: /metrics

@@ -1,0 +1,245 @@
+{
+  "application": {
+    "name": "AKIG",
+    "version": "1.0.0",
+    "description": "Plateforme Immobilière Intelligente"
+  },
+  "services": {
+    "backend": {
+      "name": "AKIG Backend",
+      "port": 4000,
+      "directory": "backend",
+      "command": "npm run dev",
+      "description": "API REST Express + PostgreSQL",
+      "status": "Ready"
+    },
+    "frontend": {
+      "name": "AKIG Frontend",
+      "port": 3000,
+      "directory": "frontend",
+      "command": "npm run start",
+      "description": "React 18 + setupProxy + Tailwind CSS",
+      "status": "Ready"
+    }
+  },
+  "access": {
+    "application": "http://localhost:5173",
+    "api": "http://localhost:4000/api",
+    "health": "http://localhost:4000/api/health",
+    "info": "http://localhost:4000/api/info"
+  },
+  "modules": [
+    {
+      "id": 1,
+      "name": "Gestion Immobilière",
+      "features": [
+        "Gestion des propriétés",
+        "Listings & Vitrine",
+        "Calendrier de disponibilité",
+        "Documents & Contrats"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Recouvrement & Paiements",
+      "features": [
+        "Suivi des loyers",
+        "Rappels de paiements",
+        "Historique des paiements",
+        "Rapports financiers"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Opérations & Maintenance",
+      "features": [
+        "Demandes de maintenance",
+        "Suivi des réparations",
+        "Gestion des contrats entretien",
+        "Journal d'activité"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Reporting & Analytics",
+      "features": [
+        "Tableaux de bord",
+        "Graphiques financiers",
+        "Rapports personnalisés",
+        "Export de données"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Portails Client",
+      "features": [
+        "Portail Locataire",
+        "Portail Propriétaire",
+        "Notifications & Alertes",
+        "Support Chat"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Administration",
+      "features": [
+        "Gestion des utilisateurs",
+        "Gestion des rôles & permissions",
+        "Configuration système",
+        "Logs & Audit"
+      ]
+    },
+    {
+      "id": 7,
+      "name": "IA & Recherche Avancée",
+      "features": [
+        "Machine Learning",
+        "Chatbot IA",
+        "Prévisions de marché",
+        "Recherche intelligente"
+      ]
+    },
+    {
+      "id": 8,
+      "name": "Cartographie & Géolocalisation",
+      "features": [
+        "Carte des propriétés",
+        "Analyse géographique",
+        "Clustering d'immeubles",
+        "Zones de service"
+      ]
+    }
+  ],
+  "roles": [
+    {
+      "id": 1,
+      "name": "Super Admin",
+      "permissions": ["*"],
+      "description": "Accès complet à tout"
+    },
+    {
+      "id": 2,
+      "name": "Admin",
+      "permissions": [
+        "users:manage",
+        "roles:manage",
+        "config:manage",
+        "audit:view"
+      ],
+      "description": "Gestion utilisateurs et configuration"
+    },
+    {
+      "id": 3,
+      "name": "Gestionnaire",
+      "permissions": [
+        "properties:manage",
+        "contracts:manage",
+        "payments:manage",
+        "reports:view"
+      ],
+      "description": "Tous les modules opérationnels"
+    },
+    {
+      "id": 4,
+      "name": "Agent",
+      "permissions": [
+        "properties:manage",
+        "payments:manage",
+        "maintenance:manage"
+      ],
+      "description": "Gestion propriétés et paiements"
+    },
+    {
+      "id": 5,
+      "name": "Comptable",
+      "permissions": [
+        "payments:view",
+        "payments:manage",
+        "reports:view",
+        "reports:create"
+      ],
+      "description": "Finances et rapports"
+    },
+    {
+      "id": 6,
+      "name": "Locataire",
+      "permissions": [
+        "properties:view",
+        "payments:view",
+        "support:create"
+      ],
+      "description": "Accès portail locataire"
+    }
+  ],
+  "technology": {
+    "backend": {
+      "runtime": "Node.js 22",
+      "framework": "Express 4.18",
+      "database": "PostgreSQL",
+      "authentication": "JWT",
+      "security": [
+        "Helmet",
+        "CORS",
+        "Rate Limiting",
+        "SQL Injection Prevention"
+      ],
+      "routes": 136
+    },
+    "frontend": {
+      "framework": "React 19",
+      "bundler": "Vite 7.1",
+      "styling": "Tailwind CSS 3.4",
+      "routing": "React Router v6",
+      "visualization": "Recharts",
+      "i18n": "react-i18next",
+      "realtime": "Socket.io",
+      "pages": 13,
+      "components": 50
+    },
+    "database": {
+      "type": "PostgreSQL",
+      "fallback": "Mock (pas de DB requise)",
+      "tables": [
+        "users",
+        "roles",
+        "permissions",
+        "user_roles",
+        "role_permissions"
+      ]
+    }
+  },
+  "launch": {
+    "windows": {
+      "option1": "Double-clic sur QUICK_LAUNCH.bat",
+      "option2": "Double-clic sur LAUNCH_AKIG_SIMPLE.bat",
+      "option3": "PowerShell: .\\LAUNCH_AKIG.ps1"
+    },
+    "linux_mac": {
+      "command": "chmod +x LAUNCH_AKIG.sh && ./LAUNCH_AKIG.sh"
+    }
+  },
+  "configuration": {
+    "backend": {
+      "env_file": "backend/.env",
+      "variables": {
+        "PORT": "4000",
+        "DATABASE_URL": "postgres://localhost/akig",
+        "JWT_SECRET": "supersecret",
+        "DISABLE_REDIS": "true"
+      }
+    },
+    "frontend": {
+      "env_file": "akig-ultimate/.env",
+      "variables": {
+        "VITE_API_URL": "http://localhost:4000",
+        "VITE_API_PROXY": "http://localhost:4000"
+      }
+    }
+  },
+  "status": {
+    "system": "Ready for launch",
+    "all_files": "Present",
+    "dependencies": "Auto-installed on first launch",
+    "database": "Optional (Mock fallback available)"
+  }
+}

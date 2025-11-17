@@ -1,0 +1,14 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "AKIG PostgreSQL",
+      "Group": "Production",
+      "Host": "postgres",
+      "Port": 5432,
+      "MaintenanceDB": "postgres",
+      "Username": "user",
+      "SSLMode": "prefer",
+      "PassFile": "/tmp/pgpassfile"
+    }
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "navigation": {
+    "dashboard": "Tableau de bord",
+    "payments": "Paiements",
+    "contracts": "Contrats",
+    "tenants": "Locataires",
+    "properties": "Propriétés",
+    "invoices": "Factures",
+    "reports": "Rapports",
+    "settings": "Paramètres",
+    "admin": "Administration"
+  },
+  "common": {
+    "agency": "Agence",
+    "property": "Propriété",
+    "tenant": "Locataire",
+    "owner": "Propriétaire",
+    "address": "Adresse",
+    "email": "Email",
+    "phone": "Téléphone",
+    "date": "Date",
+    "amount": "Montant",
+    "status": "Statut",
+    "actions": "Actions",
+    "active": "Actif",
+    "inactive": "Inactif",
+    "pending": "En attente",
+    "completed": "Complété",
+    "failed": "Échoué",
+    "archived": "Archivé"
+  },
+  "breadcrumb": {
+    "home": "Accueil",
+    "back_to_home": "Retour à l'accueil"
+  },
+  "pagination": {
+    "showing": "Affichage de {{from}} à {{to}} sur {{total}}",
+    "no_items": "Aucun élément à afficher",
+    "items_per_page": "Éléments par page"
+  },
+  "validation": {
+    "required_field": "Ce champ est requis",
+    "invalid_email": "Email invalide",
+    "invalid_phone": "Numéro de téléphone invalide",
+    "min_length": "Minimum {{count}} caractères",
+    "max_length": "Maximum {{count}} caractères",
+    "match_fields": "Les champs ne correspondent pas"
+  },
+  "messages": {
+    "confirm_delete": "Êtes-vous sûr de vouloir supprimer cet élément ?",
+    "confirm_action": "Êtes-vous sûr de vouloir effectuer cette action ?",
+    "saved_successfully": "Enregistrement réussi",
+    "deleted_successfully": "Suppression réussie",
+    "updated_successfully": "Mise à jour réussie",
+    "operation_failed": "L'opération a échoué",
+    "try_again": "Veuillez réessayer",
+    "loading": "Chargement en cours...",
+    "no_internet": "Pas de connexion Internet"
+  }
+}

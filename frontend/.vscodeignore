@@ -1,0 +1,13 @@
+# Ignore CSS validation warnings for Tailwind CSS
+src/index.css
+src/globals.css
+postcss.config.js
+tailwind.config.js
+
+# Standard ignore patterns
+node_modules/
+dist/
+build/
+.git/
+.env
+.env.local

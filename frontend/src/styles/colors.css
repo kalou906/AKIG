@@ -1,0 +1,47 @@
+:root {
+    --gn-forest: #006400;
+    --gn-gold: #ffd700;
+    --gn-red: #ce1126;
+    --gn-green: #009e49;
+    --gn-blue: #2d3a8c;
+}
+
+.text-gn-forest {
+    color: var(--gn-forest);
+}
+
+.text-gn-gold {
+    color: var(--gn-gold);
+}
+
+.text-gn-red {
+    color: var(--gn-red);
+}
+
+.text-gn-green {
+    color: var(--gn-green);
+}
+
+.text-gn-blue {
+    color: var(--gn-blue);
+}
+
+.bg-gn-forest {
+    background-color: var(--gn-forest);
+}
+
+.bg-gn-gold {
+    background-color: var(--gn-gold);
+}
+
+.bg-gn-red {
+    background-color: var(--gn-red);
+}
+
+.bg-gn-green {
+    background-color: var(--gn-green);
+}
+
+.bg-gn-blue {
+    background-color: var(--gn-blue);
+}

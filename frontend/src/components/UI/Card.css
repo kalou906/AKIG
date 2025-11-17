@@ -1,0 +1,54 @@
+/* Card.css - Styles pour les cartes */
+
+.card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #E5E7EB;
+    overflow: hidden;
+    transition: box-shadow 0.2s ease;
+}
+
+.card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+    border-bottom: 1px solid #F3F4F6;
+    background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
+}
+
+.card-icon {
+    font-size: 24px;
+    margin-top: 4px;
+}
+
+.card-title {
+    margin: 0 0 4px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #111827;
+}
+
+.card-subtitle {
+    margin: 0;
+    font-size: 13px;
+    color: #6B7280;
+}
+
+.card-body {
+    padding: 16px;
+}
+
+.card-footer {
+    padding: 12px 16px;
+    border-top: 1px solid #F3F4F6;
+    background: #F9FAFB;
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}

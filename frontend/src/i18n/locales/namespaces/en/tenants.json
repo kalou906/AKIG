@@ -1,0 +1,90 @@
+{
+  "title": "Tenants",
+  "subtitle": "Tenant management",
+  "list": {
+    "title": "Tenants List",
+    "columns": {
+      "id": "ID",
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "property": "Property",
+      "lease_start": "Lease Start",
+      "lease_end": "Lease End",
+      "status": "Status",
+      "arrears": "Arrears"
+    },
+    "actions": {
+      "view_profile": "View Profile",
+      "edit": "Edit",
+      "view_lease": "View Lease",
+      "view_payments": "View Payments",
+      "send_message": "Send Message"
+    }
+  },
+  "form": {
+    "title": "New Tenant",
+    "edit_title": "Edit Tenant",
+    "first_name": "First Name",
+    "last_name": "Last Name",
+    "email": "Email",
+    "phone": "Phone",
+    "address": "Address",
+    "id_number": "ID Number",
+    "national_id": "National ID",
+    "passport": "Passport",
+    "employer": "Employer",
+    "occupation": "Occupation",
+    "emergency_contact": "Emergency Contact",
+    "notes": "Notes",
+    "submit": "Create Tenant"
+  },
+  "profile": {
+    "title": "Tenant Profile",
+    "personal_information": "Personal Information",
+    "contact_information": "Contact Information",
+    "current_lease": "Current Lease",
+    "payment_history": "Payment History",
+    "documents": "Documents",
+    "activity": "Activity"
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "new": "New",
+    "departing": "Departing",
+    "departed": "Departed",
+    "in_default": "In Default",
+    "suspended": "Suspended",
+    "pending_verification": "Pending Verification"
+  },
+  "communication": {
+    "title": "Communication",
+    "send_email": "Send Email",
+    "send_sms": "Send SMS",
+    "send_notification": "Send Notification",
+    "message_template": "Message Template",
+    "recipient": "Recipient",
+    "subject": "Subject",
+    "body": "Body",
+    "send": "Send",
+    "schedule": "Schedule"
+  },
+  "documents": {
+    "title": "Documents",
+    "upload": "Upload Document",
+    "id_copy": "ID Copy",
+    "proof_of_income": "Proof of Income",
+    "contract": "Contract",
+    "lease_agreement": "Lease Agreement",
+    "other": "Other"
+  },
+  "messages": {
+    "tenant_created": "Tenant created successfully",
+    "tenant_updated": "Tenant updated",
+    "tenant_deleted": "Tenant deleted",
+    "email_sent": "Email sent successfully",
+    "sms_sent": "SMS sent successfully",
+    "confirm_delete": "Are you sure you want to delete this tenant?"
+  }
+}

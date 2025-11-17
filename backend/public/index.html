@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AKIG Phase 5 - Gestion Immobilière</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+
+        .systems-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .system-card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .system-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .system-card h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 20px;
+        }
+
+        .system-card p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .endpoints {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .stats {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .feature-list {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-top: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .feature-list h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .feature {
+            padding: 15px;
+            background: #f8f8f8;
+            border-left: 4px solid #667eea;
+            border-radius: 5px;
+        }
+
+        .feature strong {
+            color: #667eea;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .feature p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .status {
+            background: #4caf50;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        .error-message {
+            background: #f44336;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🏢 AKIG Phase 5</div>
+            <div class="subtitle">Plateforme Complète de Gestion Immobilière</div>
+        </div>
+
+        <div class="systems-grid">
+            <div class="system-card">
+                <h3>🔐 Authentification</h3>
+                <p>Connexion sécurisée avec JWT, 2FA, et gestion des rôles</p>
+                <div class="endpoints">4 endpoints</div>
+            </div>
+
+            <div class="system-card">
+                <h3>🏪 Marketplace</h3>
+                <p>Publier et rechercher des propriétés avec filtrage avancé</p>
+                <div class="endpoints">8 endpoints</div>
+            </div>
+
+            <div class="system-card">
+                <h3>📋 Contrats</h3>
+                <p>Gestion complète des contrats avec signature numérique</p>
+                <div class="endpoints">12 endpoints</div>
+            </div>
+
+            <div class="system-card">
+                <h3>💳 Paiements</h3>
+                <p>Traitement multi-devises (GNF, USD, EUR) et escrow</p>
+                <div class="endpoints">15 endpoints</div>
+            </div>
+
+            <div class="system-card">
+                <h3>📊 Rapports</h3>
+                <p>Génération automatique PDF/CSV et envoi par email</p>
+                <div class="endpoints">10 endpoints</div>
+            </div>
+
+            <div class="system-card">
+                <h3>🔍 Recherche</h3>
+                <p>Recherche intelligente avec ranking et tendances</p>
+                <div class="endpoints">12 endpoints</div>
+            </div>
+
+            <div class="system-card">
+                <h3>🗺️ Cartographie</h3>
+                <p>Mapping géographique, routes, heatmaps et proximité</p>
+                <div class="endpoints">8 endpoints</div>
+            </div>
+
+            <div class="system-card">
+                <h3>📱 Mobile</h3>
+                <p>API pour applications iOS et Android</p>
+                <div class="endpoints">11 endpoints</div>
+            </div>
+
+            <div class="system-card">
+                <h3>📈 Dashboards</h3>
+                <p>Dashboards personnalisés avec widgets temps réel</p>
+                <div class="endpoints">10 endpoints</div>
+            </div>
+
+            <div class="system-card">
+                <h3>🚨 Alertes</h3>
+                <p>Système d'alertes pour paiements et notifications</p>
+                <div class="endpoints">3 endpoints</div>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-number">84+</div>
+                <div class="stat-label">Endpoints</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">50+</div>
+                <div class="stat-label">Services</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">5200+</div>
+                <div class="stat-label">Lignes de Code</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">100%</div>
+                <div class="stat-label">Sécurisé</div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <a href="/api/docs" class="btn btn-primary">📚 API Documentation</a>
+            <a href="/api/health" class="btn btn-secondary">🏥 Health Status</a>
+        </div>
+
+        <div class="feature-list">
+            <h3>✨ Fonctionnalités Clés</h3>
+            <div class="features">
+                <div class="feature">
+                    <strong>🔒 Sécurité</strong>
+                    <p>JWT, bcrypt, protection SQL injection, 2FA, CORS</p>
+                </div>
+                <div class="feature">
+                    <strong>⚡ Performance</strong>
+                    <p>Cache Redis, compression gzip, pagination optimisée</p>
+                </div>
+                <div class="feature">
+                    <strong>📊 Analytics</strong>
+                    <p>Prometheus, OpenTelemetry, métriques temps réel</p>
+                </div>
+                <div class="feature">
+                    <strong>📧 Communications</strong>
+                    <p>Email, SMS, webhooks, notifications push</p>
+                </div>
+                <div class="feature">
+                    <strong>🔄 Automation</strong>
+                    <p>CRON jobs, tâches planifiées, rappels automatiques</p>
+                </div>
+                <div class="feature">
+                    <strong>📱 Multi-Plateforme</strong>
+                    <p>Web, Mobile (iOS/Android), Progressive Web App</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="status" id="status">
+            ✅ Serveur actif - Prêt pour la production
+        </div>
+
+        <div class="error-message" id="error"></div>
+    </div>
+
+    <script>
+        // Vérifier l'état du serveur
+        async function checkHealth() {
+            try {
+                const response = await fetch('/api/health');
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('status').innerHTML = `✅ ${data.status || 'Serveur actif'} - Prêt pour la production`;
+                } else {
+                    document.getElementById('status').innerHTML = '⚠️ Serveur en cours de démarrage...';
+                }
+            } catch (err) {
+                document.getElementById('status').innerHTML = '⚠️ Connexion au serveur...';
+            }
+        }
+
+        // Vérifier au chargement
+        checkHealth();
+        // Revérifier toutes les 5 secondes
+        setInterval(checkHealth, 5000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,348 @@
+# 🗺️ PRA DOCUMENTATION MAP
+
+**Visual Navigation Guide - All Files Mapped**
+
+```
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                                                                           ║
+║                     AKIG PRA - COMPLETE DOCUMENTATION                    ║
+║                              Visual Map                                   ║
+║                                                                           ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+                              ┌─────────────┐
+                              │ START_HERE  │◄─ ENTRY POINT
+                              │ Quick Start │   (Bilingual)
+                              └──────┬──────┘
+                                     │
+                    ┌────────────────┼────────────────┐
+                    │                │                │
+                    ▼                ▼                ▼
+            ┌────────────┐   ┌──────────────┐  ┌──────────────┐
+            │  README.md │   │  INDEX.md    │  │MASTER_GUIDE  │
+            │ Overview & │   │ Role-Based   │  │ Complete     │
+            │ Architecture│  │ Navigation   │  │ Reference    │
+            └──────┬─────┘   └──────┬───────┘  └──────┬───────┘
+                   │                │                  │
+        ┌──────────┼────────────────┼──────────────────┤
+        │          │                │                  │
+        ▼          ▼                ▼                  ▼
+    ┌─────────────────────────────────────────────────────────┐
+    │              For Different Roles                        │
+    ├─────────────────────────────────────────────────────────┤
+    │                                                          │
+    │  🏢 MANAGEMENT          🏗️ INFRASTRUCTURE   📱 ON-CALL  │
+    │  ├─ README (Intro)      ├─ README (Full)    ├─ RUNBOOK  │
+    │  ├─ METRICS            ├─ DEPLOYMENT_      ├─ Contacts │
+    │  ├─ RUNBOOK (Escalade) │  CHECKLIST        └─ Procedures│
+    │  └─ SLA overview       ├─ .env.example      │
+    │                        ├─ quickstart.sh     │
+    │  👨‍🔬 QA/TEST           ├─ All scripts      │
+    │  ├─ loadtest.sh        └─ VERIFY.*         │
+    │  ├─ METRICS                                │
+    │  └─ Report verification  🔒 SECURITY       │
+    │                          ├─ RUNBOOK (Sec)  │
+    │  📊 COMPLIANCE           ├─ .env security  │
+    │  ├─ METRICS             └─ Audit trail    │
+    │  ├─ POST_INCIDENT_*                       │
+    │  └─ SLA tracking        ⚡ OPERATIONS    │
+    │                          ├─ quickstart.sh  │
+    │                          ├─ status.sh      │
+    │                          └─ All scripts    │
+    │                                            │
+    └─────────────────────────────────────────────────────────┘
+
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                       DOCUMENTATION HIERARCHY                             ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+TIER 1: ENTRY POINTS (Start here)
+├─ START_HERE.txt            👈 "What is this?"
+├─ README.md                 👈 "How does it work?"
+└─ MASTER_GUIDE.txt          👈 "Where do I find X?"
+
+TIER 2: OPERATIONAL GUIDES (How to do things)
+├─ DEPLOYMENT_CHECKLIST.md   👈 "How do I set this up?"
+├─ INDEX.md                  👈 "What role am I?"
+├─ quickstart.sh             👈 "Run me!"
+└─ .env.example              👈 "Configure me"
+
+TIER 3: PROCEDURES (Day-to-day & Emergency)
+├─ RUNBOOK.md                👈 "I have an emergency!"
+├─ status.sh                 👈 "Is everything OK?"
+├─ backup.sh                 👈 "Backup now!"
+├─ restore_run.sh            👈 "Restore now!"
+└─ loadtest.sh               👈 "Test everything!"
+
+TIER 4: COMPLIANCE & TRACKING (Management & Audit)
+├─ METRICS.md                👈 "Show me the metrics"
+├─ POST_INCIDENT_TEMPLATE.md 👈 "What went wrong?"
+├─ VERIFICATION_CHECKLIST.md 👈 "Is it working?"
+└─ COMPLETION_SUMMARY.md     👈 "What was delivered?"
+
+TIER 5: PROJECT INFO (Archives)
+├─ SESSION_SUMMARY.md        👈 "What happened?"
+└─ (This file)               👈 "Where is everything?"
+
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                        FILE RELATIONSHIP GRAPH                            ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+                        ┌──────────────────┐
+                        │  EMERGENCY?      │
+                        │  INCIDENT?       │
+                        └────────┬─────────┘
+                                 │
+                                 ▼
+                         ┌───────────────┐
+                         │  RUNBOOK.md   │◄──── Emergency procedures
+                         └───────┬───────┘      • 4 Scenarios
+                                 │              • Step-by-step
+                                 │              • Contacts
+                                 │
+                        ┌────────┴────────┐
+                        │                 │
+                        ▼                 ▼
+            ┌─────────────────┐  ┌──────────────────┐
+            │ Resolved?       │  │ POST_INCIDENT_*  │ After incident
+            │                 │  │ ├─ Template      │ documentation
+            │ YES: Continue   │  │ ├─ 5-Why         │
+            │ NO: Escalate    │  │ └─ Action items  │
+            └────────┬────────┘  └──────────────────┘
+                     │
+                     ▼
+            ┌──────────────────┐
+            │  Communication   │
+            │  Status Update   │
+            └──────────────────┘
+
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                    USAGE BY SCENARIO                                      ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+SCENARIO 1: "I'm new to the PRA"
+  Path: START_HERE.txt → README.md → INDEX.md → [Your role guide]
+
+SCENARIO 2: "I'm setting up the PRA"
+  Path: START_HERE.txt → DEPLOYMENT_CHECKLIST.md → quickstart.sh
+
+SCENARIO 3: "Database is down!"
+  Path: RUNBOOK.md → Find "Database indisponible" → Follow steps
+
+SCENARIO 4: "I need to do a restore test"
+  Path: README.md → "Test de Restauration" → quickstart.sh test-restore
+
+SCENARIO 5: "Check compliance status"
+  Path: METRICS.md → Review dashboard
+
+SCENARIO 6: "What happened during the incident?"
+  Path: POST_INCIDENT_TEMPLATE.md → Complete report
+
+SCENARIO 7: "Give management an update"
+  Path: METRICS.md → COMPLETION_SUMMARY.md → Create deck
+
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                      EXECUTABLE SCRIPTS FLOW                              ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+                    ┌─────────────────┐
+                    │  quickstart.sh   │  Main entry point
+                    └────────┬────────┘
+                             │
+         ┌───────────────────┼───────────────────┐
+         │                   │                   │
+         ▼                   ▼                   ▼
+    ┌──────────┐       ┌──────────┐        ┌──────────┐
+    │ install  │       │ daily    │        │ monitor  │
+    │          │       │          │        │          │
+    │ Runs:    │       │ Runs:    │        │ Runs:    │
+    │ .env     │       │ backup   │        │ status   │
+    │ setup    │       │ .sh      │        │ .sh      │
+    │ backup   │       │          │        │ (loop)   │
+    │ restore  │       │ Creates: │        │          │
+    │ test     │       │ backup   │        │ Reports: │
+    │          │       │ file     │        │ Health   │
+    └──────────┘       └──────────┘        └──────────┘
+         │                   │                   │
+         ▼                   ▼                   ▼
+    Create .env        Backup data         Monitor status
+    Setup complete     Cron ready          Alerting active
+
+
+                    ┌────────────────┐
+                    │ test-restore   │  Validation
+                    └────────┬───────┘
+                             │
+        ┌────────────────────┼────────────────────┐
+        │                    │                    │
+        ▼                    ▼                    ▼
+    restore_run.sh      Check DB            Generate
+    • Load backup       integrity           report
+    • Restore DB        • Tables
+    • Verify            • Data
+    • Test APIs         • Constraints
+
+
+                    ┌───────────────┐
+                    │  loadtest.sh   │  Full validation
+                    └────────┬──────┘
+                             │
+        ┌────────────────────┼────────────────────┐
+        │                    │                    │
+        ▼                    ▼                    ▼
+    Test backup         Test restore         Generate
+    speed              speed + data          SLA report
+    time & size        integrity
+
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                      CONFIGURATION FILE (.env)                            ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+                   ┌─────────────────┐
+                   │ .env.example    │  Copy this
+                   └────────┬────────┘
+                            │
+                            ▼
+                   ┌─────────────────┐
+                   │ .env            │  Edit with your values
+                   ├─────────────────┤
+                   │ [PostgreSQL]    │
+                   │ [Backup]        │
+                   │ [Application]   │
+                   │ [Alerts]        │
+                   │ [Restoration]   │
+                   │ [Monitoring]    │
+                   └────────┬────────┘
+                            │
+        ┌───────────────────┼───────────────────┐
+        │                   │                   │
+        ▼                   ▼                   ▼
+   backup.sh         restore_run.sh         status.sh
+   (uses env)        (uses env)            (uses env)
+
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                    DOCUMENTATION ACCESS MATRIX                            ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+                    │ Quick │ Detailed │ Procedures │ Emergency │
+                    │ Ref   │ Info     │            │           │
+────────────────────┼───────┼──────────┼────────────┼───────────┤
+Management          │ MEAS. │ README   │ CHECKLST   │ RUNBOOK   │
+Infrastructure      │ README│ DEPLOY   │ SCRIPTS    │ RUNBOOK   │
+On-Call Support     │ INDEX │ RUNBOOK  │ RUNBOOK    │ RUNBOOK   │
+QA / Testing        │ INDEX │ LOADTEST │ SCRIPTS    │ ─         │
+Security / Audit    │ VERF. │ RUNBOOK  │ CHECKLST   │ RUNBOOK   │
+Operations          │ MEAST │ README   │ SCRIPTS    │ RUNBOOK   │
+────────────────────┼───────┼──────────┼────────────┼───────────┤
+
+Legend:
+MEAS.    = METRICS.md / SESSION_SUMMARY.md
+README   = README.md / MASTER_GUIDE.txt
+DEPLOY   = DEPLOYMENT_CHECKLIST.md
+VERF.    = VERIFICATION_CHECKLIST.md
+CHECKLST = DEPLOYMENT_CHECKLIST.md
+SCRIPTS  = backup.sh, restore_run.sh, status.sh, quickstart.sh, loadtest.sh
+RUNBOOK  = RUNBOOK.md
+LOADTEST = loadtest.sh + results
+
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                         TIME-BASED SCHEDULE                               ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+DAILY (2 min)              WEEKLY (30 min)         MONTHLY (1 hour)
+├─ Run: status.sh          ├─ Run: test-restore    ├─ Run: loadtest.sh
+├─ Check: Alerts           ├─ Review: Report       ├─ Update: METRICS.md
+└─ Note: Issues            └─ Fix: Issues          └─ Share: Report
+
+QUARTERLY (4 hours)        ANNUALLY (1 day)
+├─ Disaster Drill          ├─ Full PRA Audit
+├─ Simulate Incident       ├─ Update Procedures
+├─ Test Failover           └─ Team Training
+└─ Document Learning
+
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                           QUICK LINKS                                     ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+GETTING STARTED
+  First Read:     START_HERE.txt
+  Then Read:      README.md
+  Then Navigate:  INDEX.md or MASTER_GUIDE.txt
+
+EMERGENCY SITUATIONS
+  Go To:          RUNBOOK.md
+  Find Scenario:  "Database indisponible", "Données corrompues", etc.
+  Execute Steps:  Follow step-by-step
+
+REGULAR MAINTENANCE
+  Daily:          ./status.sh
+  Weekly:         ./quickstart.sh test-restore
+  Monthly:        ./loadtest.sh
+
+MANAGEMENT REPORTS
+  Status:         METRICS.md
+  Compliance:     VERIFICATION_CHECKLIST.md
+  Project:        COMPLETION_SUMMARY.md
+
+TROUBLESHOOTING
+  Can't find something?  → MASTER_GUIDE.txt
+  Need procedures?       → README.md + RUNBOOK.md
+  Question about role?   → INDEX.md
+  Post-incident?         → POST_INCIDENT_TEMPLATE.md
+
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                         FILE STATISTICS                                   ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+DOCUMENTATION (9 files):
+  ├─ START_HERE.txt                ~1,500 bytes
+  ├─ README.md                     ~8,000 bytes
+  ├─ RUNBOOK.md                    ~15,000 bytes
+  ├─ MASTER_GUIDE.txt              ~10,000 bytes
+  ├─ INDEX.md                      ~10,000 bytes
+  ├─ DEPLOYMENT_CHECKLIST.md       ~12,000 bytes
+  ├─ METRICS.md                    ~8,000 bytes
+  ├─ POST_INCIDENT_TEMPLATE.md     ~10,000 bytes
+  └─ VERIFICATION_CHECKLIST.md     ~6,000 bytes
+  Total: ~80 KB | ~5,000 lines
+
+SCRIPTS (5 files):
+  ├─ backup.sh                     ~9,000 bytes (280 lines)
+  ├─ restore_run.sh                ~11,000 bytes (350 lines)
+  ├─ status.sh                     ~9,500 bytes (300 lines)
+  ├─ quickstart.sh                 ~11,000 bytes (350 lines)
+  └─ loadtest.sh                   ~13,000 bytes (420 lines)
+  Total: ~53 KB | ~1,500 lines
+
+CONFIGURATION (1 file):
+  └─ .env.example                  ~2,500 bytes
+
+SUMMARY (2 files):
+  ├─ COMPLETION_SUMMARY.md         ~10,000 bytes
+  └─ SESSION_SUMMARY.md            ~12,000 bytes
+  Total: ~22 KB
+
+═══════════════════════════════════════════════════════════════════════════
+GRAND TOTAL: 17 files | ~155 KB | ~8,500+ lines | 100% Complete ✅
+═══════════════════════════════════════════════════════════════════════════
+
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                                                                         │
+│  🎯 Start Your Journey: Open START_HERE.txt                            │
+│  📖 Need Navigation? Open MASTER_GUIDE.txt                             │
+│  🚨 Emergency? Open RUNBOOK.md                                         │
+│  ✅ Ready to Deploy? Run: ./quickstart.sh install                      │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+
+Version: 1.0 | Date: October 25, 2025 | Status: 🟢 Complete

@@ -1,0 +1,135 @@
+name: Scheduled Reminders
+
+on:
+  schedule:
+    # Run reminders daily at 9 AM UTC
+    - cron: '0 9 * * *'
+  # Allow manual trigger for testing
+  workflow_dispatch:
+
+jobs:
+  reminders:
+    runs-on: ubuntu-latest
+    name: Send Reminders
+    timeout-minutes: 30
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: akig_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd backend
+          npm ci
+
+      - name: Wait for PostgreSQL
+        run: |
+          node -e "
+            const pg = require('pg');
+            const pool = new pg.Pool({
+              host: 'localhost',
+              port: 5432,
+              user: 'postgres',
+              password: 'postgres',
+              database: 'akig_test'
+            });
+            const checkDb = async () => {
+              try {
+                const result = await pool.query('SELECT NOW()');
+                console.log('✓ Database ready');
+                process.exit(0);
+              } catch (e) {
+                console.log('⏳ Waiting for database...');
+                setTimeout(checkDb, 1000);
+              }
+            };
+            checkDb();
+          "
+
+      - name: Run database migrations
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/akig_test
+        run: |
+          cd backend
+          psql $DATABASE_URL -f db/migrations/001_user_preferences.sql
+
+      - name: Run reminders job
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/akig_test
+          OTEL_EXPORTER_OTLP_ENDPOINT: ${{ secrets.OTEL_ENDPOINT || 'http://localhost:4318' }}
+          NODE_ENV: production
+        run: |
+          cd backend
+          node src/jobs/runReminders.js
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reminders-logs-${{ github.run_id }}
+          path: backend/logs/
+          retention-days: 7
+
+      - name: Notify on failure
+        if: failure()
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "❌ Reminders job failed",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Reminders Job Failed*\n*Repository:* ${{ github.repository }}\n*Run:* <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View>"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+
+      - name: Notify on success
+        if: success()
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "✅ Reminders job completed successfully",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Reminders Job Completed*\n*Repository:* ${{ github.repository }}\n*Run:* <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View>"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK

@@ -1,0 +1,120 @@
+/* DataTable.css - Styles pour tableau de données */
+
+.table-wrapper {
+    overflow-x: auto;
+    border-radius: 6px;
+    border: 1px solid #E5E7EB;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+}
+
+.data-table thead {
+    background: #F3F4F6;
+    border-bottom: 2px solid #E5E7EB;
+}
+
+.data-table th {
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+    color: #374151;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.data-table th.sortable {
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s ease;
+}
+
+.data-table th.sortable:hover {
+    background-color: #E5E7EB;
+}
+
+.sort-icon {
+    margin-left: 6px;
+    font-size: 11px;
+    opacity: 0.6;
+}
+
+.sort-icon.asc::after {
+    content: '▲';
+}
+
+.sort-icon.desc::after {
+    content: '▼';
+}
+
+.data-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #F3F4F6;
+    font-size: 14px;
+    color: #111827;
+}
+
+.data-table tbody tr:hover {
+    background-color: #F9FAFB;
+}
+
+.data-table td.actions {
+    text-align: center;
+    white-space: nowrap;
+}
+
+.table-loading,
+.table-empty {
+    padding: 40px 16px;
+    text-align: center;
+    color: #6B7280;
+    background: white;
+    border: 1px solid #E5E7EB;
+    border-radius: 6px;
+}
+
+.table-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: #F9FAFB;
+    border-top: 1px solid #E5E7EB;
+    border-radius: 0 0 6px 6px;
+}
+
+.table-pagination button {
+    padding: 6px 12px;
+    border: 1px solid #D1D5DB;
+    background: white;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s ease;
+}
+
+.table-pagination button:hover:not(:disabled) {
+    background: #1E40AF;
+    color: white;
+    border-color: #1E40AF;
+}
+
+.table-pagination button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+
+    .data-table th,
+    .data-table td {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+}

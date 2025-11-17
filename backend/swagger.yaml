@@ -1,0 +1,540 @@
+openapi: 3.0.3
+info:
+  title: AKIG - API Immobilière Premium (Guinée)
+  description: |
+    SaaS immobilier complet avec gestion contrats, paiements, charges, fiscalité, SCI, saisonnier, synchronisation bancaire.
+    Devise: GNF (Franc Guinéen)
+  version: 1.0.0
+  contact:
+    name: Support AKIG
+    email: support@akig.gn
+
+servers:
+  - url: http://localhost:4000/api
+    description: Développement
+  - url: https://api.akig.gn
+    description: Production
+
+tags:
+  - name: Authentification
+    description: Login, tokens, 2FA
+  - name: Biens
+    description: Propriétés immobilières
+  - name: Contrats
+    description: Contrats de location
+  - name: Paiements
+    description: Loyers et paiements
+  - name: Relances
+    description: Relances automatiques
+  - name: Charges
+    description: Charges et régularisations
+  - name: Fiscalité
+    description: Rapports fiscaux
+  - name: SCI
+    description: Sociétés civiles immobilières
+  - name: Saisonnier
+    description: Locations saisonnières
+  - name: Bancaire
+    description: Synchronisation bancaire
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token JWT valide 24h
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        name:
+          type: string
+        role:
+          type: string
+          enum: [admin, agent, landlord, tenant]
+        created_at:
+          type: string
+          format: date-time
+
+    Property:
+      type: object
+      properties:
+        id:
+          type: integer
+        reference:
+          type: string
+        title:
+          type: string
+        type:
+          type: string
+          enum: [apartment, house, villa, commercial]
+        address:
+          type: string
+        city:
+          type: string
+        bedrooms:
+          type: integer
+        bathrooms:
+          type: integer
+        rental_price:
+          type: number
+          format: decimal
+        status:
+          type: string
+          enum: [available, rented, maintenance]
+
+    Contract:
+      type: object
+      properties:
+        id:
+          type: integer
+        reference:
+          type: string
+        property_id:
+          type: integer
+        tenant_id:
+          type: integer
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        monthly_rent:
+          type: number
+          format: decimal
+        status:
+          type: string
+          enum: [draft, active, terminated]
+
+    Payment:
+      type: object
+      properties:
+        id:
+          type: integer
+        contract_id:
+          type: integer
+        amount_gnf:
+          type: number
+          format: decimal
+        date:
+          type: string
+          format: date
+        status:
+          type: string
+          enum: [pending, completed, failed]
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        status:
+          type: integer
+
+security:
+  - BearerAuth: []
+
+paths:
+  /auth/register:
+    post:
+      tags: [Authentification]
+      summary: S'enregistrer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+                name:
+                  type: string
+                role:
+                  type: string
+      responses:
+        201:
+          description: Utilisateur créé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /auth/login:
+    post:
+      tags: [Authentification]
+      summary: Se connecter
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        200:
+          description: Token JWT + refresh
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  refreshToken:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+
+  /auth/me:
+    get:
+      tags: [Authentification]
+      summary: Profil utilisateur
+      responses:
+        200:
+          description: Profil
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /properties:
+    get:
+      tags: [Biens]
+      summary: Lister propriétés
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+        - name: city
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        200:
+          description: Liste propriétés
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Property'
+
+    post:
+      tags: [Biens]
+      summary: Créer propriété
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Property'
+      responses:
+        201:
+          description: Propriété créée
+
+  /properties/{id}:
+    get:
+      tags: [Biens]
+      summary: Détails propriété
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Détails
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Property'
+
+  /contracts:
+    get:
+      tags: [Contrats]
+      summary: Lister contrats
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: tenant_id
+          in: query
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Liste contrats
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Contract'
+
+    post:
+      tags: [Contrats]
+      summary: Créer contrat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Contract'
+      responses:
+        201:
+          description: Contrat créé
+
+  /contracts/{id}/pdf:
+    post:
+      tags: [Contrats]
+      summary: Générer PDF contrat
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: PDF généré
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+
+  /payments:
+    get:
+      tags: [Paiements]
+      summary: Lister paiements
+      parameters:
+        - name: contract_id
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        200:
+          description: Liste paiements
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Payment'
+
+    post:
+      tags: [Paiements]
+      summary: Enregistrer paiement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                contract_id:
+                  type: integer
+                amount_gnf:
+                  type: number
+                date:
+                  type: string
+                  format: date
+                payment_method:
+                  type: string
+      responses:
+        201:
+          description: Paiement enregistré
+
+  /reminders/send-overdue:
+    post:
+      tags: [Relances]
+      summary: Relancer paiement retard
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                contractId:
+                  type: integer
+                method:
+                  type: string
+                  enum: [email, sms]
+      responses:
+        200:
+          description: Relance envoyée
+
+  /charges:
+    get:
+      tags: [Charges]
+      summary: Lister charges
+      responses:
+        200:
+          description: Liste charges
+
+    post:
+      tags: [Charges]
+      summary: Enregistrer charge
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                contractId:
+                  type: integer
+                type:
+                  type: string
+                amount:
+                  type: number
+      responses:
+        201:
+          description: Charge enregistrée
+
+  /fiscal/report/{landlordId}/{year}:
+    get:
+      tags: [Fiscalité]
+      summary: Rapport fiscal annuel
+      parameters:
+        - name: landlordId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: year
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Rapport fiscal
+
+  /sci:
+    get:
+      tags: [SCI]
+      summary: Lister SCI
+      responses:
+        200:
+          description: Liste SCI
+
+    post:
+      tags: [SCI]
+      summary: Créer SCI
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                siret:
+                  type: string
+                manager_id:
+                  type: integer
+      responses:
+        201:
+          description: SCI créée
+
+  /seasonal/reservations:
+    post:
+      tags: [Saisonnier]
+      summary: Créer réservation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                property_id:
+                  type: integer
+                guest_name:
+                  type: string
+                check_in_date:
+                  type: string
+                  format: date
+                check_out_date:
+                  type: string
+                  format: date
+                nightly_rate_gnf:
+                  type: number
+      responses:
+        201:
+          description: Réservation créée
+
+  /bank/auto-reconcile:
+    post:
+      tags: [Bancaire]
+      summary: Réconciliation automatique
+      responses:
+        200:
+          description: Transactions rapprochées
+
+  /bank/reconciliation-report:
+    get:
+      tags: [Bancaire]
+      summary: Rapport réconciliation
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        200:
+          description: Rapport détaillé
+
+  /health:
+    get:
+      tags: [Système]
+      summary: Santé API
+      responses:
+        200:
+          description: API opérationnel
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  uptime:
+                    type: number
+                  timestamp:
+                    type: string
+                    format: date-time

@@ -1,0 +1,10 @@
+/**
+ * Global CSS Imports
+ * Import this file in your main.tsx to load all global styles
+ *
+ * Usage in main.tsx:
+ * import './styles/index.css';
+ */
+
+@import './globals.css';
+

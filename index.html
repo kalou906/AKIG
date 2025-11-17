@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AKIG - Documentation Index</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px 20px;
+        }
+        
+        .status {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+        
+        .status-item {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .status-item strong {
+            display: block;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        
+        .status-item .value {
+            font-size: 1.3em;
+            color: #333;
+        }
+        
+        .sections {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .section {
+            background: #f9f9f9;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .section:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+        
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        
+        .section ul {
+            list-style: none;
+        }
+        
+        .section ul li {
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .section ul li:last-child {
+            border-bottom: none;
+        }
+        
+        .section a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section a:hover {
+            text-decoration: underline;
+        }
+        
+        .section a::before {
+            content: "📄";
+            margin-right: 8px;
+        }
+        
+        .section h2::before {
+            margin-right: 8px;
+        }
+        
+        .quick-start {
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            border: 2px dashed #667eea;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .quick-start h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        
+        .quick-start code {
+            display: block;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 12px;
+            margin: 10px 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #333;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            color: #666;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .tab:hover {
+            color: #667eea;
+        }
+        
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .grid-icon {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            margin-right: 10px;
+        }
+        
+        footer {
+            background: #f5f5f5;
+            padding: 20px;
+            text-align: center;
+            color: #999;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            margin-left: 8px;
+        }
+        
+        .badge.success {
+            background: #4caf50;
+        }
+        
+        .badge.warning {
+            background: #ff9800;
+        }
+        
+        .badge.info {
+            background: #2196f3;
+        }
+        
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+            
+            .sections {
+                grid-template-columns: 1fr;
+            }
+            
+            .status {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎉 AKIG v2.1</h1>
+            <p>Application de Gestion Immobilière - Documentation Complète</p>
+        </header>
+        
+        <div class="content">
+            <!-- Status -->
+            <div class="status">
+                <div class="status-item">
+                    <strong>Frontend</strong>
+                    <div class="value">✅ Compiled <span class="badge success">69.07 kB</span></div>
+                </div>
+                <div class="status-item">
+                    <strong>Backend</strong>
+                    <div class="value">✅ Valid Syntax</div>
+                </div>
+                <div class="status-item">
+                    <strong>Types</strong>
+                    <div class="value">✅ Installed <span class="badge success">50+</span></div>
+                </div>
+                <div class="status-item">
+                    <strong>Errors</strong>
+                    <div class="value">✅ 0 Critical <span class="badge success">100%</span></div>
+                </div>
+            </div>
+            
+            <!-- Quick Start -->
+            <div class="quick-start">
+                <h3>🚀 Démarrage Rapide (5 min)</h3>
+                <p><strong>Terminal 1 - Backend:</strong></p>
+                <code>cd c:\AKIG\backend && npm install && npm run dev</code>
+                
+                <p><strong>Terminal 2 - Frontend:</strong></p>
+                <code>cd c:\AKIG\frontend && npm install && npm start</code>
+                
+                <p><strong>Terminal 3 - Tester:</strong></p>
+                <code>cd c:\AKIG && .\test-api.ps1</code>
+                
+                <p style="margin-top: 15px;"><strong>Accès:</strong></p>
+                <code>Frontend: http://localhost:3000
+Backend: http://localhost:4000
+Health: http://localhost:4000/api/health</code>
+            </div>
+            
+            <!-- Documentation Sections -->
+            <div class="sections">
+                <div class="section">
+                    <h2>📚 Getting Started</h2>
+                    <ul>
+                        <li><a href="QUICK_REF.md" target="_blank">⚡ Quick Reference</a></li>
+                        <li><a href="README.md" target="_blank">📖 README Principal</a></li>
+                        <li><a href="GUIDE_COMPLET.md" target="_blank">📋 Guide Complet</a></li>
+                        <li><a href="README_INSTALLATION.md" target="_blank">🔧 Installation</a></li>
+                    </ul>
+                </div>
+                
+                <div class="section">
+                    <h2>🔌 API & Backend</h2>
+                    <ul>
+                        <li><a href="API_DOCUMENTATION.md" target="_blank">📡 API Endpoints</a></li>
+                        <li><a href="IMPROVEMENTS_SUMMARY.md" target="_blank">✨ Backend Improvements</a></li>
+                        <li><a href="AKIG_FINALE.md" target="_blank">🏗️ Architecture</a></li>
+                        <li><a href="COMMANDS.ps1" target="_blank">⚙️ Backend Commands</a></li>
+                    </ul>
+                </div>
+                
+                <div class="section">
+                    <h2>📊 Monitoring & Build</h2>
+                    <ul>
+                        <li><a href="BUILD_STATUS.md" target="_blank">📈 Build Status</a></li>
+                        <li><a href="VALIDATION_FINAL.md" target="_blank">✅ Final Checklist</a></li>
+                        <li><a href="test-api.ps1" target="_blank">🧪 API Tests</a></li>
+                        <li><a href="IMPROVEMENTS_SUMMARY.md" target="_blank">📋 15 Improvements</a></li>
+                    </ul>
+                </div>
+                
+                <div class="section">
+                    <h2>🛠️ Scripts & Tools</h2>
+                    <ul>
+                        <li><a href="COMMANDS.ps1" target="_blank">⚡ PowerShell Commands</a></li>
+                        <li><a href="COMMANDS.sh" target="_blank">⚡ Bash Commands</a></li>
+                        <li><a href="test-api.ps1" target="_blank">🧪 API Testing (PS)</a></li>
+                        <li><a href="test-api.sh" target="_blank">🧪 API Testing (Bash)</a></li>
+                    </ul>
+                </div>
+                
+                <div class="section">
+                    <h2>🔒 Configuration</h2>
+                    <ul>
+                        <li><a href="backend/.env.example" target="_blank">⚙️ .env Template</a></li>
+                        <li><a href="AKIG_FINALE.md" target="_blank">🔐 Security Setup</a></li>
+                        <li><a href="README_INSTALLATION.md" target="_blank">📦 Dependencies</a></li>
+                        <li><a href="IMPROVEMENTS_SUMMARY.md" target="_blank">🛡️ Error Handling</a></li>
+                    </ul>
+                </div>
+                
+                <div class="section">
+                    <h2>📞 Support</h2>
+                    <ul>
+                        <li><a href="QUICK_REF.md" target="_blank">🆘 Troubleshooting</a></li>
+                        <li><a href="GUIDE_COMPLET.md" target="_blank">📖 Complete Guide</a></li>
+                        <li><a href="README.md" target="_blank">❓ FAQ</a></li>
+                        <li><a href="COMMANDS.ps1" target="_blank">💡 Tips & Tricks</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Information -->
+            <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                <h3 style="margin-bottom: 15px;">ℹ️ Quick Links</h3>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div>
+                        <strong>🖥️ Local Servers</strong>
+                        <div style="font-size: 0.9em; color: #666; margin-top: 8px;">
+                            Frontend: http://localhost:3000<br>
+                            Backend: http://localhost:4000<br>
+                            Health: http://localhost:4000/api/health
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <strong>🚀 Quick Commands</strong>
+                        <div style="font-size: 0.9em; color: #666; margin-top: 8px;">
+                            npm run dev (backend)<br>
+                            npm start (frontend)<br>
+                            .\test-api.ps1 (test)
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <strong>📊 Project Stats</strong>
+                        <div style="font-size: 0.9em; color: #666; margin-top: 8px;">
+                            Version: 2.1<br>
+                            Status: ✅ Ready<br>
+                            Errors: 0 Critical
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <strong>📦 Tech Stack</strong>
+                        <div style="font-size: 0.9em; color: #666; margin-top: 8px;">
+                            Backend: Node.js/Express<br>
+                            Frontend: React/TypeScript<br>
+                            DB: PostgreSQL
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Features -->
+            <div style="background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%); padding: 20px; border-radius: 8px; border: 2px solid #667eea;">
+                <h3 style="color: #667eea; margin-bottom: 15px;">✨ 15 Améliorations Intégrées</h3>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; font-size: 0.9em;">
+                    <div>✅ Error Handling (8 classes)</div>
+                    <div>✅ Validation Framework</div>
+                    <div>✅ Response Formatting</div>
+                    <div>✅ Data Formatters (12+)</div>
+                    <div>✅ Cache System (TTL)</div>
+                    <div>✅ TypeScript Types (50+)</div>
+                    <div>✅ Frontend Hooks (7+)</div>
+                    <div>✅ HTTP Client</div>
+                    <div>✅ Auth Middleware</div>
+                    <div>✅ Global Constants</div>
+                    <div>✅ Security Config</div>
+                    <div>✅ Logging System</div>
+                    <div>✅ Payment Service</div>
+                    <div>✅ Documentation (5+)</div>
+                    <div>✅ Build Validation</div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>AKIG v2.1 | Status: ✅ Production Ready | Errors: 0 Critical | Last Updated: 2024-01-15</p>
+            <p style="margin-top: 10px; font-size: 0.9em;">Built with ❤️ for Property Management | Node.js • Express • React • PostgreSQL</p>
+        </footer>
+    </div>
+</body>
+</html>

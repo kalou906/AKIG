@@ -1,0 +1,26 @@
+export const payments = [
+  {
+    id: 1,
+    contrat_id: 1,
+    periode: "2025-09",
+    montant_du: 1500000,
+    montant_paye: 1500000,
+    reste: 0,
+    mode: "cash",
+    date_paiement: "2025-09-03",
+    tel: "620111111",
+    owner_id: 10,
+  },
+  {
+    id: 2,
+    contrat_id: 2,
+    periode: "2025-09",
+    montant_du: 1200000,
+    montant_paye: 450000,
+    reste: 750000,
+    mode: "bank",
+    date_paiement: "2025-09-10",
+    tel: "620222222",
+    owner_id: 11,
+  },
+];

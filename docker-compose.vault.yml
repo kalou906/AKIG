@@ -1,0 +1,94 @@
+# docker-compose.vault.yml
+# HashiCorp Vault for Secrets Management
+version: '3.8'
+
+services:
+  vault:
+    image: hashicorp/vault:1.15.4
+    container_name: akig-vault
+    ports:
+      - "8200:8200"
+    environment:
+      # Development mode (DO NOT USE IN PRODUCTION)
+      VAULT_DEV_ROOT_TOKEN_ID: ${VAULT_DEV_ROOT_TOKEN:-dev-token}
+      VAULT_DEV_LISTEN_ADDRESS: "0.0.0.0:8200"
+      # Production mode (uncomment for production)
+      # VAULT_ADDR: "https://vault:8200"
+      # VAULT_API_ADDR: "https://vault:8200"
+      # VAULT_CLUSTER_ADDR: "https://vault:8201"
+
+      # Production configuration (uncomment for production)
+      # volumes:
+      #   - ./vault/config:/vault/config:ro
+      #   - ./vault/data:/vault/file:rw
+      #   - ./vault/logs:/vault/logs:rw
+      #   - ./vault/tls:/vault/tls:ro
+      # command: server -config=/vault/config/vault.hcl
+
+    cap_add:
+      - IPC_LOCK # Required for mlock
+
+    networks:
+      - akig-network
+
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.vault.rule=Host(`vault.akig.local`)"
+      - "traefik.http.routers.vault.entrypoints=websecure"
+      - "traefik.http.routers.vault.tls.certresolver=letsencrypt"
+      - "traefik.http.services.vault.loadbalancer.server.port=8200"
+
+    healthcheck:
+      test: [ "CMD", "vault", "status" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+    restart: unless-stopped
+
+  # Vault Agent (for auto-auth and secret injection)
+  vault-agent:
+    image: hashicorp/vault:1.15.4
+    container_name: akig-vault-agent
+    depends_on:
+      - vault
+    environment:
+      VAULT_ADDR: http://vault:8200
+    volumes:
+      - ./vault/agent-config:/vault/config:ro
+      - vault-agent-cache:/vault/agent-cache
+    command: agent -config=/vault/config/agent.hcl
+    networks:
+      - akig-network
+    restart: unless-stopped
+
+  # Backend API with Vault integration
+  api:
+    extends:
+      file: docker-compose.traefik.yml
+      service: api
+    environment:
+      # Enable Vault
+      - USE_VAULT=true
+      - VAULT_ADDR=http://vault:8200
+      - VAULT_TOKEN=${VAULT_TOKEN:-dev-token}
+
+      # Dynamic DB credentials (optional)
+      - USE_VAULT_DB_CREDS=${USE_VAULT_DB_CREDS:-false}
+
+      # Fallback env vars (if Vault unavailable)
+      - DATABASE_URL=${DATABASE_URL}
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      vault:
+        condition: service_healthy
+    networks:
+      - akig-network
+
+networks:
+  akig-network:
+    external: true
+
+volumes:
+  vault-agent-cache:

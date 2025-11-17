@@ -1,0 +1,111 @@
+/* ModuleLayout.css - Layout pour modules avec onglets + doc */
+
+.module-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.module-header {
+    padding: 24px;
+    background: linear-gradient(135deg, #1E40AF 0%, #1E3A8A 100%);
+    color: white;
+    border-radius: 8px 8px 0 0;
+}
+
+.module-header h1 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.module-container {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 16px;
+    padding: 16px;
+    flex: 1;
+    overflow: hidden;
+}
+
+.module-main {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+    min-height: 500px;
+}
+
+.module-doc {
+    background: #F8FAFC;
+    border: 2px solid #E5E7EB;
+    border-radius: 8px;
+    padding: 16px;
+    overflow-y: auto;
+    position: sticky;
+    top: 16px;
+    max-height: 600px;
+}
+
+.module-doc h4 {
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1E40AF;
+}
+
+.module-doc p {
+    margin: 0 0 12px 0;
+    font-size: 13px;
+    color: #374151;
+    line-height: 1.6;
+}
+
+.doc-active-tab {
+    padding: 12px;
+    background: white;
+    border-left: 3px solid #1E40AF;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #374151;
+    margin-top: 12px;
+}
+
+.doc-active-tab strong {
+    color: #1E40AF;
+}
+
+/* Scrollbars personnalisées */
+.module-main::-webkit-scrollbar,
+.module-doc::-webkit-scrollbar {
+    width: 6px;
+}
+
+.module-main::-webkit-scrollbar-track,
+.module-doc::-webkit-scrollbar-track {
+    background: #F3F4F6;
+    border-radius: 3px;
+}
+
+.module-main::-webkit-scrollbar-thumb,
+.module-doc::-webkit-scrollbar-thumb {
+    background: #D1D5DB;
+    border-radius: 3px;
+}
+
+.module-main::-webkit-scrollbar-thumb:hover,
+.module-doc::-webkit-scrollbar-thumb:hover {
+    background: #9CA3AF;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .module-container {
+        grid-template-columns: 1fr;
+    }
+
+    .module-doc {
+        position: static;
+        max-height: 250px;
+    }
+}

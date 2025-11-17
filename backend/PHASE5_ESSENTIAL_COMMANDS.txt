@@ -1,0 +1,317 @@
+# PHASE 5 - COMMANDES ESSENTIELLES
+# Copier-coller les commandes pour déployer Phase 5
+
+═════════════════════════════════════════════════════════════════════════
+🚀 INSTALLATION INITIALE
+═════════════════════════════════════════════════════════════════════════
+
+# 1. Cloner repository
+git clone <url>
+cd AKIG/backend
+
+# 2. Installer dépendances
+npm install
+
+# 3. Créer fichier .env
+cp .env.example .env
+
+# 4. Éditer .env avec vos paramètres
+nano .env
+# À ajouter:
+# DATABASE_URL=postgresql://user:password@localhost:5432/akig_production
+# JWT_SECRET=votre_secret_très_sécurisé
+# EMAIL_SERVICE=gmail
+# EMAIL_USER=notifications@akig.gu
+# EMAIL_PASSWORD=mot_de_passe_app
+
+═════════════════════════════════════════════════════════════════════════
+🗄️ BASE DE DONNÉES
+═════════════════════════════════════════════════════════════════════════
+
+# 1. Créer base de données
+createdb akig_production
+
+# 2. Exécuter migrations de base (si existantes)
+psql akig_production < migrations/001_schema_initial.sql
+psql akig_production < migrations/002_users_auth.sql
+
+# 3. EXÉCUTER MIGRATIONS PHASE 5
+psql akig_production < MIGRATIONS_PHASE5.sql
+
+# 4. Vérifier tables créées
+psql akig_production -c "SELECT table_name FROM information_schema.tables WHERE table_schema='public' ORDER BY table_name;"
+
+# Résultat attendu: 15 tables + tables existantes
+
+═════════════════════════════════════════════════════════════════════════
+✅ VÉRIFICATION
+═════════════════════════════════════════════════════════════════════════
+
+# Vérifier fichiers Phase 5
+npm run verify
+
+# Vérifier variables d'environnement
+npm run check-env
+
+# Tests unitaires
+npm test
+
+# Tests intégration
+npm run test:integration
+
+# Couverture tests
+npm run test:coverage
+
+═════════════════════════════════════════════════════════════════════════
+🏃 DÉMARRAGE SERVEUR
+═════════════════════════════════════════════════════════════════════════
+
+# Démarrage développement (nodemon)
+npm run dev
+
+# Démarrage production
+npm start
+
+# Ou avec PM2
+npm install -g pm2
+pm2 start ecosystem.config.js
+pm2 save
+pm2 startup
+pm2 logs akig-backend
+
+═════════════════════════════════════════════════════════════════════════
+🧪 TESTS ENDPOINTS
+═════════════════════════════════════════════════════════════════════════
+
+# Health check
+curl http://localhost:4000/api/health
+
+# Phase 5 status
+curl http://localhost:4000/api/phase5/santé
+
+# Place de marché
+curl -X GET http://localhost:4000/api/place-marche/rechercher
+
+# Recherche avancée
+curl http://localhost:4000/api/recherche/avancée?query=propriété
+
+# Cartographie
+curl http://localhost:4000/api/cartographie/localisations
+
+# Dashboards
+curl http://localhost:4000/api/dashboards/modèles
+
+# Avec authentification JWT
+curl -H "Authorization: Bearer <TOKEN>" http://localhost:4000/api/paiements/rapport/transactions
+
+═════════════════════════════════════════════════════════════════════════
+📊 MONITORING
+═════════════════════════════════════════════════════════════════════════
+
+# Vérifier santé Phase 5
+npm run health:phase5
+
+# Voir logs serveur
+npm run logs
+
+# Ou directement
+tail -f logs/akig.log
+
+# Compter requêtes
+grep "GET\|POST\|PUT\|DELETE" logs/akig.log | wc -l
+
+# Voir erreurs
+grep "ERROR\|error" logs/akig.log
+
+═════════════════════════════════════════════════════════════════════════
+🔧 MAINTENANCE
+═════════════════════════════════════════════════════════════════════════
+
+# Backup base de données
+pg_dump akig_production | gzip > backup_$(date +%Y%m%d).sql.gz
+
+# Restaurer depuis backup
+gunzip < backup_20240101.sql.gz | psql akig_production
+
+# Nettoyer logs anciens (> 30j)
+find logs/ -name "*.log" -mtime +30 -delete
+
+# Redémarrer serveur
+npm run restart
+# ou
+pm2 restart akig-backend
+
+# Arrêter serveur
+npm run stop
+# ou
+pm2 stop akig-backend
+
+═════════════════════════════════════════════════════════════════════════
+📦 DÉPLOIEMENT
+═════════════════════════════════════════════════════════════════════════
+
+# Vérification pré-déploiement
+npm run deploy:check
+
+# Déploiement staging
+npm run deploy:staging
+
+# Déploiement production
+npm run deploy:production
+
+# Build production
+npm run build
+
+# Lint code
+npm run lint
+
+# Formatter code
+npm run format
+
+═════════════════════════════════════════════════════════════════════════
+🔄 GIT OPERATIONS
+═════════════════════════════════════════════════════════════════════════
+
+# Status git
+git status
+
+# Voir changements
+git diff
+
+# Commit Phase 5
+git add .
+git commit -m "feat: Phase 5 complete - 10 systems, 84 endpoints"
+
+# Push
+git push origin main
+
+# Tag release
+git tag -a v5.0.0 -m "Phase 5 Production Release"
+git push origin v5.0.0
+
+# Voir commits
+git log --oneline | head -20
+
+═════════════════════════════════════════════════════════════════════════
+🆘 TROUBLESHOOTING
+═════════════════════════════════════════════════════════════════════════
+
+# Port 4000 déjà utilisé
+lsof -i :4000
+kill -9 <PID>
+
+# BD déconnectée
+psql -U postgres -c "SELECT 1;"
+
+# Dépendances manquantes
+npm install socket.io node-cron nodemailer pg
+
+# Clear npm cache
+npm cache clean --force
+
+# Réinstaller node_modules
+rm -rf node_modules
+npm install
+
+# Tester connexion BD
+psql $DATABASE_URL -c "SELECT 1;"
+
+# Vérifier .env
+env | grep -E "DATABASE|JWT|EMAIL|GOOGLE|FIREBASE"
+
+═════════════════════════════════════════════════════════════════════════
+📈 PERFORMANCE
+═════════════════════════════════════════════════════════════════════════
+
+# Load test avec Artillery
+npm install -g artillery
+artillery quick --count 100 --num 1000 http://localhost:4000/api/health
+
+# Vérifier mémoire
+ps aux | grep node
+
+# Vérifier CPU
+top -p $(pgrep -f "node")
+
+# Benchmark endpoints
+npm run benchmark
+
+═════════════════════════════════════════════════════════════════════════
+🔐 SÉCURITÉ
+═════════════════════════════════════════════════════════════════════════
+
+# Audit sécurité npm
+npm audit
+
+# Corriger vulnérabilités
+npm audit fix
+
+# Rotater JWT_SECRET
+# 1. Éditer .env avec nouveau secret
+# 2. Redémarrer serveur
+# 3. Clients doivent re-login
+
+# Vérifier certificat SSL
+openssl s_client -connect api.akig.gu:443 -showcerts
+
+# Tester CORS
+curl -H "Origin: http://example.com" -v http://localhost:4000/api/health
+
+═════════════════════════════════════════════════════════════════════════
+📋 CHECKLIST PRÉ-PRODUCTION
+═════════════════════════════════════════════════════════════════════════
+
+☐ npm run verify (tous fichiers présents?)
+☐ npm test (tests passent?)
+☐ npm run check-env (variables configurées?)
+☐ psql akig_production (BD accessible?)
+☐ npm run health:phase5 (tous systèmes actifs?)
+☐ GUIDE_DÉPLOIEMENT_PHASE5.md (lu?)
+☐ Backup BD créé?
+☐ Monitoring setup?
+☐ Support hotline actif?
+☐ Documentation utilisateurs prête?
+
+═════════════════════════════════════════════════════════════════════════
+📞 SUPPORT
+═════════════════════════════════════════════════════════════════════════
+
+Documentation:
+  - README_PHASE5.md
+  - GUIDE_DÉPLOIEMENT_PHASE5.md
+  - INDEX_PHASE5_COMPLET.md
+
+Contact:
+  - Email: support@akig.gu
+  - Téléphone: +224 XXX XXX XXX
+  - Slack: #phase5-support
+
+Issues:
+  - GitHub: https://github.com/akig/backend/issues
+  - Jira: https://akig.atlassian.net
+
+═════════════════════════════════════════════════════════════════════════
+✨ COMMANDES BONUS
+═════════════════════════════════════════════════════════════════════════
+
+# Générer documentation API
+npm run docs:generate
+
+# Seed données de test
+npm run seed
+
+# Watch tests
+npm test -- --watch
+
+# Debug mode
+DEBUG=* npm run dev
+
+# Profile performance
+node --prof src/index.js
+node --prof-process isolate-*.log > profile.txt
+
+═════════════════════════════════════════════════════════════════════════
+
+Phase 5 Ready to Deploy! 🚀
+
+═════════════════════════════════════════════════════════════════════════

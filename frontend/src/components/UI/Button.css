@@ -1,0 +1,107 @@
+/* Button.css - Styles pour le bouton réutilisable */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Primary Button */
+.btn-primary {
+    background-color: #1E40AF;
+    color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background-color: #1E3A8A;
+}
+
+/* Secondary Button */
+.btn-secondary {
+    background-color: #E5E7EB;
+    color: #374151;
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background-color: #D1D5DB;
+}
+
+/* Danger Button */
+.btn-danger {
+    background-color: #DC2626;
+    color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+    background-color: #B91C1C;
+}
+
+/* Success Button */
+.btn-success {
+    background-color: #059669;
+    color: white;
+}
+
+.btn-success:hover:not(:disabled) {
+    background-color: #047857;
+}
+
+/* Warning Button */
+.btn-warning {
+    background-color: #D97706;
+    color: white;
+}
+
+.btn-warning:hover:not(:disabled) {
+    background-color: #B45309;
+}
+
+/* Ghost Button */
+.btn-ghost {
+    background-color: transparent;
+    color: #1E40AF;
+    border: 1px solid #1E40AF;
+}
+
+.btn-ghost:hover:not(:disabled) {
+    background-color: #EFF6FF;
+}
+
+/* Loading state */
+.btn-loading {
+    pointer-events: none;
+}
+
+.spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

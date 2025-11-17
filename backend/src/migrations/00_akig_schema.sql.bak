@@ -1,0 +1,179 @@
+-- ============================================================
+-- AKIG - Schéma de Base de Données Complet
+-- Version simplifiée et sans conflits
+-- ============================================================
+
+-- Extensions
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "citext";
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
+-- Types ENUM (PostgreSQL ne supporte pas IF NOT EXISTS pour les types)
+DO $$ BEGIN
+    CREATE TYPE user_role AS ENUM ('AGENT', 'MANAGER', 'COMPTABLE', 'ADMIN');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE TYPE payment_method AS ENUM (
+      'CASH', 'CHECK', 'TRANSFER', 'ORANGE_MONEY', 'MTN_MOBILE_MONEY',
+      'MERCHANT', 'CREDIT_CARD', 'MOBILE_WALLET', 'BANK_DEPOSIT'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+-- Table principale: Users
+CREATE TABLE IF NOT EXISTS users (
+  id BIGSERIAL PRIMARY KEY,
+  email CITEXT UNIQUE NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  role user_role NOT NULL DEFAULT 'AGENT',
+  phone VARCHAR(20),
+  avatar_url VARCHAR(500),
+  mfa_enabled BOOLEAN DEFAULT false,
+  mfa_secret VARCHAR(255),
+  active BOOLEAN DEFAULT true,
+  last_login TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Table Agents
+CREATE TABLE IF NOT EXISTS agents (
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT UNIQUE NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  zone VARCHAR(255),
+  goals TEXT,
+  score INTEGER DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Table Sessions
+CREATE TABLE IF NOT EXISTS sessions (
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  token_hash VARCHAR(255) UNIQUE NOT NULL,
+  ip_address INET,
+  user_agent TEXT,
+  expires_at TIMESTAMP NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Table Audit
+CREATE TABLE IF NOT EXISTS audit_log (
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT REFERENCES users(id) ON DELETE SET NULL,
+  action VARCHAR(100) NOT NULL,
+  resource_type VARCHAR(100) NOT NULL,
+  resource_id BIGINT,
+  old_values JSONB,
+  new_values JSONB,
+  ip_address INET,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Table Properties
+CREATE TABLE IF NOT EXISTS properties (
+  id BIGSERIAL PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  address VARCHAR(500),
+  user_id BIGINT REFERENCES users(id),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Table Contracts
+CREATE TABLE IF NOT EXISTS contracts (
+  id BIGSERIAL PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  property_id BIGINT REFERENCES properties(id),
+  tenant_id BIGINT,
+  user_id BIGINT REFERENCES users(id),
+  status VARCHAR(50) DEFAULT 'draft',
+  start_date DATE,
+  end_date DATE,
+  rent_amount DECIMAL(10,2),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Table Tenants
+CREATE TABLE IF NOT EXISTS tenants (
+  id BIGSERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(255),
+  phone VARCHAR(20),
+  contract_id BIGINT REFERENCES contracts(id),
+  user_id BIGINT REFERENCES users(id),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Table Payments
+CREATE TABLE IF NOT EXISTS payments (
+  id BIGSERIAL PRIMARY KEY,
+  amount DECIMAL(10,2) NOT NULL,
+  method payment_method DEFAULT 'CASH',
+  status VARCHAR(50) DEFAULT 'pending',
+  contract_id BIGINT REFERENCES contracts(id),
+  user_id BIGINT REFERENCES users(id),
+  due_date DATE,
+  paid_date DATE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Table Projects
+CREATE TABLE IF NOT EXISTS projects (
+  id BIGSERIAL PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  status VARCHAR(50) DEFAULT 'planning',
+  user_id BIGINT REFERENCES users(id),
+  budget DECIMAL(12,2),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Table Clients
+CREATE TABLE IF NOT EXISTS clients (
+  id BIGSERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(255),
+  phone VARCHAR(20),
+  company VARCHAR(255),
+  user_id BIGINT REFERENCES users(id),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Indexes
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
+CREATE INDEX IF NOT EXISTS idx_agents_user_id ON agents(user_id);
+CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id);
+CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at);
+CREATE INDEX IF NOT EXISTS idx_audit_log_user_id ON audit_log(user_id);
+CREATE INDEX IF NOT EXISTS idx_properties_user_id ON properties(user_id);
+CREATE INDEX IF NOT EXISTS idx_contracts_user_id ON contracts(user_id);
+CREATE INDEX IF NOT EXISTS idx_contracts_property_id ON contracts(property_id);
+CREATE INDEX IF NOT EXISTS idx_tenants_user_id ON tenants(user_id);
+CREATE INDEX IF NOT EXISTS idx_payments_user_id ON payments(user_id);
+CREATE INDEX IF NOT EXISTS idx_payments_contract_id ON payments(contract_id);
+CREATE INDEX IF NOT EXISTS idx_projects_user_id ON projects(user_id);
+CREATE INDEX IF NOT EXISTS idx_clients_user_id ON clients(user_id);
+
+-- Données de test
+INSERT INTO users (email, name, role, password_hash) VALUES
+  ('admin@akig.fr', 'Admin AKIG', 'ADMIN', '$2b$10$abcdefghijklmnopqrstuvwxyz123456789'),
+  ('manager@akig.fr', 'Manager AKIG', 'MANAGER', '$2b$10$abcdefghijklmnopqrstuvwxyz123456789'),
+  ('agent@akig.fr', 'Agent AKIG', 'AGENT', '$2b$10$abcdefghijklmnopqrstuvwxyz123456789')
+ON CONFLICT (email) DO NOTHING;
+
+-- Message de confirmation
+SELECT 'Base de données AKIG initialisée avec succès' as status;

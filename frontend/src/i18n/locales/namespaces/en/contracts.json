@@ -1,0 +1,83 @@
+{
+  "title": "Contracts",
+  "subtitle": "Lease contract management",
+  "list": {
+    "title": "Contracts List",
+    "columns": {
+      "id": "Contract ID",
+      "tenant": "Tenant",
+      "property": "Property",
+      "start_date": "Start Date",
+      "end_date": "End Date",
+      "rent": "Rent",
+      "deposit": "Deposit",
+      "status": "Status",
+      "duration": "Duration"
+    },
+    "actions": {
+      "view_details": "View Details",
+      "edit": "Edit",
+      "renew": "Renew",
+      "terminate": "Terminate",
+      "download": "Download (PDF)"
+    }
+  },
+  "form": {
+    "title": "New Contract",
+    "edit_title": "Edit Contract",
+    "tenant_id": "Tenant",
+    "property_id": "Property",
+    "start_date": "Start Date",
+    "end_date": "End Date",
+    "rent": "Rent Amount",
+    "deposit": "Deposit Amount",
+    "conditions": "Terms & Conditions",
+    "notes": "Notes",
+    "submit": "Create Contract"
+  },
+  "status": {
+    "draft": "Draft",
+    "active": "Active",
+    "pending": "Pending Signature",
+    "expiring_soon": "Expiring Soon",
+    "expired": "Expired",
+    "terminated": "Terminated",
+    "renewed": "Renewed",
+    "on_hold": "On Hold"
+  },
+  "details": {
+    "title": "Contract Details",
+    "contract_number": "Contract Number",
+    "tenant_information": "Tenant Information",
+    "property_information": "Property Information",
+    "financial_terms": "Financial Terms",
+    "dates": "Dates",
+    "terms_conditions": "Terms & Conditions",
+    "documents": "Documents"
+  },
+  "termination": {
+    "title": "Terminate Contract",
+    "reason": "Termination Reason",
+    "notice_date": "Notice Date",
+    "effective_date": "Effective Date",
+    "final_settlement": "Final Settlement",
+    "confirm": "Confirm Termination"
+  },
+  "renewal": {
+    "title": "Renew Contract",
+    "new_start_date": "New Start Date",
+    "new_end_date": "New End Date",
+    "new_rent": "New Rent",
+    "rent_increase": "Rent Increase",
+    "percentage": "Percentage",
+    "confirm": "Confirm Renewal"
+  },
+  "messages": {
+    "contract_created": "Contract created successfully",
+    "contract_updated": "Contract updated",
+    "contract_terminated": "Contract terminated",
+    "contract_renewed": "Contract renewed",
+    "confirm_termination": "Are you sure you want to terminate this contract?",
+    "confirm_renewal": "Are you sure you want to renew this contract?"
+  }
+}

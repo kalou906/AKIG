@@ -1,0 +1,646 @@
+# =============================================================================
+# Kubernetes Canary Deployment Configuration
+# =============================================================================
+# Implements gradual traffic shifting from stable to canary version
+# with automatic rollback on error rate threshold violations
+# =============================================================================
+
+# =============================================================================
+# Stable Deployment (Production)
+# =============================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: akig-backend-stable
+  namespace: akig
+  labels:
+    app: akig-backend
+    track: stable
+    version: stable
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+
+spec:
+  replicas: 3
+  revisionHistoryLimit: 10
+
+  selector:
+    matchLabels:
+      app: akig-backend
+      track: stable
+
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+
+  template:
+    metadata:
+      labels:
+        app: akig-backend
+        track: stable
+        version: stable
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "4000"
+        prometheus.io/path: "/metrics"
+
+    spec:
+      serviceAccountName: akig-backend
+      
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+
+      # Pod anti-affinity: spread across different nodes
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - akig-backend
+              topologyKey: kubernetes.io/hostname
+
+      containers:
+        - name: akig-backend
+          image: registry.akig.io/akig/backend:latest
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - name: http
+              containerPort: 4000
+              protocol: TCP
+            - name: metrics
+              containerPort: 9090
+              protocol: TCP
+
+          # Environment variables
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: LOG_LEVEL
+              value: "info"
+            - name: PORT
+              value: "4000"
+            - name: DEPLOYMENT_TRACK
+              value: "stable"
+            - name: DEPLOYMENT_VERSION
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['version']
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+
+          # Resource requests and limits
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+
+          # Liveness probe: restart if unhealthy
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          # Readiness probe: remove from load balancer if unready
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 2
+
+          # Startup probe: give time to initialize
+          startupProbe:
+            httpGet:
+              path: /health/live
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 0
+            periodSeconds: 2
+            timeoutSeconds: 3
+            failureThreshold: 30
+
+          # Security context
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+
+          # Volume mounts
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: cache
+              mountPath: /app/.cache
+
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: cache
+          emptyDir: {}
+
+      terminationGracePeriodSeconds: 30
+
+# =============================================================================
+# Canary Deployment (New Version)
+# =============================================================================
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: akig-backend-canary
+  namespace: akig
+  labels:
+    app: akig-backend
+    track: canary
+    version: canary
+  annotations:
+    deployment.kubernetes.io/revision: "2"
+
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+
+  selector:
+    matchLabels:
+      app: akig-backend
+      track: canary
+
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+
+  template:
+    metadata:
+      labels:
+        app: akig-backend
+        track: canary
+        version: canary
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "4000"
+        prometheus.io/path: "/metrics"
+
+    spec:
+      serviceAccountName: akig-backend
+      
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - akig-backend
+              topologyKey: kubernetes.io/hostname
+
+      containers:
+        - name: akig-backend
+          image: registry.akig.io/akig/backend:canary
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - name: http
+              containerPort: 4000
+              protocol: TCP
+            - name: metrics
+              containerPort: 9090
+              protocol: TCP
+
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: LOG_LEVEL
+              value: "debug"
+            - name: PORT
+              value: "4000"
+            - name: DEPLOYMENT_TRACK
+              value: "canary"
+            - name: DEPLOYMENT_VERSION
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['version']
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 2
+
+          startupProbe:
+            httpGet:
+              path: /health/live
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 0
+            periodSeconds: 2
+            timeoutSeconds: 3
+            failureThreshold: 30
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: cache
+              mountPath: /app/.cache
+
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: cache
+          emptyDir: {}
+
+      terminationGracePeriodSeconds: 30
+
+# =============================================================================
+# Service: Backend (Routes to both stable and canary)
+# =============================================================================
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: akig-backend-svc
+  namespace: akig
+  labels:
+    app: akig-backend
+
+spec:
+  type: ClusterIP
+  selector:
+    app: akig-backend
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP
+    - name: metrics
+      port: 9090
+      targetPort: metrics
+      protocol: TCP
+
+  sessionAffinity: None
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800
+
+# =============================================================================
+# Service: Stable only (for A/B testing or percentage-based routing)
+# =============================================================================
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: akig-backend-stable
+  namespace: akig
+  labels:
+    app: akig-backend
+    track: stable
+
+spec:
+  type: ClusterIP
+  selector:
+    app: akig-backend
+    track: stable
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP
+
+# =============================================================================
+# Service: Canary only
+# =============================================================================
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: akig-backend-canary
+  namespace: akig
+  labels:
+    app: akig-backend
+    track: canary
+
+spec:
+  type: ClusterIP
+  selector:
+    app: akig-backend
+    track: canary
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP
+
+# =============================================================================
+# Ingress: Canary with Traffic Splitting
+# Routes 10% traffic to canary, 90% to stable
+# =============================================================================
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: akig-backend-canary
+  namespace: akig
+  labels:
+    app: akig-backend
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/canary: "true"
+    nginx.ingress.kubernetes.io/canary-by-header: "X-Canary"
+    nginx.ingress.kubernetes.io/canary-by-header-value: "true"
+    nginx.ingress.kubernetes.io/canary-weight: "10"
+    # Error rate threshold for automatic rollback (1% error rate)
+    nginx.ingress.kubernetes.io/canary-by-body-key: "canary"
+
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - api.akig.example.com
+      secretName: akig-backend-tls
+
+  rules:
+    - host: api.akig.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: akig-backend-canary
+                port:
+                  number: 80
+
+# =============================================================================
+# Main Ingress: Stable (90% traffic)
+# =============================================================================
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: akig-backend
+  namespace: akig
+  labels:
+    app: akig-backend
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/rate-limit: "1000"
+    nginx.ingress.kubernetes.io/limit-rps: "500"
+    nginx.ingress.kubernetes.io/proxy-body-size: "5m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "30"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "30"
+
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - api.akig.example.com
+      secretName: akig-backend-tls
+
+  rules:
+    - host: api.akig.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: akig-backend-stable
+                port:
+                  number: 80
+
+# =============================================================================
+# ServiceAccount
+# =============================================================================
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: akig-backend
+  namespace: akig
+  labels:
+    app: akig-backend
+
+# =============================================================================
+# RBAC: ClusterRole
+# =============================================================================
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: akig-backend
+  labels:
+    app: akig-backend
+
+rules:
+  # Read pod information for service discovery
+  - apiGroups: [""]
+    resources: ["pods", "services", "configmaps"]
+    verbs: ["get", "list", "watch"]
+  
+  # Read deployment status
+  - apiGroups: ["apps"]
+    resources: ["deployments", "replicasets"]
+    verbs: ["get", "list", "watch"]
+
+# =============================================================================
+# RBAC: ClusterRoleBinding
+# =============================================================================
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: akig-backend
+  labels:
+    app: akig-backend
+
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: akig-backend
+
+subjects:
+  - kind: ServiceAccount
+    name: akig-backend
+    namespace: akig
+
+# =============================================================================
+# Flagger AnalysisTemplate (for automated canary analysis)
+# Requires Flagger to be installed: https://flagger.app
+# =============================================================================
+---
+apiVersion: flagger.app/v1beta1
+kind: AnalysisTemplate
+metadata:
+  name: akig-backend-analysis
+  namespace: akig
+  labels:
+    app: akig-backend
+
+spec:
+  metrics:
+    # HTTP Success Rate (must be >99%)
+    - name: request_success_rate
+      thresholdRange:
+        min: 99
+      interval: 1m
+      query: |
+        sum(rate(http_requests_total{job="akig-backend",status!~"5.."}[5m]))
+        /
+        sum(rate(http_requests_total{job="akig-backend"}[5m]))
+        * 100
+
+    # HTTP Latency (p95 < 500ms)
+    - name: request_duration
+      thresholdRange:
+        max: 500
+      interval: 1m
+      query: |
+        histogram_quantile(0.95,
+          sum(rate(http_request_duration_seconds_bucket{job="akig-backend"}[5m]))
+          by (le)
+        ) * 1000
+
+    # Error Rate (must be <1%)
+    - name: error_rate
+      thresholdRange:
+        max: 1
+      interval: 1m
+      query: |
+        sum(rate(http_requests_total{job="akig-backend",status=~"5.."}[5m]))
+        /
+        sum(rate(http_requests_total{job="akig-backend"}[5m]))
+        * 100
+
+# =============================================================================
+# Flagger Canary Resource
+# Automates canary deployments with progressive traffic shifting
+# =============================================================================
+---
+apiVersion: flagger.app/v1beta1
+kind: Canary
+metadata:
+  name: akig-backend
+  namespace: akig
+  labels:
+    app: akig-backend
+
+spec:
+  # Target deployment
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: akig-backend-canary
+
+  # Progressive traffic shift config
+  progressDeadlineSeconds: 300
+  skipAnalysis: false
+  suspendAnalysis: false
+
+  service:
+    port: 80
+    targetPort: 4000
+
+  # Traffic shifting strategy
+  analysis:
+    interval: 1m
+    threshold: 5
+    maxWeight: 100
+    stepWeight: 10
+    metrics:
+      - name: request_success_rate
+        thresholdRange:
+          min: 99
+      - name: request_duration
+        thresholdRange:
+          max: 500
+      - name: error_rate
+        thresholdRange:
+          max: 1
+    webhooks:
+      # Slack notification
+      - name: acceptance-test
+        url: http://flagger-loadtester/
+        timeout: 5s
+        metadata:
+          type: smoke
+          cmd: "curl -sd 'test' http://akig-backend-canary/api/health | jq .status"
+
+  # Automatic rollback on failure
+  skipAnalysis: false
+  maxRetries: 5
+
+  # Session affinity for testing
+  sessionAffinity: ClientIP

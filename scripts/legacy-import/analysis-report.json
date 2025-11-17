@@ -1,0 +1,154 @@
+{
+  "analyzed_at": "2025-11-16T01:33:05.332922",
+  "archive_path": "C:\\Users\\HP\\Desktop\\SauvImmLoyer_20251116.sql",
+  "format": "sql",
+  "categories": {
+    "proprietaires": {
+      "pattern": "proprietaire|owner",
+      "count": 155,
+      "sample": [
+        "insert into `proprietaire` (`id`,`nom_proprio`,`rue_proprio`,`cp_proprio`,`ville_proprio`,`telephone`,`email`,`autre`,`iban`,`bic`,`sepa`,`iban2`,`bic2`,`titulaire`,`devise`,`tva`,`tva_prov`,`tva_taux",
+        "insert into `proprietaire` (`id`,`nom_proprio`,`rue_proprio`,`cp_proprio`,`ville_proprio`,`telephone`,`email`,`autre`,`iban`,`bic`,`sepa`,`iban2`,`bic2`,`titulaire`,`devise`,`tva`,`tva_prov`,`tva_taux",
+        "insert into `proprietaire` (`id`,`nom_proprio`,`rue_proprio`,`cp_proprio`,`ville_proprio`,`telephone`,`email`,`autre`,`iban`,`bic`,`sepa`,`iban2`,`bic2`,`titulaire`,`devise`,`tva`,`tva_prov`,`tva_taux"
+      ]
+    },
+    "immeubles": {
+      "pattern": "immeuble|building|site",
+      "count": 100,
+      "sample": [
+        "insert into `immeuble` (`id`,`adresse_id`,`typo`,`adresse`,`commentaire`,`millieme`,`nb_locaux`,`local_id1`,`millieme1`,`local_id2`,`millieme2`,`local_id3`,`millieme3`,`local_id4`,`millieme4`,`local_i",
+        "insert into `immeuble` (`id`,`adresse_id`,`typo`,`adresse`,`commentaire`,`millieme`,`nb_locaux`,`local_id1`,`millieme1`,`local_id2`,`millieme2`,`local_id3`,`millieme3`,`local_id4`,`millieme4`,`local_i",
+        "insert into `immeuble` (`id`,`adresse_id`,`typo`,`adresse`,`commentaire`,`millieme`,`nb_locaux`,`local_id1`,`millieme1`,`local_id2`,`millieme2`,`local_id3`,`millieme3`,`local_id4`,`millieme4`,`local_i"
+      ]
+    },
+    "locaux": {
+      "pattern": "local|property|unit",
+      "count": 1004,
+      "sample": [
+        "insert into `local` (`id`,`immeuble_id`,`nom`,`adresse`,`amrh`,`chaudiere`,`masq_annee`,`forfait_fisc`,`commentaire`,`statut`,`proprietaire_id`,`info_contrat`,`consistance`,`description`,`surface`,`su",
+        "insert into `local` (`id`,`immeuble_id`,`nom`,`adresse`,`amrh`,`chaudiere`,`masq_annee`,`forfait_fisc`,`commentaire`,`statut`,`proprietaire_id`,`info_contrat`,`consistance`,`description`,`surface`,`su",
+        "insert into `local` (`id`,`immeuble_id`,`nom`,`adresse`,`amrh`,`chaudiere`,`masq_annee`,`forfait_fisc`,`commentaire`,`statut`,`proprietaire_id`,`info_contrat`,`consistance`,`description`,`surface`,`su"
+      ]
+    },
+    "locataires": {
+      "pattern": "locataire|tenant",
+      "count": 1288,
+      "sample": [
+        "insert into `locataire` (`id`,`nom`,`telephone`,`email`,`adresse`,`commentaire`,`statut`,`sorti`,`proprietaire_id`,`reference`,`masq_relance`,`locataire_json`) values ('2','diallo el hadji mamadou','6",
+        "insert into `locataire` (`id`,`nom`,`telephone`,`email`,`adresse`,`commentaire`,`statut`,`sorti`,`proprietaire_id`,`reference`,`masq_relance`,`locataire_json`) values ('3','BARRY THIERNO IBRAHIM','622",
+        "insert into `locataire` (`id`,`nom`,`telephone`,`email`,`adresse`,`commentaire`,`statut`,`sorti`,`proprietaire_id`,`reference`,`masq_relance`,`locataire_json`) values ('4','DIALLO EL HADJI MAMADOU','6"
+      ]
+    },
+    "contrats": {
+      "pattern": "contrat|contract|lease",
+      "count": 1057,
+      "sample": [
+        "insert into `contrat` (`id`,`local_id`,`locataire_id`,`date_entree`,`date_fin_preavis`,`preavis`,`date_prochain_loyer`,`date_derniere_regul`,`montant_tot`,`loy`,`charges`,`charges_forfait`,`tva`,`peri",
+        "insert into `contrat` (`id`,`local_id`,`locataire_id`,`date_entree`,`date_fin_preavis`,`preavis`,`date_prochain_loyer`,`date_derniere_regul`,`montant_tot`,`loy`,`charges`,`charges_forfait`,`tva`,`peri",
+        "insert into `contrat` (`id`,`local_id`,`locataire_id`,`date_entree`,`date_fin_preavis`,`preavis`,`date_prochain_loyer`,`date_derniere_regul`,`montant_tot`,`loy`,`charges`,`charges_forfait`,`tva`,`peri"
+      ]
+    },
+    "loyers": {
+      "pattern": "loyer|rent|payment",
+      "count": 30144,
+      "sample": [
+        "insert into `loyer` (`id`,`num`,`contrat_id`,`local_id`,`nom`,`locataire_id`,`montant_tot`,`loy`,`solde`,`paiepartiel`,`charges`,`caf`,`tva`,`remise_ex`,`charge_ex`,`charge_ex_des`,`recette`,`echeance",
+        "insert into `loyer` (`id`,`num`,`contrat_id`,`local_id`,`nom`,`locataire_id`,`montant_tot`,`loy`,`solde`,`paiepartiel`,`charges`,`caf`,`tva`,`remise_ex`,`charge_ex`,`charge_ex_des`,`recette`,`echeance",
+        "insert into `loyer` (`id`,`num`,`contrat_id`,`local_id`,`nom`,`locataire_id`,`montant_tot`,`loy`,`solde`,`paiepartiel`,`charges`,`caf`,`tva`,`remise_ex`,`charge_ex`,`charge_ex_des`,`recette`,`echeance"
+      ]
+    },
+    "paiements": {
+      "pattern": "paiement|payment|transaction",
+      "count": 23603,
+      "sample": [
+        "insert into `paiement` (`p_id`,`orig`,`locataire_id`,`contrat_id`,`local_id`,`grc_encaissement`,`reglement_mode`,`reglement_detail`) values ('1027','locataire','198','212','222','','1','');",
+        "insert into `paiement` (`p_id`,`orig`,`locataire_id`,`contrat_id`,`local_id`,`grc_encaissement`,`reglement_mode`,`reglement_detail`) values ('1032','locataire','199','213','226','','1','');",
+        "insert into `paiement` (`p_id`,`orig`,`locataire_id`,`contrat_id`,`local_id`,`grc_encaissement`,`reglement_mode`,`reglement_detail`) values ('1038','locataire','43','46','33','','1','');"
+      ]
+    },
+    "charges": {
+      "pattern": "charge|utility|fee",
+      "count": 30766,
+      "sample": [
+        "insert into `charge` (`id`,`local_id`,`type`,`libelle`,`fournisseur`,`nouveau_fournisseur`,`montant_ht`,`montant_tva`,`montant_ttc`,`date_acq`,`periode_du`,`periode_au`,`commentaire`,`proprietaire_id`",
+        "insert into `charge` (`id`,`local_id`,`type`,`libelle`,`fournisseur`,`nouveau_fournisseur`,`montant_ht`,`montant_tva`,`montant_ttc`,`date_acq`,`periode_du`,`periode_au`,`commentaire`,`proprietaire_id`",
+        "insert into `charge` (`id`,`local_id`,`type`,`libelle`,`fournisseur`,`nouveau_fournisseur`,`montant_ht`,`montant_tva`,`montant_ttc`,`date_acq`,`periode_du`,`periode_au`,`commentaire`,`proprietaire_id`"
+      ]
+    }
+  },
+  "statistics": {
+    "total_inserts": 0,
+    "tables": {}
+  },
+  "data_quality": {
+    "completeness": "unknown",
+    "duplicates": "unknown",
+    "consistency": "unknown",
+    "issues": []
+  },
+  "mapping": {
+    "proprietaires": {
+      "target_table": "owners",
+      "fields": {
+        "id": "id",
+        "nom": "company_name",
+        "contact": "contact_name",
+        "email": "email",
+        "telephone": "phone",
+        "adresse": "address"
+      }
+    },
+    "immeubles": {
+      "target_table": "sites",
+      "fields": {
+        "id": "id",
+        "nom": "name",
+        "adresse": "address",
+        "proprietaire_id": "owner_id"
+      }
+    },
+    "locaux": {
+      "target_table": "properties",
+      "fields": {
+        "id": "id",
+        "nom": "name",
+        "type": "type",
+        "adresse": "address",
+        "immeuble_id": "site_id"
+      }
+    },
+    "locataires": {
+      "target_table": "tenants",
+      "fields": {
+        "id": "id",
+        "prenom": "first_name",
+        "nom": "last_name",
+        "email": "email",
+        "telephone": "phone"
+      }
+    },
+    "contrats": {
+      "target_table": "contracts",
+      "fields": {
+        "id": "id",
+        "local_id": "property_id",
+        "locataire_id": "tenant_id",
+        "date_debut": "start_date",
+        "date_fin": "end_date",
+        "loyer": "rent_amount"
+      }
+    },
+    "paiements": {
+      "target_table": "payments",
+      "fields": {
+        "id": "id",
+        "contrat_id": "contract_id",
+        "montant": "amount",
+        "date": "payment_date",
+        "type": "payment_method"
+      }
+    }
+  },
+  "errors": [],
+  "warnings": []
+}

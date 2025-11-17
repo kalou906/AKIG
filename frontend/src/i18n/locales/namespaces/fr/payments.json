@@ -1,0 +1,86 @@
+{
+  "title": "Paiements",
+  "subtitle": "Gestion des paiements et des loyers",
+  "list": {
+    "title": "Liste des paiements",
+    "columns": {
+      "id": "ID",
+      "tenant": "Locataire",
+      "property": "Propriété",
+      "amount": "Montant",
+      "due_date": "Date d'échéance",
+      "paid_date": "Date de paiement",
+      "method": "Méthode",
+      "status": "Statut",
+      "reference": "Référence"
+    },
+    "actions": {
+      "view_details": "Voir les détails",
+      "download_receipt": "Télécharger le reçu",
+      "send_reminder": "Envoyer un rappel",
+      "mark_paid": "Marquer comme payé",
+      "cancel_payment": "Annuler le paiement"
+    }
+  },
+  "form": {
+    "title": "Nouveau paiement",
+    "edit_title": "Modifier le paiement",
+    "tenant_id": "Locataire",
+    "property_id": "Propriété",
+    "amount": "Montant",
+    "due_date": "Date d'échéance",
+    "method": "Méthode de paiement",
+    "reference": "Référence",
+    "notes": "Notes",
+    "submit": "Enregistrer le paiement"
+  },
+  "methods": {
+    "card": "Carte bancaire",
+    "bank_transfer": "Virement bancaire",
+    "check": "Chèque",
+    "cash": "Espèces",
+    "mobile": "Paiement mobile",
+    "wallet": "Portefeuille électronique"
+  },
+  "status": {
+    "pending": "En attente",
+    "paid": "Payé",
+    "overdue": "En retard",
+    "partial": "Paiement partiel",
+    "cancelled": "Annulé",
+    "refunded": "Remboursé"
+  },
+  "receipt": {
+    "title": "Reçu de paiement",
+    "number": "Numéro de reçu",
+    "date": "Date",
+    "tenant": "Locataire",
+    "property": "Propriété",
+    "amount": "Montant",
+    "method": "Méthode de paiement",
+    "reference": "Référence",
+    "print": "Imprimer",
+    "download": "Télécharger (PDF)",
+    "email": "Envoyer par email"
+  },
+  "arrears": {
+    "title": "Impayés",
+    "total_amount": "Montant total des impayés",
+    "tenant_name": "Locataire",
+    "property": "Propriété",
+    "due_date": "Date d'échéance",
+    "days_overdue": "Jours de retard",
+    "send_notice": "Envoyer un avis",
+    "escalate": "Escalader",
+    "settle": "Régler"
+  },
+  "messages": {
+    "payment_recorded": "Paiement enregistré avec succès",
+    "receipt_sent": "Reçu envoyé avec succès",
+    "reminder_sent": "Rappel envoyé",
+    "payment_cancelled": "Paiement annulé",
+    "insufficient_amount": "Montant insuffisant",
+    "invalid_date": "Date invalide",
+    "duplicate_reference": "Référence déjà existante"
+  }
+}

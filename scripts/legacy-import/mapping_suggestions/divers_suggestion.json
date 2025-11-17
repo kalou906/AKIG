@@ -1,0 +1,60 @@
+{
+  "legacy_table": "divers",
+  "target_table": "TODO_remplacer_par_nom_table_cible",
+  "enabled": false,
+  "comment": "Validez et activez ce mapping après vérification",
+  "columns": {
+    "legacy_columns": [
+      "id",
+      "typ",
+      "dat",
+      "valeur",
+      "valeur_dec",
+      "id2",
+      "proprietaire_id",
+      "divers_json"
+    ],
+    "samples": [
+      {
+        "id": "11",
+        "typ": "impot_frais",
+        "dat": "2005-01-02 00:00:00",
+        "valeur": "20",
+        "valeur_dec": "0.00000",
+        "id2": "0",
+        "proprietaire_id": "0",
+        "divers_json": "NULL"
+      },
+      {
+        "id": "12",
+        "typ": "impot_frais",
+        "dat": "2006-01-02 00:00:00",
+        "valeur": "20",
+        "valeur_dec": "0.00000",
+        "id2": "0",
+        "proprietaire_id": "0",
+        "divers_json": "NULL"
+      },
+      {
+        "id": "13",
+        "typ": "impot_frais",
+        "dat": "2007-01-02 00:00:00",
+        "valeur": "20",
+        "valeur_dec": "0.00000",
+        "id2": "0",
+        "proprietaire_id": "0",
+        "divers_json": "NULL"
+      }
+    ]
+  },
+  "field_mapping": {
+    "id": "target_id",
+    "typ": "target_typ",
+    "dat": "target_dat",
+    "valeur": "target_valeur",
+    "valeur_dec": "target_valeur_dec",
+    "id2": "target_id2",
+    "proprietaire_id": "target_proprietaire_id",
+    "divers_json": "target_divers_json"
+  }
+}

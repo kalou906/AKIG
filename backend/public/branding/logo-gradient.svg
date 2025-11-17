@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="blueRedGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0056B3;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFFFFF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#CC0000;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Fond avec dégradé -->
+  <rect width="200" height="200" fill="url(#blueRedGradient)" rx="12"/>
+  
+  <!-- Texte AKIG en blanc -->
+  <text x="100" y="120" font-family="Arial, sans-serif" font-size="48" font-weight="bold"
+        text-anchor="middle" fill="#FFFFFF">AKIG</text>
+</svg>

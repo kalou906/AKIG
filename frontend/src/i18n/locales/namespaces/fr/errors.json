@@ -1,0 +1,82 @@
+{
+  "title": "Erreurs",
+  "http_errors": {
+    "400": "Mauvaise requête",
+    "401": "Non autorisé",
+    "403": "Accès refusé",
+    "404": "Non trouvé",
+    "409": "Conflit",
+    "422": "Entité invalide",
+    "429": "Trop de requêtes",
+    "500": "Erreur serveur",
+    "502": "Mauvaise passerelle",
+    "503": "Service indisponible",
+    "504": "Délai d'attente dépassé"
+  },
+  "validation": {
+    "required": "Ce champ est obligatoire",
+    "email": "Veuillez entrer une adresse email valide",
+    "phone": "Veuillez entrer un numéro de téléphone valide",
+    "url": "Veuillez entrer une URL valide",
+    "number": "Veuillez entrer un nombre valide",
+    "integer": "Veuillez entrer un nombre entier",
+    "positive": "Le nombre doit être positif",
+    "min": "La valeur minimale est {{min}}",
+    "max": "La valeur maximale est {{max}}",
+    "min_length": "La longueur minimale est {{min}} caractères",
+    "max_length": "La longueur maximale est {{max}} caractères",
+    "pattern": "Le format est invalide",
+    "match": "Les champs ne correspondent pas",
+    "unique": "Cette valeur existe déjà",
+    "date": "Veuillez entrer une date valide",
+    "date_range": "La date de fin doit être après la date de début"
+  },
+  "authentication": {
+    "invalid_credentials": "Identifiants invalides",
+    "session_expired": "Votre session a expiré",
+    "unauthorized": "Vous n'êtes pas autorisé à accéder à cette ressource",
+    "permission_denied": "Permission refusée",
+    "account_locked": "Votre compte est bloqué",
+    "account_disabled": "Votre compte est désactivé",
+    "account_not_verified": "Votre compte n'a pas été vérifié",
+    "password_reset_required": "Réinitialisation du mot de passe requise"
+  },
+  "payment": {
+    "insufficient_funds": "Fonds insuffisants",
+    "invalid_card": "Carte invalide",
+    "card_expired": "Carte expirée",
+    "cvv_invalid": "CVV invalide",
+    "transaction_failed": "La transaction a échoué",
+    "transaction_declined": "La transaction a été refusée",
+    "duplicate_transaction": "Transaction en double détectée",
+    "amount_exceeds_limit": "Le montant dépasse la limite"
+  },
+  "contract": {
+    "contract_not_found": "Contrat non trouvé",
+    "contract_expired": "Le contrat a expiré",
+    "cannot_renew": "Impossible de renouveler ce contrat",
+    "cannot_terminate": "Impossible de résilier ce contrat",
+    "invalid_dates": "Les dates sont invalides",
+    "tenant_not_assigned": "Aucun locataire assigné"
+  },
+  "tenant": {
+    "tenant_not_found": "Locataire non trouvé",
+    "duplicate_tenant": "Ce locataire existe déjà",
+    "invalid_document": "Document invalide",
+    "document_upload_failed": "Impossible de charger le document"
+  },
+  "property": {
+    "property_not_found": "Propriété non trouvée",
+    "property_unavailable": "Propriété indisponible",
+    "occupancy_limit_reached": "Limite d'occupation atteinte"
+  },
+  "general": {
+    "something_went_wrong": "Quelque chose s'est mal passé",
+    "operation_failed": "L'opération a échoué",
+    "please_try_again": "Veuillez réessayer",
+    "contact_support": "Veuillez contacter le support",
+    "network_error": "Erreur réseau. Veuillez vérifier votre connexion",
+    "timeout": "La requête a dépassé le délai d'attente",
+    "server_error": "Erreur serveur. Veuillez réessayer plus tard"
+  }
+}

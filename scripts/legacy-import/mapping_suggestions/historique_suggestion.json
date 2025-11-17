@@ -1,0 +1,65 @@
+{
+  "legacy_table": "historique",
+  "target_table": "TODO_remplacer_par_nom_table_cible",
+  "enabled": false,
+  "comment": "Validez et activez ce mapping après vérification",
+  "columns": {
+    "legacy_columns": [
+      "id",
+      "locataire_id",
+      "local_id",
+      "prop",
+      "date",
+      "objet",
+      "envoi",
+      "detail",
+      "loyer_id"
+    ],
+    "samples": [
+      {
+        "id": "49",
+        "locataire_id": "2",
+        "local_id": "0",
+        "prop": "0",
+        "date": "2015-04-13 00:00:00",
+        "objet": "Compte locatif",
+        "envoi": "Oui (PDF)",
+        "detail": "<div style=\"padding-left: 10px; font-family: verda",
+        "loyer_id": "0"
+      },
+      {
+        "id": "50",
+        "locataire_id": "3",
+        "local_id": "0",
+        "prop": "0",
+        "date": "2015-04-15 00:00:00",
+        "objet": "Objet : Révision du montant du loyer",
+        "envoi": "Non",
+        "detail": "<br><div style=\"padding-left: 410px;\">CONAKRY, le ",
+        "loyer_id": "0"
+      },
+      {
+        "id": "51",
+        "locataire_id": "5",
+        "local_id": "0",
+        "prop": "0",
+        "date": "2015-04-16 00:00:00",
+        "objet": "Contrat de location",
+        "envoi": "-",
+        "detail": "<div style=\"font-size: x-large;\">rn<div style=\"tex",
+        "loyer_id": "0"
+      }
+    ]
+  },
+  "field_mapping": {
+    "id": "target_id",
+    "locataire_id": "target_locataire_id",
+    "local_id": "target_local_id",
+    "prop": "target_prop",
+    "date": "target_date",
+    "objet": "target_objet",
+    "envoi": "target_envoi",
+    "detail": "target_detail",
+    "loyer_id": "target_loyer_id"
+  }
+}

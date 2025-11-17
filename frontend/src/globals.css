@@ -1,0 +1,31 @@
+/** 
+ * DEPRECATED: This file has been consolidated into src/index.css
+ * 
+ * Please import src/index.css in your main application file instead.
+ * 
+ * This file is kept for backward compatibility only.
+ * All styles are now centralized in src/index.css with pure CSS (no @tailwind/@apply)
+ */
+
+/* CSS Variables - kept for reference */
+:root {
+  --color-primary: #0F2557;
+  --color-secondary: #1e40af;
+  --color-accent: #F59E0B;
+  --color-success: #0EA5E9;
+  --color-warning: #F59E0B;
+  --color-error: #DC2626;
+  --color-info: #3B82F6;
+  --color-bg: #F5F7FB;
+  --color-bg-light: #FFFFFF;
+  --color-bg-hover: #F3F4F6;
+  --color-text: #0A0A0A;
+  --color-text-muted: #4B5563;
+  --color-text-light: #6B7280;
+  --color-border: #E5E7EB;
+  --color-border-light: #F3F4F6;
+  --font-sans: 'Inter', sans-serif;
+  --font-heading: 'Poppins', sans-serif;
+}
+
+/* All component styles moved to src/index.css */

@@ -1,0 +1,254 @@
+name: 🚀 CD Pipeline - Deploy to Production
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - "frontend/**"
+      - "docker-compose.yml"
+      - ".github/workflows/cd.yml"
+
+# Timeout global
+jobs:
+  # ==========================================
+  # 1. BUILD (réutiliser l'artifact de CI)
+  # ==========================================
+  build:
+    name: 🏗️  Build & Package
+    runs-on: ubuntu-latest
+    outputs:
+      image-tag: ${{ steps.meta.outputs.tags }}
+    steps:
+      - name: 📦 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+
+      - name: 📥 Install dependencies
+        run: |
+          cd backend && npm ci
+          cd ../frontend && npm ci
+
+      - name: 🏗️  Build frontend
+        run: cd frontend && npm run build
+        env:
+          REACT_APP_API_URL: ${{ secrets.API_URL_PROD }}
+          CI: true
+
+      - name: 📤 Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: |
+            frontend/build/
+            backend/src/
+            docker-compose.yml
+          retention-days: 1
+
+  # ==========================================
+  # 2. DEPLOY TO PRODUCTION
+  # ==========================================
+  deploy:
+    name: 🚀 Deploy to Production
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: production
+      url: ${{ secrets.PRODUCTION_URL }}
+    steps:
+      - name: 📦 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📥 Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-artifacts
+
+      - name: 🔑 Configure SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+
+      - name: 📋 Display deployment info
+        run: |
+          echo "🚀 Deploying to: ${{ secrets.SERVER_HOST }}"
+          echo "👤 User: ${{ secrets.SERVER_USER }}"
+          echo "📂 Path: ${{ secrets.DEPLOY_PATH }}"
+
+      - name: 📦 Upload code to server
+        run: |
+          rsync -avz \
+            --exclude='node_modules' \
+            --exclude='.git' \
+            --exclude='.env' \
+            --exclude='dist' \
+            -e "ssh -i ~/.ssh/deploy_key" \
+            . ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${{ secrets.DEPLOY_PATH }}/
+
+      - name: 🔄 Deploy with Docker Compose
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
+            cd ${{ secrets.DEPLOY_PATH }}
+            
+            echo "📥 Pulling latest code..."
+            git pull origin main || true
+            
+            echo "🐳 Building Docker images..."
+            docker-compose -f docker-compose.yml pull
+            
+            echo "🛑 Stopping old containers..."
+            docker-compose -f docker-compose.yml down || true
+            
+            echo "🔄 Starting new containers..."
+            docker-compose -f docker-compose.yml up -d postgres
+            sleep 5
+            
+            echo "🗄️  Running database migrations..."
+            docker-compose -f docker-compose.yml exec -T api npm run db:migrate || true
+            
+            echo "🌱 Loading seed data..."
+            docker-compose -f docker-compose.yml exec -T api npm run db:seed || true
+            
+            echo "🚀 Starting services..."
+            docker-compose -f docker-compose.yml up -d api frontend nginx
+            
+            echo "✅ Deployment complete"
+            docker-compose ps
+          EOF
+
+      - name: 🏥 Health check
+        run: |
+          echo "🔍 Health check..."
+          sleep 10
+          
+          # Vérifier l'API
+          API_STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ secrets.PRODUCTION_URL }}/api/health)
+          if [ "$API_STATUS" -eq 200 ]; then
+            echo "✅ API healthy (HTTP $API_STATUS)"
+          else
+            echo "❌ API unhealthy (HTTP $API_STATUS)"
+            exit 1
+          fi
+          
+          # Vérifier le frontend
+          WEB_STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ secrets.PRODUCTION_URL }}/)
+          if [ "$WEB_STATUS" -eq 200 ]; then
+            echo "✅ Frontend healthy (HTTP $WEB_STATUS)"
+          else
+            echo "❌ Frontend unhealthy (HTTP $WEB_STATUS)"
+            exit 1
+          fi
+
+      - name: 📧 Deploy notification
+        if: success()
+        run: |
+          echo "✅ Deployment successful!"
+          echo "📍 URL: ${{ secrets.PRODUCTION_URL }}"
+          echo "🕐 Timestamp: $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
+
+      - name: 🚨 Rollback on failure
+        if: failure()
+        run: |
+          echo "❌ Deployment failed. Rolling back..."
+          ssh -i ~/.ssh/deploy_key ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
+            cd ${{ secrets.DEPLOY_PATH }}
+            
+            echo "🔄 Rolling back to previous version..."
+            git revert HEAD --no-edit || true
+            docker-compose -f docker-compose.yml down
+            docker-compose -f docker-compose.yml up -d
+            
+            echo "⏮️  Rollback complete"
+          EOF
+          exit 1
+
+  # ==========================================
+  # 3. POST-DEPLOYMENT TESTS
+  # ==========================================
+  smoke-tests:
+    name: 🧪 Smoke Tests (Post-Deploy)
+    runs-on: ubuntu-latest
+    needs: deploy
+    steps:
+      - name: 📦 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+
+      - name: 🎭 Install Playwright
+        run: |
+          cd frontend
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: 🧪 Run smoke tests
+        env:
+          BASE_URL: ${{ secrets.PRODUCTION_URL }}
+        run: |
+          cd frontend
+          npx playwright test tests/dashboard.spec.ts --project=Chromium
+          npx playwright test tests/modules.spec.ts --project=Chromium
+
+      - name: 📊 Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: smoke-tests-report
+          path: frontend/playwright-report/
+          retention-days: 7
+
+  # ==========================================
+  # 4. MONITORING & ALERTS
+  # ==========================================
+  monitoring:
+    name: 📊 Post-Deploy Monitoring
+    runs-on: ubuntu-latest
+    needs: deploy
+    steps:
+      - name: 📊 Monitor server resources
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
+            echo "📊 Server Resources:"
+            echo "CPU: $(top -bn1 | grep "Cpu(s)" | awk '{print $2}')"
+            echo "Memory: $(free -h | awk 'NR==2 {print $3 "/" $2}')"
+            echo "Disk: $(df -h / | awk 'NR==2 {print $3 "/" $2}')"
+            
+            echo ""
+            echo "🐳 Docker status:"
+            docker ps --format "table {{.Names}}\t{{.Status}}"
+            
+            echo ""
+            echo "📋 Recent logs (API):"
+            docker logs --tail 20 akig_api || true
+          EOF
+
+      - name: 📧 Send success notification
+        if: success()
+        run: |
+          echo "✅ Production deployment successful!"
+          echo "📍 Environment: Production"
+          echo "🔗 URL: ${{ secrets.PRODUCTION_URL }}"
+          echo "🕐 Deploy time: $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
+          # À mettre en place: intégration Slack/Email/PagerDuty
+
+# ==========================================
+# REQUIRED GITHUB SECRETS FOR DEPLOYMENT:
+# ==========================================
+# - SSH_PRIVATE_KEY: Clé SSH privée pour déploiement
+# - SERVER_HOST: Hostname/IP du serveur production
+# - SERVER_USER: Utilisateur SSH (ex: deploy)
+# - DEPLOY_PATH: Chemin de déploiement (ex: /home/deploy/akig)
+# - PRODUCTION_URL: URL de la production (ex: https://akig.com)
+# - API_URL_PROD: URL API production
+# - SNYK_TOKEN: Token Snyk (optionnel)

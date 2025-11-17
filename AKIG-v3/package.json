@@ -1,0 +1,50 @@
+{
+  "name": "@akig/root",
+  "version": "3.0.0",
+  "private": true,
+  "description": "AKIG v3.0 - Système Immobilier Hyper-Moderne & IA-Driven",
+  "author": "AKIG Corp",
+  "license": "PROPRIETARY",
+  "engines": {
+    "node": ">=22.11.0",
+    "pnpm": ">=9.14.2"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "test:ci": "turbo run test:ci",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "typecheck": "turbo run typecheck",
+    "db:migrate": "pnpm -F api db:migrate:deploy",
+    "db:seed": "pnpm -F api db:seed",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "install:all": "./scripts/install.sh",
+    "prepare": "husky install"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.5.0",
+    "@commitlint/config-conventional": "^19.5.0",
+    "@types/node": "^22.8.6",
+    "eslint": "^9.14.0",
+    "eslint-config-akig": "workspace:*",
+    "husky": "^9.1.6",
+    "lint-staged": "^15.2.10",
+    "prettier": "^3.3.3",
+    "turbo": "^2.3.0",
+    "typescript": "^5.7.2"
+  },
+  "packageManager": "pnpm@9.14.2",
+  "pnpm": {
+    "overrides": {
+      "express": "^5.0.1",
+      "axios": "^1.7.9"
+    },
+    "patchedDependencies": {
+      "@nestjs/core": "patches/@nestjs__core.patch"
+    }
+  }
+}

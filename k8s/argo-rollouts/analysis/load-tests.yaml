@@ -1,0 +1,35 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: load-tests
+  namespace: solvency-ai
+spec:
+  args:
+  - name: service-url
+  metrics:
+  - name: load-test
+    provider:
+      job:
+        spec:
+          template:
+            spec:
+              containers:
+              - name: k6
+                image: loadimpact/k6:latest
+                command:
+                - k6
+                - run
+                - --vus=10
+                - --duration=2m
+                - -e
+                - SERVICE_URL={{args.service-url}}
+                - /scripts/load-test.js
+                volumeMounts:
+                - name: scripts
+                  mountPath: /scripts
+              volumes:
+              - name: scripts
+                configMap:
+                  name: k6-scripts
+      successCondition: job.status.succeeded > 0
+      failureLimit: 1

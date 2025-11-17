@@ -1,0 +1,107 @@
+# ============================================================
+# .dockerignore - Optimiser la taille des images Docker
+# ============================================================
+
+# Version Control
+.git
+.gitignore
+.gitattributes
+.github
+
+# Dependencies (recréées dans le build)
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json.*.bak
+
+# Build Artifacts & Caches
+dist
+build
+.next
+.nuxt
+out
+.cache
+.eslintcache
+.stylelintcache
+.turbo
+coverage
+*.log
+
+# Development
+.env.local
+.env.*.local
+.env.development*
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Testing
+__tests__
+__test__
+test
+tests
+.jest
+.mocha
+.nyc_output
+cypress
+
+# Documentation (optional, keep if needed)
+*.md
+docs
+README*
+CHANGELOG*
+
+# CI/CD
+.travis.yml
+.gitlab-ci.yml
+.circleci
+Jenkinsfile
+azure-pipelines.yml
+
+# Docker
+.dockerignore
+Dockerfile
+docker-compose*.yml
+docker-compose*.yaml
+
+# Scripts & Configuration (keep only necessary)
+scripts/dev*
+scripts/test*
+*.example
+.editorconfig
+.prettierignore
+eslintignore
+.stylelintignore
+
+# Workspace files
+*.workspace
+.vscode-extensions
+
+# Temporary files
+*.tmp
+*.temp
+.tmp
+
+# IDE Project Files
+*.iml
+.project
+.classpath
+.c9
+
+# Local development
+.env.local
+local.conf.js
+local.settings.json
+
+# Misc
+LICENSE
+CONTRIBUTING.md
+CONTRIBUTORS.md
+.gitpod.yml
+renovate.json
+.dependabot

@@ -1,0 +1,469 @@
+groups:
+  # ============================================
+  # Groupe: KPIs Métier Critiques
+  # ============================================
+  - name: business-kpis
+    interval: 30s
+    rules:
+      # Taux de collecte des loyers
+      - alert: LowRentCollectionRate
+        expr: akig_rent_collection_rate_percent < 80
+        for: 3d
+        labels:
+          severity: warning
+          service: billing
+          team: finance
+        annotations:
+          summary: "Taux de collecte des loyers faible: {{ $value }}%"
+          description: "Le taux de collecte est inférieur à 80% depuis 3 jours pour l'agence {{ $labels.agency_id }}"
+          dashboard: "https://grafana.akig.local/d/rent-collection"
+          runbook: "https://wiki.akig.local/runbooks/low-rent-collection"
+
+      # Montant d'impayés croissant
+      - alert: HighArrearsAmount
+        expr: akig_arrears_total_amount > 100000
+        for: 7d
+        labels:
+          severity: warning
+          service: billing
+          team: finance
+        annotations:
+          summary: "Montant d'impayés élevé: {{ $value | humanize }}€"
+          description: "Les impayés totaux dépassent 100k€ depuis une semaine"
+          dashboard: "https://grafana.akig.local/d/arrears-tracking"
+
+      # Moyenne des jours de retard
+      - alert: HighAverageLatePayments
+        expr: akig_overdue_days_average > 60
+        for: 5d
+        labels:
+          severity: warning
+          service: billing
+          team: finance
+        annotations:
+          summary: "Retard moyen de paiement élevé: {{ $value }} jours"
+          description: "Les retards moyens dépassent 60 jours"
+
+      # Taux d'occupation faible
+      - alert: LowOccupancyRate
+        expr: akig_occupancy_rate_percent < 70
+        for: 2w
+        labels:
+          severity: warning
+          service: properties
+          team: operations
+        annotations:
+          summary: "Taux d'occupation faible: {{ $value }}%"
+          description: "Occupation inférieure à 70% pour l'agence {{ $labels.agency_id }}"
+          dashboard: "https://grafana.akig.local/d/occupancy"
+
+      # Biens vacants critiques
+      - alert: ExcessiveVacancy
+        expr: akig_vacant_units_total > 20
+        for: 1m
+        labels:
+          severity: critical
+          service: properties
+          team: operations
+        annotations:
+          summary: "Trop de biens vacants: {{ $value }} unités"
+          description: "Plus de 20 unités vacantes détectées"
+
+      # Contrats expirant bientôt
+      - alert: ManyContractsExpiringSoon
+        expr: akig_contracts_expiring_soon_total > 10
+        for: 1h
+        labels:
+          severity: warning
+          service: contracts
+          team: operations
+        annotations:
+          summary: "Contrats expirant: {{ $value }} dans les 30 jours"
+          description: "Nombreux contrats proches de l'expiration - action requise"
+          dashboard: "https://grafana.akig.local/d/expiring-contracts"
+
+      # Locataires en défaut critiques
+      - alert: HighDefaultRate
+        expr: (akig_tenants_in_default_total / akig_total_tenants_count) > 0.05
+        for: 5d
+        labels:
+          severity: critical
+          service: billing
+          team: finance
+        annotations:
+          summary: "Taux de défaut élevé: {{ $value | humanizePercentage }}"
+          description: "Plus de 5% des locataires en défaut de paiement"
+
+  # ============================================
+  # Groupe: Performance & Disponibilité
+  # ============================================
+  - name: system-performance
+    interval: 30s
+    rules:
+      # Taux d'échec de paiement élevé
+      - alert: HighPaymentFailureRate
+        expr: rate(akig_payment_processing_time_seconds_bucket{le="+Inf"}[5m]) > 0.1
+        for: 10m
+        labels:
+          severity: critical
+          service: payments
+          team: platform
+        annotations:
+          summary: "Taux d'échec des paiements élevé"
+          description: "Plus de 10% des paiements échouent sur les 5 dernières minutes"
+          dashboard: "https://grafana.akig.local/d/payment-metrics"
+          runbook: "https://wiki.akig.local/runbooks/payment-failures"
+
+      # Temps de traitement des paiements élevé
+      - alert: SlowPaymentProcessing
+        expr: histogram_quantile(0.95, rate(akig_payment_processing_time_seconds_bucket[5m])) > 10
+        for: 5m
+        labels:
+          severity: warning
+          service: payments
+          team: platform
+        annotations:
+          summary: "Traitement des paiements lent: P95={{ $value }}s"
+          description: "Le 95e percentile du temps de traitement dépasse 10 secondes"
+
+      # Base de données non accessible
+      - alert: DatabaseConnectionFailures
+        expr: rate(db_connection_errors_total[5m]) > 0
+        for: 2m
+        labels:
+          severity: critical
+          service: database
+          team: platform
+        annotations:
+          summary: "Erreurs de connexion à la base de données"
+          description: "Impossible de se connecter à PostgreSQL"
+          runbook: "https://wiki.akig.local/runbooks/db-connection-failures"
+
+      # Cache Redis non accessible
+      - alert: RedisCacheDown
+        expr: up{job="redis"} == 0
+        for: 1m
+        labels:
+          severity: high
+          service: cache
+          team: platform
+        annotations:
+          summary: "Cache Redis indisponible"
+          description: "Redis ne répond pas aux requêtes de santé"
+          dashboard: "https://grafana.akig.local/d/redis-monitoring"
+
+      # Utilisation mémoire critique
+      - alert: HighMemoryUsage
+        expr: (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) < 0.1
+        for: 5m
+        labels:
+          severity: critical
+          service: infrastructure
+          team: platform
+        annotations:
+          summary: "Utilisation mémoire critique: {{ $value | humanizePercentage }}"
+          description: "Moins de 10% de mémoire disponible sur le serveur"
+
+      # Espace disque faible
+      - alert: LowDiskSpace
+        expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) < 0.1
+        for: 10m
+        labels:
+          severity: critical
+          service: infrastructure
+          team: platform
+        annotations:
+          summary: "Espace disque faible: {{ $value | humanizePercentage }}"
+          description: "Moins de 10% d'espace disque disponible"
+          runbook: "https://wiki.akig.local/runbooks/low-disk-space"
+
+  # ============================================
+  # Groupe: Sécurité
+  # ============================================
+  - name: security-alerts
+    interval: 30s
+    rules:
+      # Tentatives de brute force
+      - alert: BruteForceAttackDetected
+        expr: increase(akig_brute_force_attempts_total[5m]) > 20
+        for: 1m
+        labels:
+          severity: critical
+          service: security
+          team: infosec
+        annotations:
+          summary: "Attaque par force brute détectée"
+          description: "Plus de 20 tentatives échouées en 5 minutes"
+          dashboard: "https://grafana.akig.local/d/security-threats"
+          runbook: "https://wiki.akig.local/runbooks/brute-force-attack"
+
+      # Anomalie de connexion détectée
+      - alert: AnomalousLoginDetected
+        expr: increase(akig_anomalous_logins_total[5m]) > 5
+        for: 5m
+        labels:
+          severity: high
+          service: security
+          team: infosec
+        annotations:
+          summary: "Connexions anormales détectées: {{ $value }}"
+          description: "{{ $value }} connexions anormales dans les 5 dernières minutes"
+          dashboard: "https://grafana.akig.local/d/anomaly-detection"
+
+      # Erreurs d'authentification élevées
+      - alert: HighAuthenticationFailures
+        expr: rate(akig_authentication_failures_total[5m]) > 0.05
+        for: 10m
+        labels:
+          severity: warning
+          service: security
+          team: infosec
+        annotations:
+          summary: "Taux d'échec d'authentification élevé"
+          description: "Plus de 5% des tentatives d'authentification échouent"
+
+      # Accès non autorisé détecté
+      - alert: UnauthorizedAccessAttempts
+        expr: increase(akig_unauthorized_access_attempts_total[5m]) > 10
+        for: 5m
+        labels:
+          severity: high
+          service: security
+          team: infosec
+        annotations:
+          summary: "Tentatives d'accès non autorisées: {{ $value }}"
+          description: "{{ $value }} tentatives d'accès non autorisées détectées"
+
+      # Certificat SSL expirant bientôt
+      - alert: CertificateExpiringSoon
+        expr: (ssl_certificate_not_after - time()) / 86400 < 30
+        for: 1h
+        labels:
+          severity: warning
+          service: security
+          team: infosec
+        annotations:
+          summary: "Certificat SSL expire dans {{ $value }} jours"
+          description: "Renouvellement de certificat requis dans 30 jours"
+          runbook: "https://wiki.akig.local/runbooks/certificate-renewal"
+
+  # ============================================
+  # Groupe: Audit & Conformité
+  # ============================================
+  - name: audit-compliance
+    interval: 1m
+    rules:
+      # Entrées d'audit manquantes
+      - alert: MissingAuditLogs
+        expr: rate(akig_audit_log_entries_total[5m]) == 0
+        for: 30m
+        labels:
+          severity: critical
+          service: audit
+          team: compliance
+        annotations:
+          summary: "Logs d'audit ne sont pas enregistrés"
+          description: "Aucune entrée d'audit depuis 30 minutes"
+          runbook: "https://wiki.akig.local/runbooks/missing-audit-logs"
+
+      # Intégrité des logs d'audit compromise
+      - alert: AuditIntegrityFailure
+        expr: rate(akig_audit_verification_failures_total[5m]) > 0
+        for: 5m
+        labels:
+          severity: critical
+          service: audit
+          team: compliance
+        annotations:
+          summary: "Intégrité des logs d'audit compromise"
+          description: "Vérification de l'intégrité de la chaîne d'audit a échoué"
+
+      # Nombreuses suppressions/modifications suspectes
+      - alert: SuspiciousDataModifications
+        expr: (rate(akig_audit_log_entries_total{action="DELETE"}[5m]) + 
+                rate(akig_audit_log_entries_total{action="UPDATE"}[5m])) > 0.1
+        for: 10m
+        labels:
+          severity: high
+          service: audit
+          team: compliance
+        annotations:
+          summary: "Taux de modification de données élevé"
+          description: "Nombreuses suppressions/modifications détectées"
+          dashboard: "https://grafana.akig.local/d/audit-trail"
+
+      # Documents non conformes détectés
+      - alert: NonCompliantDocuments
+        expr: akig_compliance_issues_total > 50
+        for: 1h
+        labels:
+          severity: warning
+          service: compliance
+          team: compliance
+        annotations:
+          summary: "Documents non conformes: {{ $value }}"
+          description: "Plus de 50 problèmes de conformité détectés"
+
+  # ============================================
+  # Groupe: Rotation de Clés
+  # ============================================
+  - name: key-rotation
+    interval: 1h
+    rules:
+      # Clés non rotationnées depuis longtemps
+      - alert: KeyRotationOverdue
+        expr: (time() - akig_last_key_rotation_timestamp) / 86400 > 90
+        for: 1h
+        labels:
+          severity: warning
+          service: security
+          team: infosec
+        annotations:
+          summary: "Rotation de clés requise"
+          description: "Les clés n'ont pas été rotationnées depuis 90 jours"
+          runbook: "https://wiki.akig.local/runbooks/key-rotation"
+
+      # Échec de la dernière rotation de clés
+      - alert: KeyRotationFailed
+        expr: akig_last_key_rotation_success == 0
+        for: 1h
+        labels:
+          severity: critical
+          service: security
+          team: infosec
+        annotations:
+          summary: "Echec de la rotation de clés"
+          description: "La dernière rotation de clés a échoué"
+          dashboard: "https://grafana.akig.local/d/key-management"
+
+  # ============================================
+  # Groupe: Sauvegarde & Récupération
+  # ============================================
+  - name: backup-recovery
+    interval: 30m
+    rules:
+      # Sauvegarde n'a pas eu lieu récemment
+      - alert: BackupNotRecent
+        expr: (time() - akig_last_successful_backup_timestamp) / 3600 > 26
+        for: 30m
+        labels:
+          severity: critical
+          service: backup
+          team: platform
+        annotations:
+          summary: "Sauvegarde n'a pas eu lieu depuis 26 heures"
+          description: "Vérifier que les sauvegardes automatiques fonctionnent"
+          runbook: "https://wiki.akig.local/runbooks/backup-failure"
+
+      # Espace sauvegarde presque plein
+      - alert: BackupStorageFull
+        expr: (akig_backup_storage_used_bytes / akig_backup_storage_total_bytes) > 0.9
+        for: 1h
+        labels:
+          severity: warning
+          service: backup
+          team: platform
+        annotations:
+          summary: "Espace sauvegarde à 90%"
+          description: "Espace de sauvegarde presque épuisé - nettoyage requis"
+          runbook: "https://wiki.akig.local/runbooks/backup-storage-cleanup"
+
+      # Intégrité sauvegarde compromise
+      - alert: BackupIntegrityIssue
+        expr: akig_last_backup_integrity_check_passed == 0
+        for: 1h
+        labels:
+          severity: critical
+          service: backup
+          team: platform
+        annotations:
+          summary: "Vérification d'intégrité sauvegarde a échoué"
+          description: "La dernière sauvegarde n'a pas passé le contrôle d'intégrité"
+          dashboard: "https://grafana.akig.local/d/backup-status"
+
+      # Test de restauration échoué
+      - alert: RestoreTestFailed
+        expr: akig_last_restore_test_success == 0
+        for: 1h
+        labels:
+          severity: high
+          service: backup
+          team: platform
+        annotations:
+          summary: "Test de restauration a échoué"
+          description: "Le dernier test de restauration de sauvegarde a échoué"
+
+  # ============================================
+  # Groupe: Métriques Métier Détaillées
+  # ============================================
+  - name: business-metrics
+    interval: 30s
+    rules:
+      # Dépôt d'exportation anormal
+      - alert: AbnormalDataExport
+        expr: rate(akig_data_exports_total[5m]) > 1
+        for: 15m
+        labels:
+          severity: warning
+          service: data
+          team: infosec
+        annotations:
+          summary: "Exports de données anormalement élevés"
+          description: "Plus d'1 export par seconde en moyenne sur 5 min"
+          dashboard: "https://grafana.akig.local/d/data-exports"
+
+      # Documents uploadés anormalement
+      - alert: AbnormalDocumentUpload
+        expr: rate(akig_documents_uploaded_total[5m]) > 5
+        for: 10m
+        labels:
+          severity: warning
+          service: documents
+          team: operations
+        annotations:
+          summary: "Uploads de documents anormalement élevés"
+          description: "{{ $value | humanize }} documents/s uploadés"
+
+      # Factures non créées (anomalie système)
+      - alert: InvoiceCreationFailure
+        expr: increase(akig_invoice_creation_failures_total[1h]) > 5
+        for: 10m
+        labels:
+          severity: high
+          service: billing
+          team: operations
+        annotations:
+          summary: "Échecs de création de factures"
+          description: "{{ $value }} factures n'ont pas pu être créées en une heure"
+
+  # ============================================
+  # Groupe: Opérations
+  # ============================================
+  - name: operations
+    interval: 1m
+    rules:
+      # Jobs planifiés échoués
+      - alert: ScheduledJobFailure
+        expr: increase(akig_scheduled_job_failures_total[1h]) > 0
+        for: 5m
+        labels:
+          severity: warning
+          service: jobs
+          team: platform
+        annotations:
+          summary: "Job planifié a échoué: {{ $labels.job_name }}"
+          description: "Vérifier les logs du job"
+          dashboard: "https://grafana.akig.local/d/scheduled-jobs"
+
+      # Tâche de nettoyage échouée
+      - alert: CleanupJobFailure
+        expr: (time() - akig_last_cleanup_job_timestamp) / 3600 > 25
+        for: 30m
+        labels:
+          severity: warning
+          service: jobs
+          team: platform
+        annotations:
+          summary: "Tâche de nettoyage n'a pas tourné depuis 25 heures"
+          description: "Vérifier l'état du job de nettoyage"
+          runbook: "https://wiki.akig.local/runbooks/cleanup-failure"

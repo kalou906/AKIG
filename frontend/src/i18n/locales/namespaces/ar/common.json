@@ -1,0 +1,60 @@
+{
+  "navigation": {
+    "dashboard": "لوحة التحكم",
+    "payments": "المدفوعات",
+    "contracts": "العقود",
+    "tenants": "المستأجرون",
+    "properties": "الممتلكات",
+    "invoices": "الفواتير",
+    "reports": "التقارير",
+    "settings": "الإعدادات",
+    "admin": "الإدارة"
+  },
+  "common": {
+    "agency": "الوكالة",
+    "property": "الممتلك",
+    "tenant": "المستأجر",
+    "owner": "المالك",
+    "address": "العنوان",
+    "email": "البريد الإلكتروني",
+    "phone": "الهاتف",
+    "date": "التاريخ",
+    "amount": "المبلغ",
+    "status": "الحالة",
+    "actions": "الإجراءات",
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "pending": "قيد الانتظار",
+    "completed": "مكتمل",
+    "failed": "فشل",
+    "archived": "مؤرشف"
+  },
+  "breadcrumb": {
+    "home": "الرئيسية",
+    "back_to_home": "العودة إلى الرئيسية"
+  },
+  "pagination": {
+    "showing": "عرض {{from}} إلى {{to}} من {{total}}",
+    "no_items": "لا توجد عناصر للعرض",
+    "items_per_page": "العناصر لكل صفحة"
+  },
+  "validation": {
+    "required_field": "هذا الحقل مطلوب",
+    "invalid_email": "عنوان بريد إلكتروني غير صالح",
+    "invalid_phone": "رقم هاتف غير صالح",
+    "min_length": "الحد الأدنى {{count}} أحرف",
+    "max_length": "الحد الأقصى {{count}} أحرف",
+    "match_fields": "الحقول غير متطابقة"
+  },
+  "messages": {
+    "confirm_delete": "هل أنت متأكد من أنك تريد حذف هذا العنصر؟",
+    "confirm_action": "هل أنت متأكد من أنك تريد تنفيذ هذا الإجراء؟",
+    "saved_successfully": "تم الحفظ بنجاح",
+    "deleted_successfully": "تم الحذف بنجاح",
+    "updated_successfully": "تم التحديث بنجاح",
+    "operation_failed": "فشلت العملية",
+    "try_again": "يرجى المحاولة مرة أخرى",
+    "loading": "جاري التحميل...",
+    "no_internet": "لا يوجد اتصال إنترنت"
+  }
+}

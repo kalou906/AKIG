@@ -1,0 +1,83 @@
+{
+  "title": "العقود",
+  "subtitle": "إدارة عقود الإيجار",
+  "list": {
+    "title": "قائمة العقود",
+    "columns": {
+      "id": "رقم العقد",
+      "tenant": "المستأجر",
+      "property": "الممتلك",
+      "start_date": "تاريخ البداية",
+      "end_date": "تاريخ النهاية",
+      "rent": "الإيجار",
+      "deposit": "الضمان",
+      "status": "الحالة",
+      "duration": "المدة"
+    },
+    "actions": {
+      "view_details": "عرض التفاصيل",
+      "edit": "تحرير",
+      "renew": "تجديد",
+      "terminate": "إنهاء",
+      "download": "تحميل (PDF)"
+    }
+  },
+  "form": {
+    "title": "عقد جديد",
+    "edit_title": "تحرير العقد",
+    "tenant_id": "المستأجر",
+    "property_id": "الممتلك",
+    "start_date": "تاريخ البداية",
+    "end_date": "تاريخ النهاية",
+    "rent": "مبلغ الإيجار",
+    "deposit": "مبلغ الضمان",
+    "conditions": "الشروط",
+    "notes": "ملاحظات",
+    "submit": "إنشاء العقد"
+  },
+  "status": {
+    "draft": "مسودة",
+    "active": "نشط",
+    "pending": "قيد الانتظار للتوقيع",
+    "expiring_soon": "ينتهي قريباً",
+    "expired": "منتهي",
+    "terminated": "منهي",
+    "renewed": "مجدد",
+    "on_hold": "موقوف"
+  },
+  "details": {
+    "title": "تفاصيل العقد",
+    "contract_number": "رقم العقد",
+    "tenant_information": "معلومات المستأجر",
+    "property_information": "معلومات الممتلك",
+    "financial_terms": "الشروط المالية",
+    "dates": "التواريخ",
+    "terms_conditions": "الشروط والأحكام",
+    "documents": "الوثائق"
+  },
+  "termination": {
+    "title": "إنهاء العقد",
+    "reason": "سبب الإنهاء",
+    "notice_date": "تاريخ الإشعار",
+    "effective_date": "التاريخ الفعلي",
+    "final_settlement": "التسوية النهائية",
+    "confirm": "تأكيد الإنهاء"
+  },
+  "renewal": {
+    "title": "تجديد العقد",
+    "new_start_date": "تاريخ البداية الجديد",
+    "new_end_date": "تاريخ النهاية الجديد",
+    "new_rent": "الإيجار الجديد",
+    "rent_increase": "زيادة الإيجار",
+    "percentage": "النسبة المئوية",
+    "confirm": "تأكيد التجديد"
+  },
+  "messages": {
+    "contract_created": "تم إنشاء العقد بنجاح",
+    "contract_updated": "تم تحديث العقد",
+    "contract_terminated": "تم إنهاء العقد",
+    "contract_renewed": "تم تجديد العقد",
+    "confirm_termination": "هل أنت متأكد من إنهاء هذا العقد؟",
+    "confirm_renewal": "هل أنت متأكد من تجديد هذا العقد؟"
+  }
+}

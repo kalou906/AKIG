@@ -1,0 +1,52 @@
+/* Police: Montserrat */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --akig-blue: #0B2E67;
+  --akig-red: #E53935;
+  --akig-white: #FFFFFF;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  font-family: 'Montserrat', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+.dark body {
+  background-color: #0b1626;
+  color: #f5f7ff;
+}
+
+/* Logo non déformé */
+.logo-akig {
+  height: 56px;
+  object-fit: contain;
+}
+
+/* Bande guinéenne en pied */
+.band-guinee {
+  display: flex;
+  height: 4px;
+}
+
+.band-guinee > div:nth-child(1) {
+  background: #D71920;
+}
+
+.band-guinee > div:nth-child(2) {
+  background: #FFD100;
+}
+
+.band-guinee > div:nth-child(3) {
+  background: #007A5E;
+}

@@ -1,0 +1,116 @@
+﻿import http from './clientBase';
+import { buildQuery } from '../lib/queryBuilder';
+
+// --- Auth ---
+export const Auth = {
+	login: (payload: any) => http('/auth/login', { method: 'POST', body: JSON.stringify(payload) }),
+	me: () => http('/auth/me'),
+};
+
+// --- Core ---
+export const Users = { list: () => http('/users') };
+export const Roles = { list: () => http('/roles') };
+
+export const Tenants = {
+  list: (yearOrQuery?: number | string, page?: number, pageSize?: number, filters?: Record<string, unknown>) => {
+    // Simple usage: list() or list(year)
+    if (page === undefined && pageSize === undefined && filters === undefined) {
+      const year = typeof yearOrQuery === 'number' ? yearOrQuery : undefined;
+      return http(`/tenants${year ? `?year=${year}` : ''}`);
+    }
+    // Advanced usage: list(query, page, pageSize, filters)
+    const query = typeof yearOrQuery === 'string' ? yearOrQuery : '';
+    const path = buildQuery('/tenants', { query, page, pageSize, ...filters });
+    return http(path);
+  },
+  get: (id: string | number) => http(`/tenants/${id}`),
+};
+
+export const Properties = { list: () => http('/properties') };
+
+export const Contracts = {
+  list: (query?: string, page?: number, pageSize?: number, filters?: Record<string, unknown>) => {
+    if (query === undefined && page === undefined) {
+      return http('/contracts');
+    }
+    const path = buildQuery('/contracts', { query: query || '', page, pageSize, ...filters });
+    return http(path);
+  },
+};
+
+export const Payments = { list: () => http('/payments') };
+
+// --- Reports ---
+export const Reports = {
+	summary: (year: number) => http(`/reports/summary?year=${year}`),
+	monthlyPayments: (year: number) => http(`/reports/payments/monthly?year=${year}`),
+	topOverdue: (year: number) => http(`/reports/top-overdue?year=${year}`),
+	topPayers: (year: number) => http(`/reports/top-payers?year=${year}`),
+	getContractPayments: (contractId: number | string, year: number) =>
+		http(`/contracts/${contractId}/payments?year=${year}`),
+};
+
+// --- Ops ---
+export const Alerts = { list: () => http('/alerts') };
+export const Maintenance = { list: () => http('/maintenance') };
+
+// --- Health ---
+export const Health = { ping: () => http('/health') };
+
+// --- AI ---
+export const AI = {
+  assist: (prompt: string, context: Record<string, unknown>) =>
+    http('/ai/assist', { method: 'POST', body: JSON.stringify({ prompt, context }) }),
+};
+
+// --- Metrics ---
+export const Metrics = {
+  getImpayesWeekly: () => http<number[]>('/metrics/impaye/weekly'),
+  getImpayesMonthly: () => http<number[]>('/metrics/impaye/monthly'),
+  getPaymentsWeekly: () => http<number[]>('/metrics/payments/weekly'),
+  getOccupancyRate: () => http<number>('/metrics/occupancy/rate'),
+  getTenantCount: () => http<number>('/metrics/tenants/count'),
+  getRevenueMonthly: () => http<number[]>('/metrics/revenue/monthly'),
+};
+
+// Advanced / legacy query builder wrapper
+export const Advanced = {
+	tenantsQuery: (query: string, page: number, pageSize: number, filters: Record<string, unknown> = {}) => {
+		const path = buildQuery('/tenants', { query, page, pageSize, ...filters });
+		return http(path);
+	}
+};
+
+// --- Imports ---
+export const Imports = {
+  importPaymentsCsv: (sourceFile: string, serverPath: string) =>
+    http('/imports/payments/csv', { method: 'POST', body: JSON.stringify({ sourceFile, serverPath }) }),
+  getImportRuns: (limit: number = 20) => http<any[]>(`/imports/runs?limit=${limit}`),
+};
+
+// Named export for backward compatibility with { api } import pattern
+export const api = {
+  Auth, Users, Roles, Tenants, Properties, Contracts, Payments, Reports, Alerts, Maintenance, Health, AI, Metrics, Advanced, Imports,
+  // Lowercase aliases for legacy compatibility
+  auth: Auth,
+  users: Users,
+  roles: Roles,
+  tenants: Tenants,
+  properties: Properties,
+  contracts: Contracts,
+  payments: Payments,
+  reports: Reports,
+  alerts: Alerts,
+  maintenance: Maintenance,
+  health: Health,
+  ai: AI,
+  metrics: Metrics,
+  imports: Imports,
+};
+
+// Default export
+export default api;
+
+
+// Re-export http as req for backward compat
+export { http as req };

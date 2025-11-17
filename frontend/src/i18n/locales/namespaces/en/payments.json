@@ -1,0 +1,86 @@
+{
+  "title": "Payments",
+  "subtitle": "Payment and rent management",
+  "list": {
+    "title": "Payments List",
+    "columns": {
+      "id": "ID",
+      "tenant": "Tenant",
+      "property": "Property",
+      "amount": "Amount",
+      "due_date": "Due Date",
+      "paid_date": "Payment Date",
+      "method": "Method",
+      "status": "Status",
+      "reference": "Reference"
+    },
+    "actions": {
+      "view_details": "View Details",
+      "download_receipt": "Download Receipt",
+      "send_reminder": "Send Reminder",
+      "mark_paid": "Mark as Paid",
+      "cancel_payment": "Cancel Payment"
+    }
+  },
+  "form": {
+    "title": "New Payment",
+    "edit_title": "Edit Payment",
+    "tenant_id": "Tenant",
+    "property_id": "Property",
+    "amount": "Amount",
+    "due_date": "Due Date",
+    "method": "Payment Method",
+    "reference": "Reference",
+    "notes": "Notes",
+    "submit": "Record Payment"
+  },
+  "methods": {
+    "card": "Credit Card",
+    "bank_transfer": "Bank Transfer",
+    "check": "Check",
+    "cash": "Cash",
+    "mobile": "Mobile Payment",
+    "wallet": "E-wallet"
+  },
+  "status": {
+    "pending": "Pending",
+    "paid": "Paid",
+    "overdue": "Overdue",
+    "partial": "Partial Payment",
+    "cancelled": "Cancelled",
+    "refunded": "Refunded"
+  },
+  "receipt": {
+    "title": "Payment Receipt",
+    "number": "Receipt Number",
+    "date": "Date",
+    "tenant": "Tenant",
+    "property": "Property",
+    "amount": "Amount",
+    "method": "Payment Method",
+    "reference": "Reference",
+    "print": "Print",
+    "download": "Download (PDF)",
+    "email": "Email"
+  },
+  "arrears": {
+    "title": "Arrears",
+    "total_amount": "Total Arrears Amount",
+    "tenant_name": "Tenant",
+    "property": "Property",
+    "due_date": "Due Date",
+    "days_overdue": "Days Overdue",
+    "send_notice": "Send Notice",
+    "escalate": "Escalate",
+    "settle": "Settle"
+  },
+  "messages": {
+    "payment_recorded": "Payment recorded successfully",
+    "receipt_sent": "Receipt sent successfully",
+    "reminder_sent": "Reminder sent",
+    "payment_cancelled": "Payment cancelled",
+    "insufficient_amount": "Insufficient amount",
+    "invalid_date": "Invalid date",
+    "duplicate_reference": "Reference already exists"
+  }
+}

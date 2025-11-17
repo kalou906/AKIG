@@ -1,0 +1,147 @@
+version: '3.8'
+
+services:
+  # ============================================
+  # PostgreSQL Database
+  # ============================================
+  postgres:
+    image: postgres:15-alpine
+    container_name: akig_postgres
+    environment:
+      POSTGRES_USER: akig
+      POSTGRES_PASSWORD: akig_password
+      POSTGRES_DB: akig_production
+      TZ: Africa/Conakry
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-postgres.sql:/docker-entrypoint-initdb.d/01-init.sql
+      - ./backend/migrations:/docker-entrypoint-initdb.d/migrations
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U akig -d akig_production"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - akig_network
+    restart: unless-stopped
+
+  # ============================================
+  # Backend API
+  # ============================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: akig_backend
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DATABASE_URL: postgresql://akig:akig_password@postgres:5432/akig_production
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-this-in-production}
+      JWT_EXPIRY: 24h
+      CORS_ORIGIN: http://localhost:3000
+      LOG_LEVEL: info
+      LOG_FILE_ENABLED: "true"
+      LOG_FILE_PATH: /app/logs
+      TZ: Africa/Conakry
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./backend/uploads:/app/uploads
+      - ./backend/logs:/app/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/api/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - akig_network
+    restart: unless-stopped
+
+  # ============================================
+  # Frontend Application
+  # ============================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        REACT_APP_API_URL: http://localhost:4000
+        REACT_APP_ENV: production
+    container_name: akig_frontend
+    environment:
+      REACT_APP_API_URL: http://localhost:4000
+      REACT_APP_ENV: production
+      REACT_APP_LOG_LEVEL: info
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - akig_network
+    restart: unless-stopped
+
+  # ============================================
+  # Redis Cache (Optional)
+  # ============================================
+  redis:
+    image: redis:7-alpine
+    container_name: akig_redis
+    environment:
+      TZ: Africa/Conakry
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - akig_network
+    restart: unless-stopped
+    profiles:
+      - optional
+
+# ============================================
+# Volumes
+# ============================================
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+# ============================================
+# Networks
+# ============================================
+networks:
+  akig_network:
+    driver: bridge
+
+# ============================================
+# Instructions
+# ============================================
+# Start all services:
+# docker-compose up -d
+#
+# View logs:
+# docker-compose logs -f backend
+# docker-compose logs -f frontend
+#
+# Stop all services:
+# docker-compose down
+#
+# Remove volumes (careful!):
+# docker-compose down -v
+#
+# Start with Redis:
+# docker-compose --profile optional up -d

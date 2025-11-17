@@ -1,0 +1,215 @@
+# Règles d'alertes pour AKIG
+# Basées sur les métriques critiques du système de recouvrement
+
+groups:
+  - name: akig_backend_alerts
+    interval: 30s
+    rules:
+      # ========== DISPONIBILITÉ ==========
+      
+      - alert: BackendDown
+        expr: up{job="akig-backend"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: backend
+        annotations:
+          summary: "Backend AKIG indisponible"
+          description: "Le backend n'a pas répondu aux dernières 5 minutes"
+
+      - alert: HighResponseTime
+        expr: |
+          histogram_quantile(0.95, 
+            rate(http_request_duration_seconds_bucket{job="akig-backend"}[5m])
+          ) > 1
+        for: 5m
+        labels:
+          severity: warning
+          service: backend
+        annotations:
+          summary: "Temps de réponse élevé ({{ $value | humanizeDuration }})"
+          description: "p95 du temps de réponse dépasse 1s"
+
+      # ========== ERREURS ==========
+      
+      - alert: HighErrorRate
+        expr: |
+          (sum(rate(http_requests_total{status=~"5.."}[5m])) / 
+           sum(rate(http_requests_total[5m]))) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          service: backend
+        annotations:
+          summary: "Taux d'erreur élevé: {{ $value | humanizePercentage }}"
+          description: "Plus de 5% des requêtes génèrent des erreurs 5xx"
+
+      # ========== BASE DE DONNÉES ==========
+      
+      - alert: PostgreSQLDown
+        expr: up{job="postgres"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: database
+        annotations:
+          summary: "PostgreSQL indisponible"
+          description: "PostgreSQL n'a pas répondu aux dernières minutes"
+
+      - alert: DatabaseConnectionPoolExhausted
+        expr: |
+          (pg_stat_database_numbackends{datname="akig"} / 
+           pg_settings_max_connections) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          service: database
+        annotations:
+          summary: "Pool de connexions BD presque saturé: {{ $value | humanizePercentage }}"
+          description: "Plus de 80% des connexions utilisées"
+
+      - alert: SlowQueries
+        expr: |
+          rate(pg_stat_statements_mean_time{datname="akig"}[5m]) > 1000
+        for: 10m
+        labels:
+          severity: warning
+          service: database
+        annotations:
+          summary: "Requêtes lentes détectées ({{ $value | humanizeDuration }} avg)"
+          description: "Temps moyen des requêtes > 1s"
+
+      # ========== CACHE REDIS ==========
+      
+      - alert: RedisDown
+        expr: up{job="redis"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: cache
+        annotations:
+          summary: "Redis indisponible"
+          description: "Le serveur cache Redis n'a pas répondu"
+
+      - alert: RedisMemoryHigh
+        expr: |
+          (redis_memory_used_bytes / redis_memory_max_bytes) > 0.9
+        for: 5m
+        labels:
+          severity: warning
+          service: cache
+        annotations:
+          summary: "Mémoire Redis proche du max: {{ $value | humanizePercentage }}"
+          description: "Utilisation mémoire Redis > 90%"
+
+      # ========== RECOUVREMENT - CRITIQUES ==========
+      
+      - alert: Impayes Critiques
+        expr: |
+          count(impayes_jours_retard_bucket{le="+Inf", jours_retard_min="60"}) > 50
+        for: 15m
+        labels:
+          severity: critical
+          service: recouvrement
+          business_impact: high
+        annotations:
+          summary: "{{ $value }} impayés en situation critique (>60j)"
+          description: "Nombreux impayés dépassent 60 jours - intervention urgente requise"
+
+      - alert: MissionsNonAssignees
+        expr: |
+          missions_non_assignees_total > 100
+        for: 1h
+        labels:
+          severity: high
+          service: recouvrement
+        annotations:
+          summary: "{{ $value }} missions non assignées"
+          description: "Nombreuses missions en attente d'assignation"
+
+      - alert: PerformanceAgentBasse
+        expr: |
+          agent_score_journalier < 5
+        for: 2h
+        labels:
+          severity: info
+          service: recouvrement
+        annotations:
+          summary: "Agent {{ $labels.agent_id }}: score faible {{ $value }}"
+          description: "Performance agent en dessous du seuil"
+
+      # ========== PROMESSES DE PAIEMENT ==========
+      
+      - alert: PromessesNonHonorées
+        expr: |
+          count(promesses_paiement_status{status="non_honoree"}) > 10
+        for: 24h
+        labels:
+          severity: warning
+          service: recouvrement
+        annotations:
+          summary: "{{ $value }} promesses de paiement non honorées"
+          description: "Locataires n'ayant pas tenu leurs promesses"
+
+      # ========== TAUX DE PONCTUALITÉ ==========
+      
+      - alert: TauxPonctualiteBas
+        expr: |
+          (count(paiements_a_temps) / count(paiements_total)) < 0.75
+        for: 7d
+        labels:
+          severity: high
+          service: recouvrement
+          business_impact: high
+        annotations:
+          summary: "Taux de ponctualité: {{ $value | humanizePercentage }}"
+          description: "Moins de 75% des paiements sont à temps - tendance baisse"
+
+      # ========== SITES SENSIBLES ==========
+      
+      - alert: SiteSensibleProbleme
+        expr: |
+          impayes_montant{site_type="sensible"} > 50000
+        for: 12h
+        labels:
+          severity: high
+          service: recouvrement
+          business_impact: high
+        annotations:
+          summary: "Site sensible en problème: {{ $labels.site_name }}"
+          description: "Montant impayé: {{ $value | humanize }}€"
+
+      # ========== RESSOURCES SYSTÈME ==========
+      
+      - alert: CPUHigh
+        expr: |
+          (100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)) > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: infrastructure
+        annotations:
+          summary: "CPU élevé: {{ $value | humanize }}%"
+          description: "Utilisation CPU {{ $labels.instance }} > 80%"
+
+      - alert: DiskSpaceLow
+        expr: |
+          (node_filesystem_avail_bytes{device!~"tmpfs"} / node_filesystem_size_bytes) < 0.1
+        for: 10m
+        labels:
+          severity: warning
+          service: infrastructure
+        annotations:
+          summary: "Espace disque faible: {{ $value | humanizePercentage }} libre"
+          description: "Moins de 10% d'espace disque disponible"
+
+      - alert: MemoryHigh
+        expr: |
+          (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) > 0.85
+        for: 5m
+        labels:
+          severity: warning
+          service: infrastructure
+        annotations:
+          summary: "Mémoire élevée: {{ $value | humanizePercentage }}"
+          description: "Utilisation mémoire > 85%"

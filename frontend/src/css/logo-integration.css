@@ -1,0 +1,411 @@
+/**
+ * logo-integration.css
+ * Styles pour l'intégration du logo AKIG dans tous les composants
+ * Responsive et adapté à tous les breakpoints
+ */
+
+:root {
+  /* Logo Colors */
+  --logo-primary-blue: #004E89;
+  --logo-secondary-blue: #003861;
+  --logo-red: #CE1126;
+  --logo-gold: #FFD700;
+  --logo-white: #FFFFFF;
+  
+  /* Logo Sizes */
+  --logo-size-xs: 24px;      /* Mobile icon */
+  --logo-size-sm: 32px;      /* Sidebar, small headers */
+  --logo-size-md: 40px;      /* Normal headers, modals */
+  --logo-size-lg: 50px;      /* Large headers, auth pages */
+  --logo-size-xl: 64px;      /* Hero sections */
+  --logo-size-xxl: 200px;    /* PDF, prints */
+}
+
+/* ========== GENERIC LOGO STYLES ========== */
+.akig-logo {
+  display: block;
+  object-fit: contain;
+  object-position: center;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.1));
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.akig-logo:hover,
+.akig-logo:focus-within {
+  filter: drop-shadow(0 4px 12px rgba(255, 215, 0, 0.3));
+  transform: scale(1.05);
+}
+
+/* ========== LOGO SIZES ========== */
+.logo-xs {
+  height: var(--logo-size-xs);
+  width: auto;
+  max-width: 80px;
+}
+
+.logo-sm {
+  height: var(--logo-size-sm);
+  width: auto;
+  max-width: 120px;
+}
+
+.logo-md {
+  height: var(--logo-size-md);
+  width: auto;
+  max-width: 150px;
+}
+
+.logo-lg {
+  height: var(--logo-size-lg);
+  width: auto;
+  max-width: 200px;
+}
+
+.logo-xl {
+  height: var(--logo-size-xl);
+  width: auto;
+  max-width: 300px;
+}
+
+.logo-xxl {
+  height: var(--logo-size-xxl);
+  width: auto;
+  max-width: 400px;
+}
+
+/* ========== LOGO POSITIONING ========== */
+.logo-top-left {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 10;
+}
+
+.logo-top-center {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+
+.logo-top-right {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 10;
+}
+
+.logo-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+}
+
+.logo-bottom-left {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  z-index: 10;
+}
+
+.logo-bottom-center {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+
+.logo-bottom-right {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  z-index: 10;
+}
+
+/* ========== LOGO CONTEXTS ========== */
+
+/* Header Logo */
+.header .akig-logo,
+.navbar .akig-logo {
+  height: 40px;
+  width: auto;
+  max-width: 150px;
+  margin-right: 8px;
+}
+
+@media (max-width: 768px) {
+  .header .akig-logo,
+  .navbar .akig-logo {
+    height: 32px;
+    max-width: 120px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header .akig-logo,
+  .navbar .akig-logo {
+    height: 24px;
+    max-width: 80px;
+  }
+}
+
+/* Footer Logo */
+.footer .akig-logo {
+  height: 32px;
+  width: auto;
+  max-width: 80px;
+  margin-right: 8px;
+}
+
+@media (max-width: 480px) {
+  .footer .akig-logo {
+    height: 24px;
+    max-width: 60px;
+  }
+}
+
+/* Sidebar/Navigation Logo */
+.sidebar .akig-logo,
+.nav-menu .akig-logo {
+  height: 36px;
+  width: auto;
+  max-width: 90px;
+  margin-bottom: 12px;
+}
+
+.sidebar.collapsed .akig-logo {
+  height: 28px;
+  max-width: 40px;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 768px) {
+  .sidebar .akig-logo,
+  .nav-menu .akig-logo {
+    height: 32px;
+    max-width: 80px;
+  }
+}
+
+/* Modal/Dialog Logo */
+.modal .akig-logo,
+.dialog .akig-logo {
+  height: 30px;
+  width: auto;
+  max-width: 60px;
+}
+
+/* Auth Page Logo */
+.auth-page .akig-logo,
+.login-page .akig-logo,
+.register-page .akig-logo {
+  height: 50px;
+  width: auto;
+  max-width: 200px;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 768px) {
+  .auth-page .akig-logo,
+  .login-page .akig-logo,
+  .register-page .akig-logo {
+    height: 40px;
+    max-width: 150px;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-page .akig-logo,
+  .login-page .akig-logo,
+  .register-page .akig-logo {
+    height: 30px;
+    max-width: 120px;
+  }
+}
+
+/* Dashboard Page Logo */
+.dashboard .akig-logo,
+.page-header .akig-logo {
+  height: 35px;
+  width: auto;
+  max-width: 100px;
+}
+
+/* Error Page Logo */
+.error-page .akig-logo {
+  height: 80px;
+  width: auto;
+  max-width: 200px;
+  margin-bottom: 24px;
+  filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.15));
+}
+
+@media (max-width: 768px) {
+  .error-page .akig-logo {
+    height: 60px;
+    max-width: 150px;
+  }
+}
+
+/* Notification Logo */
+.notification .akig-logo,
+.toast .akig-logo,
+.alert .akig-logo {
+  height: 24px;
+  width: auto;
+  max-width: 60px;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+/* ========== LOGO ANIMATIONS ========== */
+@keyframes logoFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes logoSlide {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes logoPulse {
+  0%, 100% {
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.1));
+  }
+  50% {
+    filter: drop-shadow(0 4px 12px rgba(255, 215, 0, 0.3));
+  }
+}
+
+.logo-animate-fade {
+  animation: logoFadeIn 0.6s ease-out;
+}
+
+.logo-animate-slide {
+  animation: logoSlide 0.6s ease-out;
+}
+
+.logo-animate-pulse {
+  animation: logoPulse 2s ease-in-out infinite;
+}
+
+/* ========== LOGO WITH TEXT ========== */
+.logo-with-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo-with-text .logo-text {
+  font-weight: 700;
+  color: var(--logo-primary-blue);
+  letter-spacing: 1px;
+}
+
+.logo-with-text .logo-subtitle {
+  font-size: 0.75em;
+  font-weight: 500;
+  color: var(--logo-gold);
+  letter-spacing: 0.5px;
+  display: block;
+}
+
+/* ========== LOGO STATES ========== */
+.logo-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(50%) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.logo-muted {
+  opacity: 0.7;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.1));
+}
+
+.logo-highlighted {
+  filter: drop-shadow(0 4px 16px rgba(255, 215, 0, 0.5));
+  transform: scale(1.08);
+}
+
+/* ========== DARK MODE SUPPORT ========== */
+@media (prefers-color-scheme: dark) {
+  .akig-logo {
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+  }
+
+  .akig-logo:hover {
+    filter: drop-shadow(0 4px 14px rgba(255, 215, 0, 0.4));
+  }
+}
+
+/* ========== PRINT STYLES ========== */
+@media print {
+  .akig-logo {
+    filter: none;
+    transform: none;
+  }
+
+  .logo-animate-fade,
+  .logo-animate-slide,
+  .logo-animate-pulse {
+    animation: none;
+  }
+}
+
+/* ========== ACCESSIBILITY ========== */
+/* Ensures alt text is present for screen readers */
+
+.logo-link:focus-visible .akig-logo {
+  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6));
+  outline: 2px solid var(--logo-gold);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ========== UTILITY CLASSES ========== */
+.logo-rounded {
+  border-radius: 8px;
+  padding: 2px;
+}
+
+.logo-circle {
+  border-radius: 50%;
+  padding: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.logo-shadow {
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2));
+}
+
+.logo-shadow-gold {
+  filter: drop-shadow(0 4px 12px rgba(255, 215, 0, 0.4));
+}
+
+.logo-invert {
+  filter: invert(1);
+}
+
+.logo-sepia {
+  filter: sepia(0.5) hue-rotate(350deg) saturate(0.8);
+}

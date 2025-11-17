@@ -1,0 +1,204 @@
+groups:
+  - name: akig_backend_alerts
+    interval: 30s
+    rules:
+      # High Error Rate
+      - alert: HighErrorRate
+        expr: |
+          (sum(rate(http_requests_total{status=~"5.."}[5m])) / 
+           sum(rate(http_requests_total[5m]))) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          component: backend
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value | humanizePercentage }} over 5 minutes"
+
+      # High Response Time
+      - alert: HighResponseTime
+        expr: |
+          histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 1
+        for: 5m
+        labels:
+          severity: warning
+          component: backend
+        annotations:
+          summary: "High response time detected"
+          description: "P95 response time is {{ $value | humanizeDuration }}"
+
+      # Database Connection Pool Exhausted
+      - alert: DatabaseConnectionPoolExhausted
+        expr: |
+          (pg_stat_activity_count / pg_settings_max_connections) > 0.8
+        for: 2m
+        labels:
+          severity: critical
+          component: database
+        annotations:
+          summary: "Database connection pool nearly exhausted"
+          description: "{{ $value | humanizePercentage }} of connections in use"
+
+      # Redis Memory High
+      - alert: RedisMemoryHigh
+        expr: |
+          (redis_memory_used_bytes / redis_memory_max_bytes) > 0.85
+        for: 5m
+        labels:
+          severity: warning
+          component: cache
+        annotations:
+          summary: "Redis memory usage high"
+          description: "Redis is using {{ $value | humanizePercentage }} of available memory"
+
+      # Pod Restart Rate High
+      - alert: PodRestartRateHigh
+        expr: |
+          rate(kube_pod_container_status_restarts_total{namespace="default"}[1h]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          component: kubernetes
+        annotations:
+          summary: "Pod restart rate is high"
+          description: "{{ $labels.pod }} has restarted {{ $value }} times in the last hour"
+
+      # API Latency SLA Breach
+      - alert: APILatencySLABreach
+        expr: |
+          histogram_quantile(0.99, rate(http_request_duration_seconds_bucket{path=~"/api/.*"}[5m])) > 2
+        for: 10m
+        labels:
+          severity: critical
+          component: backend
+        annotations:
+          summary: "API latency SLA breach"
+          description: "P99 latency is {{ $value | humanizeDuration }}"
+
+      # Authentication Failures Spike
+      - alert: AuthenticationFailureSpike
+        expr: |
+          rate(auth_failures_total[5m]) > 10
+        for: 2m
+        labels:
+          severity: warning
+          component: security
+        annotations:
+          summary: "Spike in authentication failures"
+          description: "{{ $value | humanize }} failed auth attempts per second"
+
+      # Audit Log Processing Lag
+      - alert: AuditLogProcessingLag
+        expr: |
+          audit_log_processing_lag_seconds > 60
+        for: 5m
+        labels:
+          severity: warning
+          component: audit
+        annotations:
+          summary: "Audit log processing lag high"
+          description: "Audit log processing is {{ $value | humanizeDuration }} behind"
+
+      # Memory Leak Detection
+      - alert: PossibleMemoryLeak
+        expr: |
+          rate(container_memory_usage_bytes{pod=~"akig-backend.*"}[5m]) > 0
+          and
+          rate(container_memory_working_set_bytes{pod=~"akig-backend.*"}[1h]) > rate(container_memory_working_set_bytes{pod=~"akig-backend.*"}[5m]) * 1.1
+        for: 30m
+        labels:
+          severity: warning
+          component: backend
+        annotations:
+          summary: "Possible memory leak detected"
+          description: "Memory usage trending upward on {{ $labels.pod }}"
+
+      # Disk Space Low
+      - alert: DiskSpaceLow
+        expr: |
+          (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes) < 0.1
+        for: 5m
+        labels:
+          severity: critical
+          component: infrastructure
+        annotations:
+          summary: "Low disk space"
+          description: "{{ $value | humanizePercentage }} disk space available"
+
+      # Certificate Expiring Soon
+      - alert: CertificateExpiringInDays
+        expr: |
+          certmanager_certificate_expiration_timestamp_seconds - time() < 604800
+        for: 1m
+        labels:
+          severity: warning
+          component: infrastructure
+        annotations:
+          summary: "SSL certificate expiring soon"
+          description: "Certificate expires in {{ (($value - time()) / 86400) | humanize }} days"
+
+      # Payment Processing Queue Backup
+      - alert: PaymentProcessingQueueBackup
+        expr: |
+          job_queue_depth{job_type="payment"} > 1000
+        for: 10m
+        labels:
+          severity: critical
+          component: payments
+        annotations:
+          summary: "Payment processing queue backup"
+          description: "{{ $value | humanize }} payments pending in queue"
+
+      # Request Rate Exceeds Capacity
+      - alert: RequestRateExceedsCapacity
+        expr: |
+          rate(http_requests_total[1m]) > 10000
+        for: 5m
+        labels:
+          severity: critical
+          component: backend
+        annotations:
+          summary: "Request rate exceeds capacity"
+          description: "{{ $value | humanize }} requests per minute"
+
+      # Health Check Failures
+      - alert: HealthCheckFailures
+        expr: |
+          rate(health_check_failures_total[5m]) > 0
+        for: 2m
+        labels:
+          severity: critical
+          component: backend
+        annotations:
+          summary: "Health check failures detected"
+          description: "{{ $labels.component }} health checks failing"
+
+---
+groups:
+  - name: akig_business_alerts
+    interval: 60s
+    rules:
+      # Payment Failure Rate High
+      - alert: PaymentFailureRateHigh
+        expr: |
+          (sum(rate(payments_failed_total[5m])) / 
+           sum(rate(payments_total[5m]))) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          component: payments
+        annotations:
+          summary: "High payment failure rate"
+          description: "{{ $value | humanizePercentage }} of payments failing"
+
+      # No Successful Contracts in Time Window
+      - alert: NoSuccessfulContractCreation
+        expr: |
+          increase(contracts_created_total[1h]) == 0
+        for: 1h
+        labels:
+          severity: warning
+          component: business
+        annotations:
+          summary: "No successful contract creations in last hour"
+          description: "Zero contracts created in the last 60 minutes"

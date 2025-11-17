@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-family: 'Montserrat', 'Segoe UI', sans-serif;
+    background-image: radial-gradient(circle at top right, rgba(198, 40, 40, 0.08), transparent 45%),
+      radial-gradient(circle at bottom left, rgba(11, 31, 75, 0.09), transparent 50%),
+      theme('colors.akig.bg');
+    min-height: 100vh;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Poppins', 'Montserrat', sans-serif;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply rounded-xl bg-white/90 shadow-lg backdrop-blur border border-white/50;
+  }
+
+  .brand-gradient {
+    @apply bg-gradient-to-br from-akig-blue to-akig-blueDark;
+  }
+
+  .flag-strip {
+    @apply flex h-2 overflow-hidden rounded-full shadow;
+  }
+
+  .flag-strip span:nth-child(1) {
+    @apply flex-1 bg-[#CE1126];
+  }
+
+  .flag-strip span:nth-child(2) {
+    @apply flex-1 bg-[#FCD116];
+  }
+
+  .flag-strip span:nth-child(3) {
+    @apply flex-1 bg-[#009460];
+  }
+}

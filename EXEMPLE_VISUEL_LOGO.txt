@@ -1,0 +1,81 @@
+🎨 EXEMPLE VISUEL - AVANT ET APRÈS
+═══════════════════════════════════════════════════════════════════════════════════
+
+AVANT (MAINTENANT):
+═══════════════════
+
+Page de connexion actuellement:
+
+    ┌─────────────────────────────────────────────┐
+    │                                             │
+    │    Fond BLEU avec dégradé (joli déjà)      │
+    │                                             │
+    │           ┌─────────────────┐               │
+    │           │ [BOÎTE BLEUE]A  │  AKIG        │
+    │           │    Logo ici     │  Gestion... │
+    │           │  (Lettre "A")   │               │
+    │           └─────────────────┘               │
+    │                                             │
+    │    ┌─────────────────────────────────────┐  │
+    │    │      FORMULAIRE DE CONNEXION        │  │
+    │    │                                     │  │
+    │    │  Email: [demo@akig.com]             │  │
+    │    │  Mot de passe: [•••••••••]          │  │
+    │    │                                     │  │
+    │    │         [Connexion]                 │  │
+    │    └─────────────────────────────────────┘  │
+    │                                             │
+    └─────────────────────────────────────────────┘
+
+
+APRÈS (AVEC VOTRE LOGO):
+════════════════════════
+
+Page de connexion avec votre logo:
+
+    ┌─────────────────────────────────────────────┐
+    │                                             │
+    │    Fond BLEU avec dégradé (même)           │
+    │                                             │
+    │           ┌─────────────────┐               │
+    │           │ [VOTRE LOGO]    │  AKIG        │
+    │           │    À la place   │  Gestion... │
+    │           │    du "A"       │               │
+    │           └─────────────────┘               │
+    │                                             │
+    │    ┌─────────────────────────────────────┐  │
+    │    │      FORMULAIRE DE CONNEXION        │  │
+    │    │                                     │  │
+    │    │  Email: [demo@akig.com]             │  │
+    │    │  Mot de passe: [•••••••••]          │  │
+    │    │                                     │  │
+    │    │         [Connexion]                 │  │
+    │    └─────────────────────────────────────┘  │
+    │                                             │
+    └─────────────────────────────────────────────┘
+
+
+LE CODE CHANGE SIMPLEMENT:
+══════════════════════════
+
+AVANT:
+──────
+    <div className="w-14 h-14 bg-gradient-to-br from-white to-blue-100 rounded-xl flex items-center justify-center shadow-lg">
+        <span className="text-2xl font-bold text-blue-600">A</span>
+    </div>
+    
+    ↑ C'est une BOÎTE HTML avec un "A" dedans
+
+
+APRÈS:
+───────
+    <img 
+        src="/assets/logos/logo.png" 
+        alt="Logo" 
+        className="w-14 h-14 object-contain drop-shadow-lg rounded-xl"
+    />
+    
+    ↑ C'est une IMAGE (votre logo) affichée à la place
+
+
+═══════════════════════════════════════════════════════════════════════════════════

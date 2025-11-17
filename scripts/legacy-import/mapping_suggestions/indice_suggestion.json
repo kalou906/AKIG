@@ -1,0 +1,45 @@
+{
+  "legacy_table": "indice",
+  "target_table": "TODO_remplacer_par_nom_table_cible",
+  "enabled": false,
+  "comment": "Validez et activez ce mapping après vérification",
+  "columns": {
+    "legacy_columns": [
+      "id",
+      "typ",
+      "dat",
+      "valeur",
+      "libelle"
+    ],
+    "samples": [
+      {
+        "id": "1",
+        "typ": "IRL",
+        "dat": "2006-04-15 00:00:00",
+        "valeur": "111.47000",
+        "libelle": "NULL"
+      },
+      {
+        "id": "2",
+        "typ": "IRL",
+        "dat": "2006-07-15 00:00:00",
+        "valeur": "111.98000",
+        "libelle": "NULL"
+      },
+      {
+        "id": "3",
+        "typ": "IRL",
+        "dat": "2006-10-15 00:00:00",
+        "valeur": "112.43000",
+        "libelle": "NULL"
+      }
+    ]
+  },
+  "field_mapping": {
+    "id": "target_id",
+    "typ": "target_typ",
+    "dat": "target_dat",
+    "valeur": "target_valeur",
+    "libelle": "target_libelle"
+  }
+}

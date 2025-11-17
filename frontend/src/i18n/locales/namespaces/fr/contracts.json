@@ -1,0 +1,83 @@
+{
+  "title": "Contrats",
+  "subtitle": "Gestion des contrats de location",
+  "list": {
+    "title": "Liste des contrats",
+    "columns": {
+      "id": "ID Contrat",
+      "tenant": "Locataire",
+      "property": "Propriété",
+      "start_date": "Date de début",
+      "end_date": "Date de fin",
+      "rent": "Loyer",
+      "deposit": "Caution",
+      "status": "Statut",
+      "duration": "Durée"
+    },
+    "actions": {
+      "view_details": "Voir les détails",
+      "edit": "Modifier",
+      "renew": "Renouveler",
+      "terminate": "Résilier",
+      "download": "Télécharger (PDF)"
+    }
+  },
+  "form": {
+    "title": "Nouveau contrat",
+    "edit_title": "Modifier le contrat",
+    "tenant_id": "Locataire",
+    "property_id": "Propriété",
+    "start_date": "Date de début",
+    "end_date": "Date de fin",
+    "rent": "Montant du loyer",
+    "deposit": "Montant de la caution",
+    "conditions": "Conditions",
+    "notes": "Notes",
+    "submit": "Créer le contrat"
+  },
+  "status": {
+    "draft": "Brouillon",
+    "active": "Actif",
+    "pending": "En attente de signature",
+    "expiring_soon": "Expire bientôt",
+    "expired": "Expiré",
+    "terminated": "Résilié",
+    "renewed": "Renouvelé",
+    "on_hold": "En attente"
+  },
+  "details": {
+    "title": "Détails du contrat",
+    "contract_number": "Numéro du contrat",
+    "tenant_information": "Informations du locataire",
+    "property_information": "Informations de la propriété",
+    "financial_terms": "Conditions financières",
+    "dates": "Dates",
+    "terms_conditions": "Conditions",
+    "documents": "Documents"
+  },
+  "termination": {
+    "title": "Résilier le contrat",
+    "reason": "Motif de résiliation",
+    "notice_date": "Date du préavis",
+    "effective_date": "Date effective",
+    "final_settlement": "Règlement final",
+    "confirm": "Confirmer la résiliation"
+  },
+  "renewal": {
+    "title": "Renouveler le contrat",
+    "new_start_date": "Nouvelle date de début",
+    "new_end_date": "Nouvelle date de fin",
+    "new_rent": "Nouveau loyer",
+    "rent_increase": "Augmentation du loyer",
+    "percentage": "Pourcentage",
+    "confirm": "Confirmer le renouvellement"
+  },
+  "messages": {
+    "contract_created": "Contrat créé avec succès",
+    "contract_updated": "Contrat mis à jour",
+    "contract_terminated": "Contrat résilié",
+    "contract_renewed": "Contrat renouvelé",
+    "confirm_termination": "Êtes-vous sûr de vouloir résilier ce contrat ?",
+    "confirm_renewal": "Êtes-vous sûr de vouloir renouveler ce contrat ?"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "atRules": [
+    "tailwind",
+    "layer",
+    "apply",
+    "screen",
+    "variants",
+    "responsive"
+  ]
+}

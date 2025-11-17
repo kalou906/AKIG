@@ -1,0 +1,65 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: solvency-api
+  namespace: solvency-ai
+spec:
+  replicas: 10
+  strategy:
+    canary:
+      steps:
+      - setWeight: 10
+      - pause: {duration: 5m}
+      
+      - setWeight: 25
+      - pause: {duration: 30s}
+      
+      - setWeight: 25
+      - pause: {duration: 2m}
+      - analysis:
+          templates:
+          - templateName: smoke-tests
+          args:
+          - name: service-url
+            value: "http://solvency-api-preview:80"
+      
+      - setWeight: 50
+      - pause: {duration: 10m}
+      
+      - setWeight: 50
+      - pause: {duration: 1m}
+      - analysis:
+          templates:
+          - templateName: load-tests
+          args:
+          - name: service-url
+            value: "http://solvency-api-service:80"
+      
+      - setWeight: 100
+      - pause: {duration: 30s}
+      
+      trafficRouting:
+        istio:
+          virtualService:
+            name: solvency-api-vs
+            routes:
+            - primary
+    
+      canaryService: solvency-api-canary
+      stableService: solvency-api-service
+  
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      app: solvency-api
+  template:
+    metadata:
+      labels:
+        app: solvency-api
+        version: stable
+    spec:
+      containers:
+      - name: api
+        image: solvency-api:latest
+        ports:
+        - containerPort: 8000

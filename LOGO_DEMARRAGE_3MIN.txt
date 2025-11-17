@@ -1,0 +1,128 @@
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                                                                               ║
+║                  ⚡ DÉMARRAGE ULTRA-RAPIDE (3 MINUTES!) ⚡                   ║
+║                                                                               ║
+║                      COPIER-COLLER FACILE - PAS DE TEXTE!                    ║
+║                                                                               ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+
+═══════════════════════════════════════════════════════════════════════════════════
+🎯 ÉTAPE 1 - OBTENIR VOTRE LOGO
+═══════════════════════════════════════════════════════════════════════════════════
+
+Avoir un fichier image:
+  • Logo.png
+  • Logo.jpg
+  • Ou créer gratuitement sur: Canva.com
+
+Image CARRÉE de préférence!
+
+
+═══════════════════════════════════════════════════════════════════════════════════
+📁 ÉTAPE 2 - PLACER LE FICHIER
+═══════════════════════════════════════════════════════════════════════════════════
+
+COPIER ce chemin EXACT:
+┌────────────────────────────────────────────────────────────┐
+│  C:\AKIG\frontend\public\assets\logos                      │
+└────────────────────────────────────────────────────────────┘
+
+ÉTAPES:
+  1. Win+E (Explorateur)
+  2. Coller le chemin dans la barre d'adresse
+  3. Appuyer Entrée
+  4. Copier votre fichier logo ici
+  5. Le renommer: logo.png
+
+
+═══════════════════════════════════════════════════════════════════════════════════
+💻 ÉTAPE 3 - MODIFIER LE CODE
+═══════════════════════════════════════════════════════════════════════════════════
+
+OUVRIR ce fichier:
+┌────────────────────────────────────────────────────────────┐
+│  C:\AKIG\frontend\src\pages\Login.jsx                      │
+└────────────────────────────────────────────────────────────┘
+
+CHERCHER ET REMPLACER:
+
+CETTE PARTIE (environ ligne 71-74):
+┌────────────────────────────────────────────────────────────┐
+│  <div className="w-14 h-14 bg-gradient-to-br from-white   │
+│  to-blue-100 rounded-xl flex items-center justify-center  │
+│  shadow-lg">                                               │
+│      <span className="text-2xl font-bold text-blue-600">A │
+│      </span>                                               │
+│  </div>                                                    │
+└────────────────────────────────────────────────────────────┘
+
+PAR CETTE PARTIE:
+┌────────────────────────────────────────────────────────────┐
+│  <img                                                      │
+│      src="/assets/logos/logo.png"                         │
+│      alt="Logo"                                            │
+│      className="w-14 h-14 object-contain drop-shadow-lg   │
+│      rounded-xl"                                           │
+│  />                                                        │
+└────────────────────────────────────────────────────────────┘
+
+SAUVEGARDER: Ctrl+S
+
+
+═══════════════════════════════════════════════════════════════════════════════════
+🚀 ÉTAPE 4 - REDÉMARRER
+═══════════════════════════════════════════════════════════════════════════════════
+
+OUVRIR PowerShell et COPIER-COLLER:
+
+┌────────────────────────────────────────────────────────────┐
+│  cd C:\AKIG\frontend                                       │
+│  npm start                                                 │
+└────────────────────────────────────────────────────────────┘
+
+ATTENDRE:
+  • 2-3 minutes
+  • Chercher "Compiled successfully" en VERT
+
+
+═══════════════════════════════════════════════════════════════════════════════════
+✅ ÉTAPE 5 - VÉRIFIER
+═══════════════════════════════════════════════════════════════════════════════════
+
+OUVRIR navigateur:
+┌────────────────────────────────────────────────────────────┐
+│  http://localhost:3000/login                               │
+└────────────────────────────────────────────────────────────┘
+
+RÉSULTAT ATTENDU:
+  ✓ Votre logo est visible ← À côté de "AKIG"
+  ✓ Le "A" bleu a disparu
+  ✓ C'est fini! 🎉
+
+
+═══════════════════════════════════════════════════════════════════════════════════
+🔧 DÉPANNAGE EN 1 MINUTE
+═══════════════════════════════════════════════════════════════════════════════════
+
+"Le logo n'apparaît pas"
+  → Ctrl+Shift+R (dans navigateur)
+  → Vérifier fichier existe: C:\AKIG\frontend\public\assets\logos\logo.png
+  → Vérifier code contient: src="/assets/logos/logo.png"
+
+"Erreur dans PowerShell"
+  → Appuyer Ctrl+C
+  → Taper: npm start
+  → Attendre 2-3 min
+
+"Je ne suis pas sûr"
+  → Lire: LOGO_CHECKLIST_FINALE.txt
+
+
+═══════════════════════════════════════════════════════════════════════════════════
+
+C'EST TOUT! 🚀
+
+Vous avez réussi! Votre logo est maintenant visible! ✨
+
+═══════════════════════════════════════════════════════════════════════════════════

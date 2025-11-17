@@ -1,0 +1,218 @@
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                                                                               ║
+║     🎨 GUIDE SUPER SIMPLE - AJOUTER VOTRE LOGO EN 5 MINUTES ⏱️              ║
+║                                                                               ║
+║                         PAS DE TECHNIQUE COMPLIQUÉE!                          ║
+║                                                                               ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+
+═══════════════════════════════════════════════════════════════════════════════════
+📍 OÙ ÊTRE LE LOGO ACTUELLEMENT?
+═══════════════════════════════════════════════════════════════════════════════════
+
+Sur la page de connexion, vous voyez ceci:
+
+┌─────────────────────────────────────┐
+│                                     │
+│    [BOÎTE BLEUE AVEC "A"]   AKIG    │
+│         Logo ici!                   │
+│                                     │
+└─────────────────────────────────────┘
+
+Cette boîte bleue avec la lettre "A" = LE LOGO ACTUEL
+
+Vous voulez remplacer cette boîte bleue par VOTRE LOGO PERSONNEL ✨
+
+
+═══════════════════════════════════════════════════════════════════════════════════
+🎯 5 ÉTAPES SIMPLES
+═══════════════════════════════════════════════════════════════════════════════════
+
+✅ ÉTAPE 1: OBTENIR VOTRE LOGO
+───────────────────────────────────────────────────────────────────────────────────
+
+Vous avez besoin d'une IMAGE:
+  • Votre logo de société
+  • Votre initiale
+  • Un symbole
+  • N'importe quelle image
+
+Format OBLIGATOIRE:
+  ✓ PNG (meilleur choix)
+  ✓ JPG 
+  ✓ SVG
+
+Où le trouver?
+  - Si vous avez une entreprise = utilisez votre logo
+  - Si vous en avez pas = utilisez un site gratuit:
+    • Canva.com (créer un logo gratuit)
+    • Logomaker.com
+    • Ou générer avec une IA
+
+IMPORTANT: 
+  • L'image doit être CARRÉE (ex: 200x200, 512x512)
+  • Moins de 500 KB de taille
+
+
+✅ ÉTAPE 2: PLACER LE FICHIER LOGO
+───────────────────────────────────────────────────────────────────────────────────
+
+C'est TRÈS SIMPLE:
+
+1. Ouvrez l'Explorateur Windows (Ctrl+E)
+
+2. Naviguez à:
+   c:\AKIG\frontend\public\assets\logos\
+
+3. Copiez-collez votre image logo dans ce dossier
+
+4. Renommez le fichier en:
+   "logo.png"
+   (ou gardez le nom, peu importe)
+
+RÉSULTAT:
+   c:\AKIG\frontend\public\assets\logos\logo.png ✅
+
+
+✅ ÉTAPE 3: REMPLACER LE LOGO DANS LE CODE
+───────────────────────────────────────────────────────────────────────────────────
+
+Ouvrez le fichier:
+   c:\AKIG\frontend\src\pages\Login.jsx
+
+Cherchez cette partie du code (environ ligne 71):
+
+    AVANT (le code actuel):
+    ────────────────────────
+    <div className="w-14 h-14 bg-gradient-to-br from-white to-blue-100 rounded-xl flex items-center justify-center shadow-lg">
+        <span className="text-2xl font-bold text-blue-600">A</span>
+    </div>
+
+
+    APRÈS (à remplacer par):
+    ────────────────────────
+    <img 
+        src="/assets/logos/logo.png" 
+        alt="Logo" 
+        className="w-14 h-14 object-contain drop-shadow-lg rounded-xl"
+    />
+
+
+COMMENT FAIRE?
+  1. Ouvrez Login.jsx dans VS Code
+  2. Appuyez sur Ctrl+H (trouver et remplacer)
+  3. Chercher: <div className="w-14 h-14 bg-gradient-to-br
+  4. Remplacer par: <img src="/assets/logos/logo.png" alt="Logo" className="w-14 h-14 object-contain drop-shadow-lg rounded-xl" />
+  5. Cliquez "Remplacer"
+
+
+✅ ÉTAPE 4: SAUVEGARDER ET REDÉMARRER
+───────────────────────────────────────────────────────────────────────────────────
+
+1. Enregistrer le fichier:
+   Ctrl+S
+
+2. Redémarrer le serveur:
+   - Ouvrir PowerShell
+   - Taper: cd c:\AKIG\frontend
+   - Taper: npm start
+
+3. Attendre que le serveur se lance (1-2 minutes)
+
+
+✅ ÉTAPE 5: VÉRIFIER LE RÉSULTAT
+───────────────────────────────────────────────────────────────────────────────────
+
+1. Ouvrir navigateur web:
+   http://localhost:3000/login
+
+2. Observer:
+   ✓ Votre logo apparaît à côté de "AKIG"
+   ✓ L'ancien "A" bleu a disparu
+   ✓ Tout fonctionne bien 🎉
+
+
+═══════════════════════════════════════════════════════════════════════════════════
+🔧 DÉPANNAGE RAPIDE
+═══════════════════════════════════════════════════════════════════════════════════
+
+PROBLÈME 1: "Le logo n'apparaît pas"
+────────────────────────────────────
+Solutions:
+  1. Vérifier le chemin est EXACT: /assets/logos/logo.png
+  2. Vérifier le fichier existe vraiment dans le dossier
+  3. Redémarrer le serveur avec npm start
+  4. Vider le cache: Ctrl+Shift+R
+
+
+PROBLÈME 2: "L'image est bizarrement déformée"
+────────────────────────────────────
+Solutions:
+  1. Vérifier que l'image est CARRÉE
+  2. Garder les classes: object-contain drop-shadow-lg
+  3. Convertir en PNG si c'est JPG
+
+
+PROBLÈME 3: "Erreur dans le terminal"
+────────────────────────────────────
+Solutions:
+  1. Vérifier les guillemets sont corrects dans le code
+  2. Pas d'espace au début/fin du chemin
+  3. Relancer: npm start
+
+
+═══════════════════════════════════════════════════════════════════════════════════
+📋 CODE EXACT À UTILISER (COPIER/COLLER)
+═══════════════════════════════════════════════════════════════════════════════════
+
+Si vous préférez copier-coller exactement:
+
+REMPLACER CECI:
+───────────────
+                    <div className="w-14 h-14 bg-gradient-to-br from-white to-blue-100 rounded-xl flex items-center justify-center shadow-lg">
+                        <span className="text-2xl font-bold text-blue-600">A</span>
+                    </div>
+
+PAR CECI:
+─────────
+                    <img 
+                        src="/assets/logos/logo.png" 
+                        alt="Logo" 
+                        className="w-14 h-14 object-contain drop-shadow-lg rounded-xl"
+                    />
+
+
+═══════════════════════════════════════════════════════════════════════════════════
+✨ VOTRE LOGO SERA VISIBLE À:
+═══════════════════════════════════════════════════════════════════════════════════
+
+✅ Page de connexion (http://localhost:3000/login)
+✅ Visible immédiatement au démarrage
+✅ À côté du texte "AKIG"
+✅ Professionnel et personnalisé
+
+
+═══════════════════════════════════════════════════════════════════════════════════
+💡 CONSEILS PRATIQUES
+═══════════════════════════════════════════════════════════════════════════════════
+
+✓ Utiliser une image CARRÉE pour le meilleur résultat
+✓ PNG avec transparence = meilleur look professionnel
+✓ Si l'image est trop petite = augmenter w-24 au lieu de w-14
+✓ Si l'image est trop grande = diminuer à w-10
+
+Exemple pour plus grand:
+  className="w-24 h-24 object-contain drop-shadow-lg rounded-xl"
+
+
+═══════════════════════════════════════════════════════════════════════════════════
+
+Questions? Posez-moi directement! ☺️
+
+Le logo doit être dans: c:\AKIG\frontend\public\assets\logos\logo.png
+Le code doit être modifié dans: c:\AKIG\frontend\src\pages\Login.jsx
+
+C'est tout! 🚀
+
+═══════════════════════════════════════════════════════════════════════════════════

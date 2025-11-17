@@ -1,0 +1,320 @@
+# AKIG v3.0 - Production-Grade Docker Compose
+# Stack: PostgreSQL 16 + TimescaleDB, Redis Cluster, API NestJS, Frontend Next.js, ML FastAPI
+
+services:
+  # ========== DATABASE ==========
+  postgres:
+    image: timescale/timescaledb:2.16.1-pg16
+    container_name: akig-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: akig_v3
+      POSTGRES_USER: akig
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme_strong_password}
+      PGDATA: /var/lib/postgresql/data/pgdata
+      # Performance tuning
+      POSTGRES_SHARED_BUFFERS: 256MB
+      POSTGRES_EFFECTIVE_CACHE_SIZE: 1GB
+      POSTGRES_WORK_MEM: 16MB
+      POSTGRES_MAINTENANCE_WORK_MEM: 128MB
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./apps/api/prisma/migrations:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U akig -d akig_v3" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - akig-network
+    command:
+      - "postgres"
+      - "-c"
+      - "max_connections=200"
+      - "-c"
+      - "shared_buffers=256MB"
+      - "-c"
+      - "effective_cache_size=1GB"
+      - "-c"
+      - "maintenance_work_mem=128MB"
+      - "-c"
+      - "checkpoint_completion_target=0.9"
+      - "-c"
+      - "wal_buffers=16MB"
+      - "-c"
+      - "default_statistics_target=100"
+      - "-c"
+      - "random_page_cost=1.1"
+      - "-c"
+      - "effective_io_concurrency=200"
+      - "-c"
+      - "work_mem=16MB"
+      - "-c"
+      - "min_wal_size=1GB"
+      - "-c"
+      - "max_wal_size=4GB"
+      - "-c"
+      - "max_worker_processes=4"
+      - "-c"
+      - "max_parallel_workers_per_gather=2"
+      - "-c"
+      - "max_parallel_workers=4"
+      - "-c"
+      - "max_parallel_maintenance_workers=2"
+
+  # ========== REDIS CLUSTER ==========
+  redis:
+    image: redis:7.4-alpine
+    container_name: akig-redis
+    restart: unless-stopped
+    command: >
+      redis-server --requirepass ${REDIS_PASSWORD:-changeme_redis_password} --maxmemory 512mb --maxmemory-policy allkeys-lru --appendonly yes --appendfsync everysec --save 900 1 --save 300 10 --save 60 10000
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - akig-network
+
+  # ========== BACKEND API (NestJS) ==========
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+      target: production
+    container_name: akig-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DATABASE_URL: postgresql://akig:${DB_PASSWORD:-changeme_strong_password}@postgres:5432/akig_v3?schema=public
+      REDIS_URL: redis://:${REDIS_PASSWORD:-changeme_redis_password}@redis:6379
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-changeme_redis_password}
+      JWT_SECRET: ${JWT_SECRET}
+      ML_API_URL: http://ml-api:8000
+      ML_API_KEY: ${ML_API_KEY}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
+    volumes:
+      - ./apps/api/logs:/app/logs
+      - ./apps/api/uploads:/app/uploads
+    ports:
+      - "4000:4000"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:4000/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - akig-network
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '1'
+          memory: 1G
+      replicas: 3 # Load balancing avec nginx
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
+  # ========== FRONTEND (Next.js 15) ==========
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+      target: production
+      args:
+        NEXT_PUBLIC_API_URL: ${API_URL:-http://localhost:4000}
+    container_name: akig-web
+    restart: unless-stopped
+    depends_on:
+      - api
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: ${API_URL:-http://localhost:4000}
+      NEXT_TELEMETRY_DISABLED: 1
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3000/api/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - akig-network
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  # ========== ML API (FastAPI + Python 3.13) ==========
+  ml-api:
+    build:
+      context: ./apps/ml-api
+      dockerfile: Dockerfile
+    container_name: akig-ml-api
+    restart: unless-stopped
+    depends_on:
+      - redis
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-changeme_redis_password}
+      REDIS_DB: 1
+      ML_API_KEY: ${ML_API_KEY}
+      MODEL_PATH: /app/models
+    volumes:
+      - ./apps/ml-api/models:/app/models:ro
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - akig-network
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 4G
+        reservations:
+          cpus: '2'
+          memory: 2G
+
+  # ========== MONITORING - PROMETHEUS ==========
+  prometheus:
+    image: prom/prometheus:v3.0.0
+    container_name: akig-prometheus
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    volumes:
+      - ./ops/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - akig-network
+
+  # ========== MONITORING - GRAFANA ==========
+  grafana:
+    image: grafana/grafana:11.3.0
+    container_name: akig-grafana
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      GF_INSTALL_PLUGINS: grafana-clock-panel,grafana-piechart-panel
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./ops/monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./ops/monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    ports:
+      - "3001:3000"
+    networks:
+      - akig-network
+
+  # ========== LOGGING - LOKI ==========
+  loki:
+    image: grafana/loki:3.2.0
+    container_name: akig-loki
+    restart: unless-stopped
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - loki_data:/loki
+    ports:
+      - "3100:3100"
+    networks:
+      - akig-network
+
+  # ========== STORAGE - MinIO (S3-compatible) ==========
+  minio:
+    image: minio/minio:RELEASE.2024-11-07T00-52-20Z
+    container_name: akig-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-akig-admin}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-changeme_minio_password}
+    volumes:
+      - minio_data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    healthcheck:
+      test: [ "CMD", "mc", "ready", "local" ]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    networks:
+      - akig-network
+
+  # ========== NGINX REVERSE PROXY ==========
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: akig-nginx
+    restart: unless-stopped
+    depends_on:
+      - api
+      - web
+    volumes:
+      - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./infra/nginx/ssl:/etc/nginx/ssl:ro
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - akig-network
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  loki_data:
+    driver: local
+  minio_data:
+    driver: local
+
+networks:
+  akig-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16

@@ -1,0 +1,36 @@
+{
+  "extends": ["stylelint-config-recommended"],
+  "customSyntax": "postcss-scss",
+  "rules": {
+    "at-rule-no-unknown": null,
+    "selector-pseudo-class-no-unknown": null
+  },
+  "overrides": [
+    {
+      "files": ["**/*.css"],
+      "rules": {
+        "at-rule-no-unknown": [
+          true,
+          {
+            "ignoreAtRules": [
+              "tailwind",
+              "apply",
+              "layer",
+              "screen",
+              "variants",
+              "responsive",
+              "import",
+              "supports",
+              "document",
+              "media",
+              "keyframes",
+              "font-face",
+              "namespace",
+              "charset"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

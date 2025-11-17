@@ -1,0 +1,271 @@
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                                                                               ║
+║            ⏰ INSTRUCTIONS PAS À PAS - 10 MINUTES MAXIMUM ⏰                 ║
+║                                                                               ║
+║                  Faire des captures d'écran = vous aider mieux!              ║
+║                                                                               ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+
+PARTIE 1️⃣: PRÉPARER VOTRE LOGO
+═══════════════════════════════════════════════════════════════════════════════════
+
+ÉTAPE 1.1: Trouver votre logo
+─────────────────────────────
+
+Vous avez besoin d'une image:
+□ Votre logo d'entreprise (sur votre ordinateur)
+□ Votre initiale
+□ Un symbole personnel
+□ Créer un logo gratuit sur Canva.com
+
+L'image doit être:
+✓ PNG, JPG, ou SVG
+✓ CARRÉE de préférence (ex: 200x200 pixels)
+✓ Moins de 500 KB
+
+
+ÉTAPE 1.2: Télécharger votre logo
+──────────────────────────────────
+
+Si l'image est sur votre ordinateur:
+  1. Localiser le fichier (ex: C:\MonLogo.png)
+  2. Copier le fichier
+
+
+Si vous créez un logo gratuit:
+  1. Aller sur: https://www.canva.com/
+  2. Créer → Logo
+  3. Télécharger votre design en PNG
+  4. Sauvegarder sur le bureau
+
+
+PARTIE 2️⃣: PLACER LE LOGO DANS LE BON DOSSIER
+═══════════════════════════════════════════════════════════════════════════════════
+
+ÉTAPE 2.1: Ouvrir l'explorateur
+────────────────────────────────
+
+Windows:
+  1. Appuyer sur: Win + E (ouvrir Explorateur)
+  OU
+  2. Chercher "Explorateur" dans le menu Démarrage
+
+
+ÉTAPE 2.2: Naviguer au bon dossier
+───────────────────────────────────
+
+Dans la barre d'adresse, taper exactement:
+  C:\AKIG\frontend\public\assets\logos
+
+Puis appuyer sur Entrée ↩️
+
+
+ÉTAPE 2.3: Copier votre logo ici
+─────────────────────────────────
+
+1. Prendre votre fichier logo (ex: MonLogo.png)
+2. Le copier dans ce dossier (Ctrl+C puis Ctrl+V)
+3. OU: Le glisser-déposer dans le dossier
+
+
+ÉTAPE 2.4: Renommer le fichier (IMPORTANT!)
+─────────────────────────────────────────────
+
+1. Faire un clic-droit sur le fichier copié
+2. Sélectionner "Renommer"
+3. Taper: logo.png
+4. Appuyer Entrée ↩️
+
+RÉSULTAT:
+   C:\AKIG\frontend\public\assets\logos\logo.png ✅
+
+(Ne mettez PAS d'accents, ni d'espaces, ni de caractères bizarres)
+
+
+PARTIE 3️⃣: MODIFIER LE CODE
+═══════════════════════════════════════════════════════════════════════════════════
+
+ÉTAPE 3.1: Ouvrir VS Code
+──────────────────────────
+
+1. Chercher "VS Code" dans le menu Démarrage
+2. OU: Cliquer sur l'icône VS Code si vous l'avez
+
+
+ÉTAPE 3.2: Ouvrir le fichier Login.jsx
+───────────────────────────────────────
+
+1. Dans VS Code, appuyer sur: Ctrl+O (ouvrir fichier)
+2. Naviguer à:
+   C:\AKIG\frontend\src\pages\Login.jsx
+3. Cliquer dessus
+4. Cliquer sur "Ouvrir"
+
+
+ÉTAPE 3.3: Trouver le code à remplacer
+───────────────────────────────────────
+
+1. Appuyer sur: Ctrl+F (fonction Chercher)
+2. Dans la boîte de recherche, taper:
+   w-14 h-14 bg-gradient-to-br
+
+3. VS Code devrait surligner le code
+
+
+ÉTAPE 3.4: Sélectionner le code à remplacer
+─────────────────────────────────────────────
+
+Vous devriez voir ces lignes (environ ligne 71-74):
+
+    <div className="w-14 h-14 bg-gradient-to-br from-white to-blue-100 rounded-xl flex items-center justify-center shadow-lg">
+        <span className="text-2xl font-bold text-blue-600">A</span>
+    </div>
+
+Sélectionner EXACTEMENT ces 3 lignes:
+  1. Cliquer au début du <div
+  2. Maintenir Shift + Cliquer à la fin du </div>
+
+
+ÉTAPE 3.5: Remplacer par le nouveau code
+──────────────────────────────────────────
+
+1. Copier ce code EXACTEMENT:
+
+    <img 
+        src="/assets/logos/logo.png" 
+        alt="Logo" 
+        className="w-14 h-14 object-contain drop-shadow-lg rounded-xl"
+    />
+
+2. Supprimer le code sélectionné: Appuyer Delete
+3. Coller le nouveau code: Ctrl+V
+
+
+ÉTAPE 3.6: Sauvegarder
+──────────────────────
+
+Appuyer sur: Ctrl+S
+
+Vous devriez voir un point blanc disparaître dans l'onglet du fichier ✅
+
+
+PARTIE 4️⃣: REDÉMARRER LE SERVEUR
+═══════════════════════════════════════════════════════════════════════════════════
+
+ÉTAPE 4.1: Ouvrir PowerShell
+─────────────────────────────
+
+1. Chercher "PowerShell" dans le menu Démarrage
+2. Ouvrir "Windows PowerShell"
+
+
+ÉTAPE 4.2: Se positionner dans le bon dossier
+───────────────────────────────────────────────
+
+Dans PowerShell, taper:
+  cd C:\AKIG\frontend
+
+Puis appuyer Entrée ↩️
+
+
+ÉTAPE 4.3: Arrêter le serveur actuel
+──────────────────────────────────────
+
+S'il y a un serveur qui tourne:
+  1. Appuyer sur: Ctrl+C
+  2. Répondre "Y" si demandé
+
+
+ÉTAPE 4.4: Relancer le serveur
+───────────────────────────────
+
+Taper:
+  npm start
+
+Puis appuyer Entrée ↩️
+
+Attendre 1-2 minutes que tout se lance...
+
+Vous devriez voir:
+  ✓ Webpack compilant...
+  ✓ Compiled successfully
+  ✓ Applicatino running on localhost:3000
+
+
+PARTIE 5️⃣: VÉRIFIER LE RÉSULTAT
+═══════════════════════════════════════════════════════════════════════════════════
+
+ÉTAPE 5.1: Ouvrir le navigateur
+────────────────────────────────
+
+1. Ouvrir Chrome, Firefox ou Edge
+2. Aller à: http://localhost:3000/login
+
+OU simplement aller à:
+   http://localhost:3000
+   (la page de connexion s'affiche automatiquement)
+
+
+ÉTAPE 5.2: Observer votre logo
+───────────────────────────────
+
+Vous devriez voir:
+  ✅ Votre logo à la place de la boîte bleue avec "A"
+  ✅ Votre logo à côté du texte "AKIG"
+  ✅ Tout beau et professionnel! 🎉
+
+
+ÉTAPE 5.3: Tester la connexion
+───────────────────────────────
+
+Si tout fonctionne:
+  1. Entrer: demo@akig.com
+  2. Mot de passe: demo1234
+  3. Cliquer "Connexion"
+  4. Vous devriez accéder au dashboard ✅
+
+
+═══════════════════════════════════════════════════════════════════════════════════
+✨ FÉLICITATIONS! VOUS AVEZ CHANGÉ VOTRE LOGO! ✨
+═══════════════════════════════════════════════════════════════════════════════════
+
+
+EN CAS DE PROBLÈME:
+═══════════════════════════════════════════════════════════════════════════════════
+
+PROBLÈME: "Le logo n'apparaît pas"
+──────────────────────────────────
+✓ Vérifier le fichier existe: C:\AKIG\frontend\public\assets\logos\logo.png
+✓ Vérifier le nom exactement: logo.png (pas de majuscule)
+✓ Redémarrer le navigateur: Ctrl+Shift+R
+✓ Redémarrer npm start
+
+
+PROBLÈME: "Il y a une erreur dans VS Code"
+────────────────────────────────────────────
+✓ Vérifier les guillemets: "/" au lieu de "\"
+✓ Vérifier pas d'espace avant/après le chemin
+✓ Vérifier pas d'accents
+
+
+PROBLÈME: "npm ne démarre pas"
+────────────────────────────────
+✓ Vérifier vous êtes dans: C:\AKIG\frontend
+✓ Taper: npm start (pas autre chose)
+✓ Attendre 2-3 minutes
+
+
+═══════════════════════════════════════════════════════════════════════════════════
+📞 BESOIN D'AIDE?
+═══════════════════════════════════════════════════════════════════════════════════
+
+Si quelque chose ne fonctionne pas:
+
+1. Prendre une CAPTURE D'ÉCRAN (Impr écran ou Win+Shift+S)
+2. M'envoyer la capture
+3. Me dire exactement où vous êtes bloqué
+
+Ensemble on va le faire fonctionner! 💪
+
+═══════════════════════════════════════════════════════════════════════════════════

@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: solvency-api-stable
+  namespace: solvency-ai
+spec:
+  ports:
+  - port: 80
+    targetPort: 8000
+  selector:
+    app: solvency-api
+    version: stable
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: solvency-api-canary
+  namespace: solvency-ai
+spec:
+  ports:
+  - port: 80
+    targetPort: 8000
+  selector:
+    app: solvency-api
+    version: canary

@@ -1,0 +1,90 @@
+{
+  "title": "المستأجرون",
+  "subtitle": "إدارة المستأجرين",
+  "list": {
+    "title": "قائمة المستأجرين",
+    "columns": {
+      "id": "رقم التعريف",
+      "name": "الاسم",
+      "email": "البريد الإلكتروني",
+      "phone": "الهاتف",
+      "property": "الممتلك",
+      "lease_start": "بداية الإيجار",
+      "lease_end": "نهاية الإيجار",
+      "status": "الحالة",
+      "arrears": "الديون"
+    },
+    "actions": {
+      "view_profile": "عرض الملف الشخصي",
+      "edit": "تحرير",
+      "view_lease": "عرض الإيجار",
+      "view_payments": "عرض المدفوعات",
+      "send_message": "إرسال رسالة"
+    }
+  },
+  "form": {
+    "title": "مستأجر جديد",
+    "edit_title": "تحرير المستأجر",
+    "first_name": "الاسم الأول",
+    "last_name": "اسم العائلة",
+    "email": "البريد الإلكتروني",
+    "phone": "الهاتف",
+    "address": "العنوان",
+    "id_number": "رقم الهوية",
+    "national_id": "الهوية الوطنية",
+    "passport": "جواز السفر",
+    "employer": "صاحب العمل",
+    "occupation": "المهنة",
+    "emergency_contact": "جهة الاتصال في حالة الطوارئ",
+    "notes": "ملاحظات",
+    "submit": "إنشاء المستأجر"
+  },
+  "profile": {
+    "title": "ملف المستأجر",
+    "personal_information": "البيانات الشخصية",
+    "contact_information": "معلومات الاتصال",
+    "current_lease": "الإيجار الحالي",
+    "payment_history": "سجل الدفع",
+    "documents": "الوثائق",
+    "activity": "النشاط"
+  },
+  "status": {
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "new": "جديد",
+    "departing": "غادر",
+    "departed": "غادر",
+    "in_default": "متخلف عن السداد",
+    "suspended": "معلق",
+    "pending_verification": "قيد التحقق"
+  },
+  "communication": {
+    "title": "الاتصالات",
+    "send_email": "إرسال بريد إلكتروني",
+    "send_sms": "إرسال رسالة نصية",
+    "send_notification": "إرسال إشعار",
+    "message_template": "قالب الرسالة",
+    "recipient": "المستقبل",
+    "subject": "الموضوع",
+    "body": "المحتوى",
+    "send": "إرسال",
+    "schedule": "جدولة"
+  },
+  "documents": {
+    "title": "الوثائق",
+    "upload": "رفع وثيقة",
+    "id_copy": "نسخة الهوية",
+    "proof_of_income": "إثبات الدخل",
+    "contract": "العقد",
+    "lease_agreement": "اتفاقية الإيجار",
+    "other": "أخرى"
+  },
+  "messages": {
+    "tenant_created": "تم إنشاء المستأجر بنجاح",
+    "tenant_updated": "تم تحديث المستأجر",
+    "tenant_deleted": "تم حذف المستأجر",
+    "email_sent": "تم إرسال البريد الإلكتروني بنجاح",
+    "sms_sent": "تم إرسال الرسالة النصية بنجاح",
+    "confirm_delete": "هل أنت متأكد من حذف هذا المستأجر؟"
+  }
+}

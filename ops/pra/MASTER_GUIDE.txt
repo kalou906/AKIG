@@ -1,0 +1,434 @@
+#!/bin/bash
+
+##############################################################################
+#                   AKIG PRA - MASTER GUIDE & REFERENCE                      #
+#              Complete Guide to All PRA Files and Procedures                #
+##############################################################################
+
+cat << 'EOF'
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                                                                           ║
+║                  AKIG PRA - Master Documentation Index                   ║
+║              Plan de Récupération d'Activité - AKIG Application         ║
+║                                                                           ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+📚 DOCUMENTATION STRUCTURE
+═══════════════════════════════════════════════════════════════════════════
+
+ops/pra/
+├── 🎯 README.md                    # START HERE - Overview & Goals
+├── 🚨 RUNBOOK.md                   # Emergency procedures & scenarios
+├── 📊 METRICS.md                   # SLA tracking & performance
+├── 📋 INDEX.md                     # Guide for different roles
+├── ✅ DEPLOYMENT_CHECKLIST.md      # Implementation guide
+├── 📝 POST_INCIDENT_TEMPLATE.md    # After-incident documentation
+├── ⚡ quickstart.sh                 # Interactive setup & operations
+├── 🧪 loadtest.sh                  # Validation testing
+├── 💾 backup.sh                    # Automated backups
+├── 🔄 restore_run.sh               # Restore procedures
+├── 🟢 status.sh                    # Health monitoring
+└── ⚙️  .env.example                 # Configuration template
+
+
+🎯 FOR DIFFERENT ROLES
+═══════════════════════════════════════════════════════════════════════════
+
+👨‍💼 MANAGEMENT / EXECUTIVE
+  └─ "I need to know the SLA and compliance status"
+     1. Read: README.md (Section: "Objectifs de Service")
+     2. Review: METRICS.md (Current status)
+     3. Time: 10 minutes
+     
+  └─ "What happens in case of disaster?"
+     1. Read: RUNBOOK.md (Section: "Escalade d'urgence")
+     2. Know: P1 resolution time = 30 minutes max
+     3. Time: 10 minutes
+
+🏗️ INFRASTRUCTURE / DEVOPS TEAM
+  └─ "I need to set up the PRA"
+     1. Run: ./quickstart.sh install
+     2. Read: README.md (Full)
+     3. Read: DEPLOYMENT_CHECKLIST.md
+     4. Time: 1-2 days
+
+  └─ "How do I monitor the PRA?"
+     1. Daily: ./quickstart.sh status
+     2. Weekly: ./quickstart.sh test-restore
+     3. Monthly: ./loadtest.sh
+     4. Time: 1 hour/month
+
+🧪 QA / TEST TEAM
+  └─ "How do I validate the PRA?"
+     1. Run: ./loadtest.sh
+     2. Review: Generated report
+     3. Time: 45 minutes
+
+🔒 SECURITY / AUDIT TEAM
+  └─ "Is the PRA secure and compliant?"
+     1. Read: RUNBOOK.md (Section: "Scénario 3: Attaque")
+     2. Verify: Security checklist in DEPLOYMENT_CHECKLIST.md
+     3. Audit: Backup permissions, encryption, access logs
+     4. Time: 1-2 hours
+
+📱 ON-CALL / SUPPORT TEAM
+  └─ "Incident declared P1! What do I do?"
+     1. Open: RUNBOOK.md (Keep on screen)
+     2. Find: Your scenario (DB down? Data corrupted? Attack?)
+     3. Follow: Step-by-step procedure
+     4. Contact: Escalation numbers at bottom of RUNBOOK.md
+     5. Time: Real-time reference during incident
+
+
+📖 HOW TO READ THE DOCUMENTATION
+═══════════════════════════════════════════════════════════════════════════
+
+SCENARIO 1: "We're going live with PRA tomorrow!"
+  1. README.md                    (15 min) - Understand architecture
+  2. DEPLOYMENT_CHECKLIST.md      (30 min) - Go through checklist
+  3. Run: quickstart.sh install   (30 min) - Set everything up
+  4. RUNBOOK.md (skim)            (10 min) - Know where emergency procedures are
+  Total: 1.5 hours
+
+SCENARIO 2: "I'm on-call this week"
+  1. RUNBOOK.md                   (30 min) - Read ALL scenarios
+  2. INDEX.md (On-Call section)   (10 min) - Understand workflow
+  3. Contacts (bottom of file)    (2 min)  - Know who to call
+  4. .env / credentials           (5 min)  - Know how to access systems
+  Total: 1 hour
+
+SCENARIO 3: "P1 incident declared RIGHT NOW!"
+  1. RUNBOOK.md                   (ON SCREEN) - Reference only
+  2. Find your scenario
+  3. Execute step-by-step
+  4. When blocked: Call contacts
+  5. After resolution: POST_INCIDENT_TEMPLATE.md
+  Total: DURING incident + 30 min after
+
+SCENARIO 4: "Monthly compliance check"
+  1. ./loadtest.sh               (45 min) - Run validation
+  2. METRICS.md                  (10 min) - Update dashboard
+  3. Generate report
+  4. Send to management
+  Total: 1 hour
+
+
+⚡ QUICK START - FIRST 30 MINUTES
+═══════════════════════════════════════════════════════════════════════════
+
+Step 1: Prepare Environment (5 min)
+  ssh ops@production-server
+  cd /opt/akig/ops/pra
+  ls -la
+
+Step 2: Configure (5 min)
+  cp .env.example .env
+  vim .env            # Edit with your values
+  chmod 600 .env      # Secure it
+
+Step 3: Install (10 min)
+  chmod +x *.sh
+  ./quickstart.sh install
+  # Follows you through setup
+
+Step 4: Verify (10 min)
+  ./status.sh         # Should show: "All checks passed ✓"
+  ls -lh /backups/akig/*.sql.gz  # Should see recent backup
+
+
+💡 COMMAND REFERENCE
+═══════════════════════════════════════════════════════════════════════════
+
+# Interactive mode (recommended)
+./quickstart.sh install         # First-time setup
+./quickstart.sh daily           # Run today's backup
+./quickstart.sh test-restore    # Test the restore
+./quickstart.sh monitor         # Continuous monitoring
+./quickstart.sh status          # Quick health check
+./quickstart.sh help            # Show help
+
+# Direct scripts (power users)
+./backup.sh --full              # Full backup
+./backup.sh --incremental       # Incremental backup
+./status.sh                     # Health check
+./loadtest.sh                   # Full validation
+
+# Manual operations
+psql -d akig -c "SELECT count(*) FROM users;"  # Query DB
+pg_dump -d akig | gzip > backup.sql.gz         # Manual backup
+
+
+🎓 LEARNING PATH
+═══════════════════════════════════════════════════════════════════════════
+
+Beginner (Never used PRA):
+  Day 1: Read README.md
+  Day 2: Read INDEX.md + METRICS.md
+  Day 3: Run quickstart.sh install
+  Day 4: Watch RUNBOOK.md scenarios
+  Day 5: Run loadtest.sh
+  → Can now: Understand PRA, run basic operations
+
+Intermediate (Some knowledge):
+  Day 1: Setup PRA in new environment
+  Day 2: Configure monitoring
+  Day 3: Run weekly restore test
+  Day 4: Handle minor incidents
+  → Can now: Deploy PRA, run operations, troubleshoot
+
+Advanced (Expert):
+  Day 1: Optimize scripts for your infrastructure
+  Day 2: Implement custom monitoring
+  Day 3: Design disaster recovery strategy
+  Day 4: Run disaster drills
+  → Can now: Manage PRA, optimize performance, lead drills
+
+
+📊 DECISION TREE - "WHAT DO I READ?"
+═══════════════════════════════════════════════════════════════════════════
+
+                          ┌─ README.md
+          NEW USER?       │
+             YES          └─ Start with overview
+             │
+             ├─ Need setup help?
+             │  YES → DEPLOYMENT_CHECKLIST.md
+             │  NO  → Continue
+             │
+             ├─ In production issue?
+             │  YES → RUNBOOK.md (Find your scenario)
+             │  NO  → Continue
+             │
+             ├─ Need to test?
+             │  YES → Run: ./loadtest.sh
+             │  NO  → Continue
+             │
+             ├─ Checking compliance?
+             │  YES → METRICS.md
+             │  NO  → Continue
+             │
+             └─ Something went wrong?
+                YES → POST_INCIDENT_TEMPLATE.md
+                NO  → You're good!
+
+
+🔍 FINDING WHAT YOU NEED
+═══════════════════════════════════════════════════════════════════════════
+
+"How do I..."
+
+  ...backup my database?
+    → README.md: "Sauvegarde Quotidienne"
+    → Run: ./quickstart.sh daily
+
+  ...test the restore?
+    → README.md: "Test de Restauration"
+    → Run: ./quickstart.sh test-restore
+
+  ...check if PRA is healthy?
+    → Run: ./status.sh
+
+  ...validate SLA compliance?
+    → Run: ./loadtest.sh
+    → Check: METRICS.md
+
+  ...handle a P1 incident?
+    → RUNBOOK.md: Find your scenario
+    → Call: On-call contacts
+
+  ...optimize backup speed?
+    → README.md: "Dépannage"
+    → Edit: .env (compression settings)
+    → Test: Run loadtest.sh again
+
+  ...understand what happens after incident?
+    → POST_INCIDENT_TEMPLATE.md
+
+  ...train my team?
+    → INDEX.md: By role
+    → Walk through: Scenarios in RUNBOOK.md
+
+
+✅ REGULAR MAINTENANCE
+═══════════════════════════════════════════════════════════════════════════
+
+DAILY (2 minutes)
+  □ ./status.sh
+  □ Check: No critical alerts
+
+WEEKLY (30 minutes)
+  □ ./quickstart.sh test-restore
+  □ Review: Restore report
+  □ Check: Data integrity
+
+MONTHLY (1 hour)
+  □ ./loadtest.sh
+  □ Update: METRICS.md
+  □ Review: Compliance status
+  □ Share: Report with management
+
+QUARTERLY (4 hours)
+  □ Disaster recovery drill
+  □ Simulate full incident
+  □ Test escalation procedures
+  □ Document learnings
+  □ Update RUNBOOK.md if needed
+
+ANNUALLY (1 day)
+  □ Full PRA review
+  □ Update SLA targets if needed
+  □ Review all procedures
+  □ Test all scenarios
+  □ Update documentation
+
+
+🚨 IN CASE OF EMERGENCY
+═══════════════════════════════════════════════════════════════════════════
+
+INCIDENT DECLARED? FOLLOW THESE STEPS:
+
+1. IMMEDIATE (< 1 minute)
+   - Stay calm
+   - Open: RUNBOOK.md
+   - Find: Your incident type
+
+2. DIAGNOSIS (1-5 min)
+   - Follow: "Diagnostic" steps for your scenario
+   - Note: Time and symptoms
+   - Call: Primary contact if unsure
+
+3. RECOVERY (5-30 min)
+   - Follow: "Actions correctives" steps
+   - Execute: Recommended procedure
+   - Monitor: Status.sh output
+   - Ask for help if stuck
+
+4. VERIFICATION (30 min)
+   - Test: All critical systems
+   - Verify: Data integrity
+   - Check: API endpoints
+   - Confirm: Service restored
+
+5. COMMUNICATION (Immediate)
+   - Update: Status page
+   - Notify: Stakeholders
+   - Send: Incident report
+
+6. DOCUMENTATION (After incident)
+   - Complete: POST_INCIDENT_TEMPLATE.md
+   - Schedule: Post-mortem meeting
+   - Create: Action items
+   - Share: With team
+
+CONTACTS:
+  Tier 1 (Immediate): ops-oncall@akig.com
+  Tier 2 (5 min):     cto@akig.com
+  Tier 3 (15 min):    coo@akig.com
+
+
+📞 SUPPORT
+═══════════════════════════════════════════════════════════════════════════
+
+Questions about PRA:
+  → Email: ops@akig.com
+  → Slack: #infrastructure
+  → Wiki: Search "PRA"
+
+Issues with scripts:
+  → Check: logs in /var/log/akig_*
+  → Test: ./status.sh first
+  → Review: README.md "Dépannage"
+  → Escalate: ops@akig.com
+
+Document updates:
+  → Create: GitHub issue with "PRA" tag
+  → Propose: Changes with details
+  → Discuss: With team before implementing
+
+
+🔗 RELATED DOCUMENTATION
+═══════════════════════════════════════════════════════════════════════════
+
+Within PRA:
+  ├─ README.md              (Architecture, setup, usage)
+  ├─ RUNBOOK.md             (Emergency scenarios)
+  ├─ METRICS.md             (SLA tracking, compliance)
+  ├─ INDEX.md               (Documentation index)
+  ├─ DEPLOYMENT_CHECKLIST.md (Implementation guide)
+  └─ POST_INCIDENT_TEMPLATE.md (Post-mortem template)
+
+External references:
+  ├─ PostgreSQL Docs: https://www.postgresql.org/docs/current/
+  ├─ pg_dump Manual: https://www.postgresql.org/docs/current/app-pgdump.html
+  ├─ Bash Scripting: https://www.gnu.org/software/bash/manual/
+  └─ Company Wiki: [Your internal documentation]
+
+
+✨ BEST PRACTICES
+═══════════════════════════════════════════════════════════════════════════
+
+1. AUTOMATE
+   □ Setup cron for backup.sh (hourly)
+   □ Setup cron for status.sh (every 5 min)
+   □ Enable Slack/Email alerts
+
+2. TEST REGULARLY
+   □ Weekly restore test (quickstart.sh test-restore)
+   □ Monthly load test (./loadtest.sh)
+   □ Quarterly disaster drill
+
+3. DOCUMENT EVERYTHING
+   □ Keep incident reports
+   □ Update METRICS.md monthly
+   □ Share learnings with team
+
+4. MONITOR CLOSELY
+   □ Watch backup logs daily
+   □ Review monitoring output
+   □ Alert on deviations from SLA
+
+5. TRAIN YOUR TEAM
+   □ On-call training
+   □ Scenario walkthroughs
+   □ Regular drills
+
+
+📈 SUCCESS METRICS
+═══════════════════════════════════════════════════════════════════════════
+
+Your PRA is successful when:
+
+  ✅ Backup success rate: 100% (no missed backups)
+  ✅ RPO: 1 hour or better (data loss < 1 hour)
+  ✅ RTO: 30 minutes or better (downtime < 30 min)
+  ✅ Restore test pass rate: 100% (weekly tests work)
+  ✅ Team trained: Everyone knows procedures
+  ✅ Incident response: P1 resolved < 30 min
+  ✅ SLA compliance: Month-to-month 99.9%+ uptime
+
+If any metric fails: Update procedures and notify team.
+
+
+═══════════════════════════════════════════════════════════════════════════
+
+🎉 YOU'RE READY TO DEPLOY!
+
+Next steps:
+  1. Read: README.md
+  2. Configure: .env
+  3. Run: ./quickstart.sh install
+  4. Verify: ./status.sh
+  5. Join: #infrastructure on Slack
+  6. Share: This guide with your team
+
+Good luck! 🚀
+
+═══════════════════════════════════════════════════════════════════════════
+
+Version: 1.0 | Date: Oct 25, 2025 | Status: 🟢 PRODUCTION READY
+
+For questions: ops@akig.com
+For emergencies: ops-oncall@akig.com (+33 6XX XX XX XX)
+
+EOF

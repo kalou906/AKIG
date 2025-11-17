@@ -1,0 +1,7 @@
+# AKIG v3.0 - Workspace Configuration
+# Monorepo structure avec pnpm workspaces
+
+packages:
+  - 'apps/*'
+  - 'packages/*'
+  - 'infra/*'

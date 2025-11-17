@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: smoke-tests
+  namespace: solvency-ai
+spec:
+  args:
+  - name: service-url
+  metrics:
+  - name: smoke-test-metrics
+    provider:
+      job:
+        spec:
+          template:
+            spec:
+              containers:
+              - name: smoketest
+                image: curlimages/curl:latest
+                command:
+                - /bin/sh
+                - -c
+                - |
+                  set -e
+                  curl -f ${SERVICE_URL}/health
+                  curl -f -H "Authorization: Bearer ${API_TOKEN}" \
+                    ${SERVICE_URL}/tenants/demo-tenant-1/solvency
+                env:
+                - name: SERVICE_URL
+                  value: "{{args.service-url}}"
+                - name: API_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: solvency-secrets
+                      key: JWT_SECRET
+              restartPolicy: Never
+      successCondition: job.status.succeeded > 0
+      failureLimit: 3

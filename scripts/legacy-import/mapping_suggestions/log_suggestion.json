@@ -1,0 +1,80 @@
+{
+  "legacy_table": "log",
+  "target_table": "TODO_remplacer_par_nom_table_cible",
+  "enabled": false,
+  "comment": "Validez et activez ce mapping après vérification",
+  "columns": {
+    "legacy_columns": [
+      "id",
+      "stamp",
+      "type1",
+      "type2",
+      "libelle",
+      "key1",
+      "key2",
+      "proprietaire_id",
+      "sql",
+      "result",
+      "json",
+      "log_json"
+    ],
+    "samples": [
+      {
+        "id": "1093",
+        "stamp": "2024-10-26 16:09:01",
+        "type1": "corbeille",
+        "type2": "charge",
+        "libelle": "TOURE MAMADOUnCharge récupérable/locative : Consom",
+        "key1": "25925",
+        "key2": "0",
+        "proprietaire_id": "43",
+        "sql": "insert into `charge` (`id`,`local_id`,`type`,`libe",
+        "result": "NULL",
+        "json": "{\"local_id\":\"583\",\"type\":\"13\",\"user_id\":\"36\"}",
+        "log_json": "NULL"
+      },
+      {
+        "id": "1094",
+        "stamp": "2024-10-26 16:09:05",
+        "type1": "corbeille",
+        "type2": "charge",
+        "libelle": "TOURE MAMADOUnCharge récupérable/locative : Consom",
+        "key1": "25924",
+        "key2": "0",
+        "proprietaire_id": "43",
+        "sql": "insert into `charge` (`id`,`local_id`,`type`,`libe",
+        "result": "NULL",
+        "json": "{\"local_id\":\"583\",\"type\":\"13\",\"user_id\":\"36\"}",
+        "log_json": "NULL"
+      },
+      {
+        "id": "1095",
+        "stamp": "2024-11-07 13:20:47",
+        "type1": "corbeille",
+        "type2": "loyer",
+        "libelle": "Loyer octobre 2024nBERETE MOUSTAPHAnGASSAMA KALIFA",
+        "key1": "28892",
+        "key2": "0",
+        "proprietaire_id": "131",
+        "sql": "insert into `loyer` (`id`,`num`,`contrat_id`,`loca",
+        "result": "NULL",
+        "json": "{\"local_id\":\"886\",\"locataire_id\":\"1104\",\"user_id\":",
+        "log_json": "NULL"
+      }
+    ]
+  },
+  "field_mapping": {
+    "id": "target_id",
+    "stamp": "target_stamp",
+    "type1": "target_type1",
+    "type2": "target_type2",
+    "libelle": "target_libelle",
+    "key1": "target_key1",
+    "key2": "target_key2",
+    "proprietaire_id": "target_proprietaire_id",
+    "sql": "target_sql",
+    "result": "target_result",
+    "json": "target_json",
+    "log_json": "target_log_json"
+  }
+}

@@ -1,0 +1,248 @@
+# ============================================
+# AKIG v3.0 - Comprehensive .gitignore
+# ============================================
+
+# ============================================
+# Dependencies
+# ============================================
+node_modules/
+.pnpm-store/
+.pnp
+.pnp.js
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+*.whl
+
+# ============================================
+# Environment Variables
+# ============================================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
+
+# ============================================
+# Build Outputs
+# ============================================
+# Next.js
+apps/web/.next/
+apps/web/out/
+apps/web/.turbo/
+
+# NestJS
+apps/api/dist/
+apps/api/.turbo/
+
+# Shared packages
+packages/**/dist/
+packages/**/.turbo/
+
+# ============================================
+# Testing
+# ============================================
+coverage/
+*.lcov
+.nyc_output/
+
+# Playwright
+apps/web/test-results/
+apps/web/playwright-report/
+apps/web/playwright/.cache/
+
+# ============================================
+# Logs
+# ============================================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+pnpm-debug.log*
+
+# ============================================
+# IDEs & Editors
+# ============================================
+# VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# JetBrains
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+.\#*
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# ============================================
+# OS Files
+# ============================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+
+# ============================================
+# Docker
+# ============================================
+# Don't ignore docker-compose.yml but ignore overrides
+docker-compose.override.yml
+
+# ============================================
+# Database
+# ============================================
+*.sqlite
+*.sqlite3
+*.db
+
+# Prisma
+apps/api/prisma/dev.db
+apps/api/prisma/migrations/**/migration.sql.backup
+
+# PostgreSQL
+*.dump
+*.sql.backup
+
+# ============================================
+# Uploads & Media
+# ============================================
+uploads/
+temp/
+tmp/
+
+# ============================================
+# Security & Secrets
+# ============================================
+*.pem
+*.key
+*.cert
+*.crt
+*.p12
+*.pfx
+secrets/
+.secrets/
+
+# JWT keys
+jwt-*.key
+
+# ============================================
+# ML Models
+# ============================================
+apps/ml-api/models/*.pkl
+apps/ml-api/models/*.h5
+apps/ml-api/models/*.pb
+apps/ml-api/models/*.onnx
+apps/ml-api/models/saved_model/
+
+# Exclude checkpoints
+apps/ml-api/checkpoints/
+
+# ============================================
+# Monitoring & Metrics
+# ============================================
+# Prometheus data
+prometheus_data/
+
+# Grafana data
+grafana_data/
+
+# Loki data
+loki_data/
+
+# ============================================
+# Cache
+# ============================================
+.cache/
+.parcel-cache/
+.turbo/
+.eslintcache
+.stylelintcache
+
+# ============================================
+# Misc
+# ============================================
+*.tsbuildinfo
+.npmrc
+.yarnrc
+.yarn/
+
+# Backup files
+*.bak
+*.backup
+
+# Patch files
+*.orig
+*.rej
+
+# Temporary files
+*.tmp
+*.temp
+
+# ============================================
+# Keep These Files
+# ============================================
+!.gitkeep
+!.dockerignore
+!.editorconfig
+!.prettierrc
+!.eslintrc.js
+
+# ============================================
+# Project Specific
+# ============================================
+# Don't ignore example configs
+!.env.example
+!docker-compose.example.yml
+
+# Keep documentation assets
+!docs/assets/**
+
+# Keep scripts
+!scripts/**
+
+# Keep infra configs (templates)
+!infra/k8s/**/*.yaml.example
+!infra/terraform/**/*.tf.example
+!infra/nginx/*.conf.example

@@ -1,0 +1,63 @@
+# Configuration Prometheus pour AKIG
+# Scrape les métriques des services
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'akig-monitoring'
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - 'alertmanager:9093'
+
+# Load rules once and periodically evaluate them
+rule_files:
+  - '/etc/prometheus/rules/*.yml'
+
+# Scrape configurations
+scrape_configs:
+  # Prometheus lui-même
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Backend AKIG
+  - job_name: 'akig-backend'
+    metrics_path: '/api/metrics'
+    static_configs:
+      - targets: ['backend:4000']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'backend'
+
+  # PostgreSQL
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'postgres'
+
+  # Redis
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'redis'
+
+  # Node exporter (système hôte)
+  - job_name: 'node'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'akig-host'

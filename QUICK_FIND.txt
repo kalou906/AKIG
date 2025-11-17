@@ -1,0 +1,128 @@
+# 📑 QUICK FIND - TROUVER CE QUE VOUS CHERCHEZ
+
+---
+
+## ⚡ VOUS ÊTES TRÈS PRESSÉ? (30 secondes)
+
+→ **RECAP_FINAL.txt**
+
+---
+
+## ⏱️ VOUS AVEZ 5 MINUTES
+
+→ **START.txt** (Ultra quick start)
+
+---
+
+## ⏱️ VOUS AVEZ 15 MINUTES
+
+→ **LANCER_AKIG_WINDOWS.md** (Si sur Windows)  
+→ **LANCER_AKIG_LOCAL.md** (Si sur Mac/Linux)
+
+---
+
+## ⏱️ VOUS AVEZ 30 MINUTES
+
+→ **INDEX_DEMARRAGE.md** (Index complet)  
+→ **VERIFICATION_RAPIDE.md** (Vérifications)
+
+---
+
+## 🔍 JE CHERCHE...
+
+### "Comment lancer l'app?"
+→ **START.txt** (5 min)
+→ **LANCER_AKIG_WINDOWS.md** (15 min)
+
+### "Comment vérifier que ça marche?"
+→ **VERIFICATION_RAPIDE.md** (2 min)
+
+### "Ça ne marche pas!"
+→ **LANCER_AKIG_WINDOWS.md** → Dépannage
+
+### "Quoi de nouveau? (Genius Features)"
+→ **00_INTEGRATION_COMPLETE_SUMMARY.txt** (5 min)
+
+### "Détails techniques?"
+→ **EXACT_CHANGES_INTEGRATION.md** (20 min)
+→ **GENIUS_FEATURES_INTEGRATION_COMPLETE.md** (30 min)
+
+### "Avant de deployer?"
+→ **TODO_PROCHAINES_ETAPES.md**
+
+### "Résumé final?"
+→ **SESSION_FINALE_RESUME.md**
+
+### "Tout l'index?"
+→ **INDEX_DEMARRAGE.md**
+
+---
+
+## 📊 PAR RÔLE
+
+### Je suis Développeur
+1. **START.txt** (2 min)
+2. **LANCER_AKIG_WINDOWS.md** (10 min)
+3. **EXACT_CHANGES_INTEGRATION.md** (20 min)
+4. Faire `make up`
+
+### Je suis DevOps
+1. **LANCER_AKIG_LOCAL.md** (15 min)
+2. Voir: **docker-compose.yml**
+3. Voir: **Makefile**
+4. Faire: `make prod`
+
+### Je suis Manager
+1. **START.txt** (2 min)
+2. **00_INTEGRATION_COMPLETE_SUMMARY.txt** (5 min)
+3. Faire: `make up`
+4. Tester l'app
+
+### Je suis QA
+1. **START.txt** (2 min)
+2. **VERIFICATION_RAPIDE.md** (2 min)
+3. **LANCER_AKIG_WINDOWS.md** (10 min)
+4. Faire: `make test`
+
+---
+
+## ✅ CHECKLIST RAPIDE
+
+```
+[ ] Docker lancé
+[ ] Make installé
+[ ] cd C:\AKIG
+[ ] make up
+[ ] Attendre 60 secondes
+[ ] Ouvrir http://localhost:3000
+[ ] Se connecter: admin@akig.com / admin123
+[ ] Voir le dashboard
+```
+
+---
+
+## 🆘 HELP
+
+- `make help` - Toutes les commandes
+- `make logs` - Voir les erreurs
+- `make status` - État des services
+- `make health` - Santé des services
+
+---
+
+## 📚 FICHIERS CLÉS
+
+| Fichier | Temps | Contenu |
+|---------|-------|---------|
+| **START.txt** | 2 min | Ultra rapide |
+| **RECAP_FINAL.txt** | 1 min | Très court |
+| **LANCER_AKIG_WINDOWS.md** | 15 min | Complet Windows |
+| **LANCER_AKIG_LOCAL.md** | 15 min | Complet Linux/Mac |
+| **VERIFICATION_RAPIDE.md** | 3 min | Checklist |
+| **INDEX_DEMARRAGE.md** | 10 min | Index complet |
+
+---
+
+**Status**: ✅ READY TO LAUNCH  
+**Next**: `cd C:\AKIG && make up`
+

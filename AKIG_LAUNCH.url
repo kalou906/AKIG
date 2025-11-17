@@ -1,0 +1,10 @@
+[InternetShortcut]
+URL=http://localhost:5173
+IconIndex=0
+
+; Pour mettre cette icône sur le bureau:
+; 1. Créez le fichier AKIG_LAUNCH.url
+; 2. Mettez le dans c:\AKIG\
+; 3. Clic-droit > Envoyer vers > Bureau (créer un raccourci)
+; 4. Puis double-cliquez sur QUICK_LAUNCH.bat d'abord
+; 5. Ensuite cliquez sur le raccourci du bureau

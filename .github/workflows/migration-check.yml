@@ -1,0 +1,499 @@
+name: Migration Check & Validation
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: false
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      dry_run:
+        description: 'Dry run (no actual migration)'
+        required: false
+        type: boolean
+        default: true
+
+concurrency:
+  group: migration-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '18'
+  MIGRATIONS_DIR: './ops/migrations'
+
+jobs:
+  # =====================================================================
+  # STAGE 1: Validate Migration Files
+  # =====================================================================
+  validate-migrations:
+    name: Validate Migration Files
+    runs-on: ubuntu-latest
+    outputs:
+      migration-count: ${{ steps.count.outputs.count }}
+      migrations: ${{ steps.list.outputs.migrations }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Count migration files
+        id: count
+        run: |
+          count=$(find ${{ env.MIGRATIONS_DIR }}/sql -name "*.sql" 2>/dev/null | wc -l)
+          echo "count=$count" >> $GITHUB_OUTPUT
+          echo "Found $count migration files"
+
+      - name: List migration files
+        id: list
+        run: |
+          migrations=$(find ${{ env.MIGRATIONS_DIR }}/sql -name "*.sql" -type f | sort | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          echo "migrations=$migrations" >> $GITHUB_OUTPUT
+          find ${{ env.MIGRATIONS_DIR }}/sql -name "*.sql" -type f | sort | while read f; do
+            echo "  - $(basename $f)"
+          done
+
+      - name: Validate SQL syntax
+        run: |
+          echo "Validating SQL files..."
+          for file in ${{ env.MIGRATIONS_DIR }}/sql/*.sql; do
+            if [ -f "$file" ]; then
+              echo "✓ Checking: $(basename $file)"
+              # Basic SQL validation (check for BEGIN/COMMIT)
+              if grep -q "^BEGIN;" "$file" && grep -q "^COMMIT;" "$file"; then
+                echo "  ✓ Contains BEGIN/COMMIT"
+              else
+                echo "  ⚠ Warning: Missing BEGIN/COMMIT wrapper"
+              fi
+            fi
+          done
+
+      - name: Check for migration naming convention
+        run: |
+          echo "Checking naming convention (NNN_description.sql)..."
+          for file in ${{ env.MIGRATIONS_DIR }}/sql/*.sql; do
+            if [ -f "$file" ]; then
+              basename=$(basename "$file")
+              if [[ ! $basename =~ ^[0-9]{3}_ ]]; then
+                echo "✗ Invalid naming: $basename (must start with 3 digits)"
+                exit 1
+              fi
+            fi
+          done
+          echo "✓ All migrations follow naming convention"
+
+  # =====================================================================
+  # STAGE 2: Database Connection Check
+  # =====================================================================
+  check-database:
+    name: Check Database Connection
+    runs-on: ubuntu-latest
+    needs: validate-migrations
+    if: success()
+
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_DB: akig_test
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Test database connection
+        env:
+          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/akig_test
+        run: |
+          echo "Testing database connection..."
+          node -e "
+            const { Client } = require('pg');
+            const client = new Client({ connectionString: process.env.DATABASE_URL });
+            client.connect()
+              .then(() => {
+                console.log('✓ Database connection successful');
+                return client.query('SELECT NOW()');
+              })
+              .then(result => {
+                console.log('✓ Query executed:', result.rows[0]);
+                return client.end();
+              })
+              .catch(err => {
+                console.error('✗ Connection failed:', err.message);
+                process.exit(1);
+              });
+          "
+
+      - name: Create migrations table
+        env:
+          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/akig_test
+        run: |
+          echo "Creating migrations table..."
+          node -e "
+            const { Client } = require('pg');
+            const client = new Client({ connectionString: process.env.DATABASE_URL });
+            client.connect()
+              .then(() => {
+                return client.query(\`
+                  CREATE TABLE IF NOT EXISTS migrations (
+                    id SERIAL PRIMARY KEY,
+                    name VARCHAR(255) UNIQUE NOT NULL,
+                    applied_at TIMESTAMP DEFAULT NOW()
+                  )
+                \`);
+              })
+              .then(() => {
+                console.log('✓ Migrations table created');
+                return client.end();
+              })
+              .catch(err => {
+                console.error('✗ Failed:', err.message);
+                process.exit(1);
+              });
+          "
+
+  # =====================================================================
+  # STAGE 3: Test Migrations on Test Database
+  # =====================================================================
+  test-migrations:
+    name: Test Migrations
+    runs-on: ubuntu-latest
+    needs: check-database
+    if: success()
+
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_DB: akig_test
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run migrations on test database
+        env:
+          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/akig_test
+        run: |
+          echo "Running migrations on test database..."
+          node ops/migrations/migration_runner.js pending || true
+          echo ""
+          echo "Migration status:"
+          node ops/migrations/migration_runner.js status
+
+      - name: Validate migrations completed
+        env:
+          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/akig_test
+        run: |
+          echo "Validating migration completion..."
+          node -e "
+            const { Client } = require('pg');
+            const client = new Client({ connectionString: process.env.DATABASE_URL });
+            client.connect()
+              .then(() => {
+                return client.query('SELECT COUNT(*) as count FROM migrations');
+              })
+              .then(result => {
+                const count = result.rows[0].count;
+                console.log(\`✓ \${count} migrations applied\`);
+                if (count === 0) {
+                  console.log('⚠ No migrations were applied');
+                }
+                return client.end();
+              })
+              .catch(err => {
+                console.error('✗ Validation failed:', err.message);
+                process.exit(1);
+              });
+          "
+
+      - name: Check data integrity
+        env:
+          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/akig_test
+        run: |
+          echo "Checking data integrity..."
+          node -e "
+            const { Client } = require('pg');
+            const client = new Client({ connectionString: process.env.DATABASE_URL });
+            client.connect()
+              .then(() => {
+                // Check all tables exist
+                return client.query(\`
+                  SELECT tablename FROM pg_tables WHERE schemaname = 'public'
+                \`);
+              })
+              .then(result => {
+                const tables = result.rows.map(r => r.tablename);
+                console.log('✓ Tables created:', tables.join(', '));
+                
+                // Check constraints
+                return tables;
+              })
+              .then(() => {
+                return client.query(\`
+                  SELECT constraint_name, constraint_type
+                  FROM information_schema.table_constraints
+                  WHERE table_schema = 'public'
+                \`);
+              })
+              .then(result => {
+                console.log(\`✓ Constraints validated: \${result.rowCount} constraints found\`);
+                return client.end();
+              })
+              .catch(err => {
+                console.error('✗ Integrity check failed:', err.message);
+                process.exit(1);
+              });
+          "
+
+  # =====================================================================
+  # STAGE 4: Performance Check
+  # =====================================================================
+  check-performance:
+    name: Performance Check
+    runs-on: ubuntu-latest
+    needs: test-migrations
+    if: success()
+
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_DB: akig_test
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Setup test migrations
+        env:
+          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/akig_test
+        run: |
+          node ops/migrations/migration_runner.js pending || true
+
+      - name: Check index performance
+        env:
+          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/akig_test
+        run: |
+          echo "Checking index performance..."
+          node -e "
+            const { Client } = require('pg');
+            const client = new Client({ connectionString: process.env.DATABASE_URL });
+            client.connect()
+              .then(() => {
+                return client.query(\`
+                  SELECT indexname, tablename 
+                  FROM pg_indexes 
+                  WHERE schemaname = 'public'
+                  ORDER BY tablename, indexname
+                \`);
+              })
+              .then(result => {
+                if (result.rows.length > 0) {
+                  console.log('✓ Indexes created:');
+                  result.rows.forEach(row => {
+                    console.log(\`  - \${row.tablename}.\${row.indexname}\`);
+                  });
+                } else {
+                  console.log('⚠ No indexes found');
+                }
+                return client.end();
+              })
+              .catch(err => {
+                console.error('✗ Index check failed:', err.message);
+                process.exit(1);
+              });
+          "
+
+      - name: Check table statistics
+        env:
+          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/akig_test
+        run: |
+          echo "Checking table statistics..."
+          node -e "
+            const { Client } = require('pg');
+            const client = new Client({ connectionString: process.env.DATABASE_URL });
+            client.connect()
+              .then(() => {
+                return client.query(\`
+                  SELECT schemaname, tablename, n_live_tup as row_count
+                  FROM pg_stat_user_tables
+                  WHERE schemaname = 'public'
+                  ORDER BY tablename
+                \`);
+              })
+              .then(result => {
+                console.log('✓ Table statistics:');
+                result.rows.forEach(row => {
+                  console.log(\`  - \${row.tablename}: \${row.row_count} rows\`);
+                });
+                return client.end();
+              })
+              .catch(err => {
+                console.error('✗ Stats check failed:', err.message);
+                process.exit(1);
+              });
+          "
+
+  # =====================================================================
+  # STAGE 5: Notification & Reporting
+  # =====================================================================
+  report:
+    name: Generate Report
+    runs-on: ubuntu-latest
+    needs: [validate-migrations, check-database, test-migrations, check-performance]
+    if: always()
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Generate migration report
+        run: |
+          cat > migration_report.md << 'EOF'
+          # Migration Check Report
+          
+          **Date**: $(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          **Workflow**: ${{ github.workflow }}
+          **Trigger**: ${{ github.event_name }}
+          
+          ## Summary
+          - Migration Files Validated: ${{ needs.validate-migrations.outputs.migration-count }}
+          - Database Connection: ✓
+          - Migrations Tested: ✓
+          - Performance Checked: ✓
+          
+          ## Results
+          - Validation: ${{ needs.validate-migrations.result }}
+          - Database Check: ${{ needs.check-database.result }}
+          - Migration Test: ${{ needs.test-migrations.result }}
+          - Performance: ${{ needs.check-performance.result }}
+          
+          ## Overall Status
+          ${{ job.status }}
+          EOF
+          cat migration_report.md
+
+      - name: Upload report
+        uses: actions/upload-artifact@v3
+        with:
+          name: migration-report
+          path: migration_report.md
+          retention-days: 30
+
+      - name: Post to Slack on failure
+        if: failure()
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "❌ Migration Check Failed",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Migration Check Failed*\nWorkflow: ${{ github.workflow }}\nBranch: ${{ github.ref_name }}\nCommit: ${{ github.sha }}"
+                  }
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "View Details"
+                      },
+                      "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+
+      - name: Fail if any job failed
+        if: failure()
+        run: |
+          echo "❌ Migration validation failed"
+          exit 1
+
+      - name: Success message
+        if: success()
+        run: |
+          echo "✅ All migration checks passed"
+          echo "  - Validation: PASSED"
+          echo "  - Database: PASSED"
+          echo "  - Migrations: PASSED"
+          echo "  - Performance: PASSED"

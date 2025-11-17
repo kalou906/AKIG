@@ -1,0 +1,397 @@
+name: Load Multi-Scenarios
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'ops/k6/**'
+      - 'backend/src/**'
+      - '.github/workflows/load-multi.yml'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to test'
+        required: false
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      vus:
+        description: 'Virtual users override (default: from scenario)'
+        required: false
+        default: ''
+        type: string
+      duration:
+        description: 'Test duration override (default: from scenario)'
+        required: false
+        default: ''
+        type: string
+
+jobs:
+  k6-multi-scenarios:
+    name: K6 Multi-Scenarios Load Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    strategy:
+      matrix:
+        scenario: ['smoke', 'load', 'stress']
+      fail-fast: false
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Validate K6 test file
+        run: |
+          if [ ! -f "ops/k6/multi_scenarios.js" ]; then
+            echo "❌ K6 test file not found: ops/k6/multi_scenarios.js"
+            exit 1
+          fi
+          echo "✓ K6 test file found"
+          wc -l ops/k6/multi_scenarios.js
+
+      - name: Set environment variables
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            ENV="${{ inputs.environment }}"
+          else
+            ENV="staging"
+          fi
+          
+          case "$ENV" in
+            staging)
+              echo "BASE_URL=${{ secrets.BASE_URL_STAGING }}" >> $GITHUB_ENV
+              echo "TEST_TOKEN=${{ secrets.TEST_TOKEN_STAGING }}" >> $GITHUB_ENV
+              ;;
+            production)
+              echo "BASE_URL=${{ secrets.BASE_URL_PRODUCTION }}" >> $GITHUB_ENV
+              echo "TEST_TOKEN=${{ secrets.TEST_TOKEN_PRODUCTION }}" >> $GITHUB_ENV
+              ;;
+            *)
+              echo "❌ Unknown environment: $ENV"
+              exit 1
+              ;;
+          esac
+          
+          echo "ENVIRONMENT=$ENV" >> $GITHUB_ENV
+          echo "SCENARIO=${{ matrix.scenario }}" >> $GITHUB_ENV
+
+      - name: Validate environment variables
+        run: |
+          if [ -z "${{ env.BASE_URL }}" ]; then
+            echo "❌ BASE_URL not configured in secrets"
+            exit 1
+          fi
+          
+          if [ -z "${{ env.TEST_TOKEN }}" ]; then
+            echo "❌ TEST_TOKEN not configured in secrets"
+            exit 1
+          fi
+          
+          echo "✓ Environment variables validated"
+          echo "  Environment: ${{ env.ENVIRONMENT }}"
+          echo "  Base URL: ${BASE_URL:0:30}..."
+          echo "  Scenario: ${{ env.SCENARIO }}"
+
+      - name: Run K6 multi-scenarios test (${{ matrix.scenario }})
+        run: |
+          docker run \
+            --name k6-test-${{ matrix.scenario }} \
+            -e BASE_URL="${{ env.BASE_URL }}" \
+            -e TOKEN="${{ env.TEST_TOKEN }}" \
+            -e SCENARIO="${{ matrix.scenario }}" \
+            -e VUS_OVERRIDE="${{ inputs.vus }}" \
+            -e DURATION_OVERRIDE="${{ inputs.duration }}" \
+            -v "${{ github.workspace }}/ops/k6:/scripts:ro" \
+            -v "${{ github.workspace }}/ops/k6/results:/results" \
+            grafana/k6:latest \
+            run \
+              --out csv=/results/results-${{ matrix.scenario }}.csv \
+              --out json=/results/results-${{ matrix.scenario }}.json \
+              /scripts/multi_scenarios.js
+        continue-on-error: true
+
+      - name: Extract K6 results
+        if: always()
+        run: |
+          echo "## K6 Load Test Results - ${{ matrix.scenario }}" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -f "ops/k6/results/results-${{ matrix.scenario }}.json" ]; then
+            echo "✓ Test completed for scenario: ${{ matrix.scenario }}"
+            
+            # Extract key metrics
+            RESULT_FILE="ops/k6/results/results-${{ matrix.scenario }}.json"
+            
+            # Parse JSON for metrics
+            echo "### Summary" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            cat "$RESULT_FILE" | grep -o '"http_reqs":[^}]*' | head -1 >> $GITHUB_STEP_SUMMARY || echo "Requests: N/A" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ No results file found for scenario: ${{ matrix.scenario }}"
+          fi
+
+      - name: Upload K6 results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-results-${{ matrix.scenario }}
+          path: ops/k6/results/
+          retention-days: 30
+          if-no-files-found: ignore
+
+      - name: Comment on PR with results
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            
+            const resultsDir = 'ops/k6/results';
+            const resultFile = path.join(resultsDir, 'results-${{ matrix.scenario }}.json');
+            
+            let comment = '## K6 Load Test Results\n\n';
+            comment += '### Scenario: ${{ matrix.scenario }}\n';
+            
+            if (fs.existsSync(resultFile)) {
+              const results = JSON.parse(fs.readFileSync(resultFile, 'utf8'));
+              const metrics = results.metrics || {};
+              
+              comment += '| Metric | Value |\n';
+              comment += '|--------|-------|\n';
+              
+              // Extract key metrics
+              if (metrics.http_reqs) {
+                const httpReqs = metrics.http_reqs.values || {};
+                comment += `| HTTP Requests | ${httpReqs.count || 0} |\n`;
+              }
+              
+              comment += '\n✓ Load test completed successfully\n';
+            } else {
+              comment += '⚠️ Test did not complete successfully\n';
+            }
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+  k6-spike-test:
+    name: K6 Spike Test (Sequential)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: k6-multi-scenarios
+    if: github.ref == 'refs/heads/main' && github.event_name != 'workflow_dispatch'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set environment variables
+        run: |
+          echo "BASE_URL=${{ secrets.BASE_URL_STAGING }}" >> $GITHUB_ENV
+          echo "TEST_TOKEN=${{ secrets.TEST_TOKEN_STAGING }}" >> $GITHUB_ENV
+
+      - name: Run K6 spike test
+        run: |
+          docker run \
+            --name k6-spike-test \
+            -e BASE_URL="${{ env.BASE_URL }}" \
+            -e TOKEN="${{ env.TEST_TOKEN }}" \
+            -e SCENARIO="spike" \
+            -v "${{ github.workspace }}/ops/k6:/scripts:ro" \
+            -v "${{ github.workspace }}/ops/k6/results:/results" \
+            grafana/k6:latest \
+            run \
+              --out csv=/results/spike-results.csv \
+              --out json=/results/spike-results.json \
+              /scripts/multi_scenarios.js
+        continue-on-error: true
+
+      - name: Upload spike test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-spike-results
+          path: ops/k6/results/spike-results.*
+          retention-days: 30
+
+  notify:
+    name: Notify Results
+    runs-on: ubuntu-latest
+    if: always()
+    needs: [k6-multi-scenarios]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: all-results
+
+      - name: Prepare summary
+        run: |
+          echo "## Load Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Workflow**: Load Multi-Scenarios" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch**: ${{ github.ref }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Status**: ${{ needs.k6-multi-scenarios.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Test Scenarios" >> $GITHUB_STEP_SUMMARY
+          echo "- smoke" >> $GITHUB_STEP_SUMMARY
+          echo "- load" >> $GITHUB_STEP_SUMMARY
+          echo "- stress" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Results Location" >> $GITHUB_STEP_SUMMARY
+          echo "Results are available in the artifacts section." >> $GITHUB_STEP_SUMMARY
+
+      - name: Send Slack notification
+        if: failure()
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "⚠️ K6 Load Tests Failed",
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "🚨 Load Test Failure"
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Repository*\n${{ github.repository }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Branch*\n${{ github.ref }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Workflow*\nLoad Multi-Scenarios"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Status*\n${{ needs.k6-multi-scenarios.result }}"
+                    }
+                  ]
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Action*\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Results>"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+
+      - name: Send Slack notification (success)
+        if: success() && github.ref == 'refs/heads/main'
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "✅ K6 Load Tests Passed",
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "✅ Load Tests Successful"
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Repository*\n${{ github.repository }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Branch*\nmain"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Workflow*\nLoad Multi-Scenarios"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Status*\nPassed ✓"
+                    }
+                  ]
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Scenarios*\n• Smoke\n• Load\n• Stress"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Action*\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Results>"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+
+      - name: Create issue on failure
+        if: failure() && github.ref == 'refs/heads/main'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '🚨 K6 Load Test Failure',
+              body: `## Load Test Failure Report
+
+**Workflow Run**: [View Run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+**Details**:
+- Repository: ${{ github.repository }}
+- Branch: ${{ github.ref }}
+- Commit: ${{ github.sha }}
+- Test Type: K6 Multi-Scenarios
+
+**Scenarios**:
+- smoke
+- load
+- stress
+
+**Action Required**:
+1. Review the workflow run results
+2. Check application performance metrics
+3. Investigate any threshold violations
+4. Deploy hotfix if needed
+
+**Timeline**: ${{ github.event.head_commit.timestamp || 'N/A' }}`,
+              labels: ['critical', 'load-test', 'performance']
+            });

@@ -1,0 +1,153 @@
+/* Dark Mode Styles */
+/* Respects prefers-color-scheme: dark */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Colors */
+    --akigBlue: #3b82f6;
+    --akigRed: #ef4444;
+    --akigGray: #0b1220;
+    --akigText: #f5f7fb;
+    --border: #1f2937;
+    --bg-light: #0f172a;
+    --bg-secondary: #1a202c;
+
+    /* Shadows - adjusted for dark mode */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+    --shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 16px 36px rgba(0, 0, 0, 0.6);
+  }
+
+  body {
+    background: var(--akigGray);
+    color: var(--akigText);
+  }
+
+  /* Card Component */
+  .card {
+    background: var(--bg-light);
+    border-color: var(--border);
+    color: var(--akigText);
+  }
+
+  .card:hover {
+    border-color: #374151;
+  }
+
+  /* Button Component */
+  .btn {
+    color: var(--akigText);
+  }
+
+  .btn-secondary {
+    background: var(--bg-secondary);
+    color: var(--akigText);
+    border-color: var(--border);
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    background: var(--border);
+  }
+
+  /* Form Elements */
+  input,
+  select,
+  textarea {
+    background: var(--bg-secondary);
+    color: var(--akigText);
+    border-color: var(--border);
+  }
+
+  input:focus,
+  select:focus,
+  textarea:focus {
+    border-color: var(--akigBlue);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: #9ca3af;
+  }
+
+  /* Links */
+  .link {
+    color: var(--akigBlue);
+  }
+
+  .link:hover {
+    color: #60a5fa;
+  }
+
+  /* Text utilities */
+  .text-primary {
+    color: var(--akigText);
+  }
+
+  .text-secondary {
+    color: #d1d5db;
+  }
+
+  .text-muted {
+    color: #9ca3af;
+  }
+
+  /* Skeleton - dark mode */
+  .skeleton {
+    background: linear-gradient(90deg, #1f2937 25%, #2d3748 50%, #1f2937 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.6s infinite;
+  }
+
+  /* Code and pre */
+  pre,
+  code {
+    background: var(--bg-secondary);
+    color: #e5e7eb;
+    border-color: var(--border);
+  }
+
+  /* Table */
+  table {
+    border-color: var(--border);
+  }
+
+  th {
+    background: var(--bg-secondary);
+    color: var(--akigText);
+  }
+
+  td {
+    border-color: var(--border);
+  }
+
+  tr:hover {
+    background: var(--bg-secondary);
+  }
+
+  /* Selection */
+  ::selection {
+    background: var(--akigBlue);
+    color: white;
+  }
+
+  /* Scrollbar (Webkit browsers) */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #374151;
+  }
+}

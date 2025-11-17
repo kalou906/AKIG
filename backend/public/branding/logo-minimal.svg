@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Trois lignes verticales - Bleu/Blanc/Rouge -->
+  <rect x="40" y="30" width="20" height="140" fill="#0056B3" rx="4"/>
+  <rect x="70" y="30" width="20" height="140" fill="#FFFFFF" stroke="#001F3F" stroke-width="1" rx="4"/>
+  <rect x="100" y="30" width="20" height="140" fill="#CC0000" rx="4"/>
+  
+  <!-- Maison stylisée au centre -->
+  <g transform="translate(130, 70)">
+    <polygon points="0,-12 -12,-2 12,-2" fill="#001F3F"/>
+    <rect x="-10" y="-2" width="20" height="16" fill="#CC0000"/>
+    <circle cx="-4" cy="4" r="1.5" fill="#FFFFFF"/>
+    <circle cx="4" cy="4" r="1.5" fill="#FFFFFF"/>
+  </g>
+  
+  <!-- Texte -->
+  <text x="100" y="195" font-family="Arial, sans-serif" font-size="12" font-weight="bold"
+        text-anchor="middle" fill="#001F3F">AKIG</text>
+</svg>

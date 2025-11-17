@@ -1,0 +1,149 @@
+name: Sauvegarde Quotidienne
+
+on:
+  schedule:
+    # Chaque jour à 02h00 UTC
+    - cron: '0 2 * * *'
+  # Déclenchement manuel
+  workflow_dispatch:
+
+env:
+  PG_HOST: localhost
+  PG_PORT: 5432
+  PG_USER: postgres
+  PG_DATABASE: akig
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    
+    # Service PostgreSQL (optionnel si base en ligne)
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: akig
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    
+    steps:
+      # 1. Checkout
+      - name: 📥 Récupérer le code
+        uses: actions/checkout@v4
+      
+      # 2. Créer la sauvegarde
+      - name: 💾 Créer la sauvegarde
+        id: backup
+        env:
+          PGPASSWORD: ${{ secrets.PG_PASSWORD || 'postgres' }}
+          PG_HOST: ${{ secrets.PG_HOST || 'localhost' }}
+        run: |
+          mkdir -p backups logs
+          
+          BACKUP_FILE="backups/$(date +%Y-%m-%d).dump"
+          echo "📅 Création de la sauvegarde: $BACKUP_FILE"
+          
+          pg_dump -h $PG_HOST \
+            -p $PG_PORT \
+            -U $PG_USER \
+            -d $PG_DATABASE \
+            --format=custom \
+            --compress=9 \
+            --file="$BACKUP_FILE"
+          
+          echo "file=$BACKUP_FILE" >> $GITHUB_OUTPUT
+          
+          # Afficher les infos
+          SIZE=$(du -h "$BACKUP_FILE" | cut -f1)
+          echo "Taille: $SIZE"
+          echo "size=$SIZE" >> $GITHUB_OUTPUT
+      
+      # 3. Générer le checksum
+      - name: 🔐 Générer le checksum
+        id: checksum
+        run: |
+          MD5=$(md5sum "${{ steps.backup.outputs.file }}" | cut -d' ' -f1)
+          echo "md5=$MD5" >> $GITHUB_OUTPUT
+          
+          echo "Checksum MD5: $MD5"
+      
+      # 4. Créer métadonnées
+      - name: 📋 Créer les métadonnées
+        run: |
+          cat > "${{ steps.backup.outputs.file }}.meta" << EOF
+          {
+            "created_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "database": "$PG_DATABASE",
+            "host": "$PG_HOST",
+            "port": "$PG_PORT",
+            "checksum_md5": "${{ steps.checksum.outputs.md5 }}",
+            "file_size": "$(stat -f%z "${{ steps.backup.outputs.file }}" 2>/dev/null || stat -c%s "${{ steps.backup.outputs.file }}")",
+            "backup_type": "automated_daily"
+          }
+          EOF
+      
+      # 5. Télécharger vers S3 (optionnel)
+      - name: ☁️ Télécharger vers S3
+        if: secrets.AWS_ACCESS_KEY_ID != ''
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+      
+      - name: 📤 Envoyer vers S3
+        if: secrets.AWS_ACCESS_KEY_ID != ''
+        run: |
+          aws s3 cp "${{ steps.backup.outputs.file }}" \
+            "s3://${{ secrets.AWS_BUCKET }}/akig-backups/"
+          
+          aws s3 cp "${{ steps.backup.outputs.file }}.meta" \
+            "s3://${{ secrets.AWS_BUCKET }}/akig-backups/"
+      
+      # 6. Artefact GitHub
+      - name: 📦 Sauvegarder comme artefact
+        uses: actions/upload-artifact@v3
+        with:
+          name: daily-backup-${{ github.run_id }}
+          path: |
+            ${{ steps.backup.outputs.file }}
+            ${{ steps.backup.outputs.file }}.meta
+          retention-days: 90
+      
+      # 7. Résumé
+      - name: 📊 Résumé de la sauvegarde
+        run: |
+          echo "## ✅ Sauvegarde Quotidienne Réussie" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Propriété | Valeur |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Fichier | \`${{ steps.backup.outputs.file }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Taille | ${{ steps.backup.outputs.size }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Checksum MD5 | \`${{ steps.checksum.outputs.md5 }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Horodatage | $(date -u +%Y-%m-%dT%H:%M:%SZ) |" >> $GITHUB_STEP_SUMMARY
+          echo "| Statut | ✅ Succès |" >> $GITHUB_STEP_SUMMARY
+
+  cleanup:
+    name: 🧹 Nettoyage
+    runs-on: ubuntu-latest
+    needs: backup
+    if: always()
+    
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+      
+      - name: 🗑️ Supprimer les vieilles sauvegardes
+        run: |
+          echo "🧹 Suppression des sauvegardes de plus de 30 jours..."
+          
+          # Cette étape serait mieux exécutée localement
+          # ou avec un cronjob dédié
+          echo "Utilisez: ./restore_backup.sh cleanup"

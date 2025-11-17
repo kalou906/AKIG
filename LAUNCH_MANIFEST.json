@@ -1,0 +1,341 @@
+{
+  "manifest": {
+    "version": "1.0.0",
+    "name": "AKIG - Plateforme Immobilière Intelligente",
+    "description": "Manifest complet de tous les fichiers de lancement et configuration",
+    "created_at": "2025-01-01",
+    "last_updated": "2025-01-01"
+  },
+
+  "launch_files": {
+    "windows": [
+      {
+        "name": "QUICK_LAUNCH.bat",
+        "type": "batch",
+        "usage": "Double-clic",
+        "level": "Débutant",
+        "description": "⭐ Recommandé - Le plus simple et rapide",
+        "features": [
+          "Interface colorée",
+          "Installe automatiquement les dépendances",
+          "Affiche l'URL d'accès",
+          "Lance Backend et Frontend"
+        ]
+      },
+      {
+        "name": "LAUNCH_AKIG_SIMPLE.bat",
+        "type": "batch",
+        "usage": "Double-clic",
+        "level": "Débutant",
+        "description": "Alternative au QUICK_LAUNCH.bat",
+        "features": [
+          "Même fonctionnalité",
+          "Interface un peu différente",
+          "Tous les mêmes avantages"
+        ]
+      },
+      {
+        "name": "LAUNCH_AKIG.ps1",
+        "type": "powershell",
+        "usage": ".\\LAUNCH_AKIG.ps1",
+        "level": "Intermédiaire",
+        "description": "Pour utilisateurs PowerShell avancés",
+        "features": [
+          "Logs détaillés",
+          "Sortie colorée",
+          "Listing complet des modules",
+          "Meilleur contrôle des erreurs"
+        ]
+      },
+      {
+        "name": "LAUNCH_AKIG.bat",
+        "type": "batch",
+        "usage": "Double-clic",
+        "level": "Débutant",
+        "description": "Version alternative standard",
+        "features": [
+          "Interface basique",
+          "Fonctionne aussi"
+        ]
+      },
+      {
+        "name": "VERIFY_SYSTEM.bat",
+        "type": "batch",
+        "usage": "Double-clic",
+        "level": "Diagnostic",
+        "description": "Vérifiez que tout est prêt avant de lancer",
+        "features": [
+          "Vérifie Node.js",
+          "Vérifie npm",
+          "Vérifie les répertoires",
+          "Vérifie les fichiers package.json",
+          "Vérifie les ports disponibles"
+        ]
+      }
+    ],
+    "linux_mac": [
+      {
+        "name": "LAUNCH_AKIG.sh",
+        "type": "shell",
+        "usage": "chmod +x LAUNCH_AKIG.sh && ./LAUNCH_AKIG.sh",
+        "level": "Intermédiaire",
+        "description": "Lancement sur Linux/Mac",
+        "features": [
+          "Interface colorée",
+          "Installe les dépendances",
+          "Lance Backend et Frontend",
+          "Affiche les commandes de log"
+        ]
+      }
+    ]
+  },
+
+  "documentation_files": [
+    {
+      "name": "READ_ME_FIRST.txt",
+      "type": "text",
+      "purpose": "Instructions principales",
+      "content": "Guide visuel avec ASCII art expliquant les 3 étapes de démarrage"
+    },
+    {
+      "name": "LAUNCH_GUIDE.md",
+      "type": "markdown",
+      "purpose": "Guide complet de lancement",
+      "sections": [
+        "Trois façons de lancer AKIG",
+        "Accès après lancement",
+        "Modules disponibles",
+        "Configuration",
+        "Troubleshooting"
+      ]
+    },
+    {
+      "name": "README_SETUP_COMPLET.md",
+      "type": "markdown",
+      "purpose": "Configuration et installation détaillées",
+      "sections": [
+        "Lancement rapide",
+        "Stack technique",
+        "Configuration",
+        "Modules et rôles",
+        "Troubleshooting"
+      ]
+    },
+    {
+      "name": "CONTROL_CENTER.html",
+      "type": "html",
+      "purpose": "Tableau de bord visuel",
+      "features": [
+        "Interface interactive",
+        "Liens directs vers les services",
+        "Listing des modules",
+        "Listing des rôles",
+        "Boutons de lancement"
+      ]
+    }
+  ],
+
+  "configuration_files": [
+    {
+      "name": "akig-config.json",
+      "type": "json",
+      "purpose": "Configuration complète du système",
+      "sections": [
+        "Services (Backend & Frontend)",
+        "Modules (8 disponibles)",
+        "Rôles (6 disponibles)",
+        "Technology Stack",
+        "Ports et URLs"
+      ]
+    },
+    {
+      "name": "AKIG_LAUNCH.url",
+      "type": "url",
+      "purpose": "Raccourci vers l'application",
+      "target": "http://localhost:5173"
+    }
+  ],
+
+  "backend_structure": {
+    "port": 4000,
+    "framework": "Express.js 4.18",
+    "runtime": "Node.js 22",
+    "database": "PostgreSQL (Mock fallback)",
+    "api_routes": 136,
+    "key_files": [
+      "src/index.js - Point d'entrée principal",
+      "src/db.js - Configuration DB",
+      "src/server.js - Serveur HTTP",
+      "src/routes/*.js - Routes API",
+      ".env - Variables d'environnement"
+    ]
+  },
+
+  "frontend_structure": {
+    "port": 5173,
+    "framework": "React 19",
+    "build_tool": "Vite 7.1",
+    "styling": "Tailwind CSS 3.4",
+    "pages": 13,
+    "components": 50,
+    "key_files": [
+      "src/pages/Dashboard.jsx - Page principale",
+      "src/pages/Parametres.jsx - Gestion des rôles",
+      "src/App.jsx - Application racine",
+      ".env - Variables d'environnement",
+      "vite.config.js - Configuration Vite"
+    ]
+  },
+
+  "access_points": {
+    "application": {
+      "url": "http://localhost:5173",
+      "description": "Application AKIG complète"
+    },
+    "api": {
+      "url": "http://localhost:4000/api",
+      "description": "API REST Backend"
+    },
+    "health_check": {
+      "url": "http://localhost:4000/api/health",
+      "description": "Vérifier l'état du serveur"
+    },
+    "info": {
+      "url": "http://localhost:4000/api/info",
+      "description": "Informations système"
+    }
+  },
+
+  "modules": [
+    {
+      "id": 1,
+      "name": "Gestion Immobilière",
+      "features": 4
+    },
+    {
+      "id": 2,
+      "name": "Recouvrement & Paiements",
+      "features": 4
+    },
+    {
+      "id": 3,
+      "name": "Opérations & Maintenance",
+      "features": 4
+    },
+    {
+      "id": 4,
+      "name": "Reporting & Analytics",
+      "features": 4
+    },
+    {
+      "id": 5,
+      "name": "Portails Client",
+      "features": 4
+    },
+    {
+      "id": 6,
+      "name": "Administration",
+      "features": 4
+    },
+    {
+      "id": 7,
+      "name": "IA & Recherche Avancée",
+      "features": 4
+    },
+    {
+      "id": 8,
+      "name": "Cartographie & Géolocalisation",
+      "features": 4
+    }
+  ],
+
+  "roles": [
+    {
+      "id": 1,
+      "name": "Super Admin",
+      "permissions": ["all"]
+    },
+    {
+      "id": 2,
+      "name": "Admin",
+      "permissions": ["users", "roles", "config", "audit"]
+    },
+    {
+      "id": 3,
+      "name": "Gestionnaire",
+      "permissions": ["properties", "contracts", "payments", "reports"]
+    },
+    {
+      "id": 4,
+      "name": "Agent",
+      "permissions": ["properties", "payments", "maintenance"]
+    },
+    {
+      "id": 5,
+      "name": "Comptable",
+      "permissions": ["payments", "reports"]
+    },
+    {
+      "id": 6,
+      "name": "Locataire",
+      "permissions": ["properties_view", "payments_view", "support"]
+    }
+  ],
+
+  "quick_start": {
+    "step_1": "Installez Node.js depuis https://nodejs.org/",
+    "step_2": "Double-cliquez sur QUICK_LAUNCH.bat",
+    "step_3": "Attendez ~30 secondes (première fois)",
+    "step_4": "Ouvrez http://localhost:5173 dans votre navigateur",
+    "step_5": "Explorez les 8 modules",
+    "step_6": "Testez la gestion des rôles dans Paramètres"
+  },
+
+  "troubleshooting": [
+    {
+      "problem": "Node.js not found",
+      "solution": "Installez Node.js depuis https://nodejs.org"
+    },
+    {
+      "problem": "Port déjà utilisé",
+      "solution": "Utilisez netstat -ano | findstr :4000 pour trouver le PID, puis taskkill"
+    },
+    {
+      "problem": "npm install échoue",
+      "solution": "Relancez les commandes npm install dans backend/ et akig-ultimate/"
+    },
+    {
+      "problem": "Connexion API échoue",
+      "solution": "Vérifiez que Backend et Frontend s'exécutent sur les bonnes fenêtres de commande"
+    }
+  ],
+
+  "environment_variables": {
+    "backend": {
+      "PORT": "4000",
+      "DATABASE_URL": "postgres://localhost/akig",
+      "JWT_SECRET": "supersecret",
+      "DISABLE_REDIS": "true"
+    },
+    "frontend": {
+      "VITE_API_URL": "http://localhost:4000",
+      "VITE_API_PROXY": "http://localhost:4000"
+    }
+  },
+
+  "recommended_order": [
+    "1. Ouvrir READ_ME_FIRST.txt",
+    "2. Double-cliquer sur VERIFY_SYSTEM.bat",
+    "3. Double-cliquer sur QUICK_LAUNCH.bat",
+    "4. Ouvrir http://localhost:5173",
+    "5. Consulter LAUNCH_GUIDE.md si problèmes"
+  ],
+
+  "notes": {
+    "database": "PostgreSQL n'est pas requis - Mock DB fallback intégré",
+    "ports": "4000 (Backend) et 5173 (Frontend) doivent être libres",
+    "node_version": "Node.js 22 recommandé (mais 18+ fonctionne)",
+    "security": "JWT + 2FA support + RBAC complet",
+    "auto_install": "Les dépendances s'installent automatiquement au premier lancement"
+  }
+}

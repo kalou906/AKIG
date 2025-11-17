@@ -1,0 +1,45 @@
+{
+  "legacy_table": "typologie",
+  "target_table": "TODO_remplacer_par_nom_table_cible",
+  "enabled": false,
+  "comment": "Validez et activez ce mapping après vérification",
+  "columns": {
+    "legacy_columns": [
+      "id",
+      "type",
+      "foncier",
+      "comptable",
+      "tresorerie"
+    ],
+    "samples": [
+      {
+        "id": "11",
+        "type": "Charge récupérable/locative : Entretien de l’immeu",
+        "foncier": "0",
+        "comptable": "1",
+        "tresorerie": "1"
+      },
+      {
+        "id": "12",
+        "type": "Charge récupérable/locative : Consommations commun",
+        "foncier": "0",
+        "comptable": "1",
+        "tresorerie": "1"
+      },
+      {
+        "id": "13",
+        "type": "Charge récupérable/locative : Consommations person",
+        "foncier": "0",
+        "comptable": "1",
+        "tresorerie": "1"
+      }
+    ]
+  },
+  "field_mapping": {
+    "id": "target_id",
+    "type": "target_type",
+    "foncier": "target_foncier",
+    "comptable": "target_comptable",
+    "tresorerie": "target_tresorerie"
+  }
+}

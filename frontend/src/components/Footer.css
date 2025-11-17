@@ -1,0 +1,282 @@
+/**
+ * Footer.css - Pied de page AKIG avec logo
+ * Thème bleu/blanc/rouge + design responsive
+ */
+
+:root {
+  --footer-bg: linear-gradient(135deg, #003861 0%, #004E89 50%, #CE1126 100%);
+  --footer-height: auto;
+  --color-white: #FFFFFF;
+  --color-blue: #004E89;
+  --color-blue-dark: #003861;
+  --color-red: #CE1126;
+  --color-gold: #FFD700;
+  --color-shadow: rgba(0, 78, 137, 0.15);
+  --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.akig-footer {
+  background: var(--footer-bg);
+  padding: 30px;
+  box-shadow: 0 -8px 24px var(--color-shadow);
+  margin-top: auto;
+  color: var(--color-white);
+  font-size: 14px;
+  position: relative;
+  bottom: 0;
+  width: 100%;
+}
+
+.footer-inner {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 30px;
+  align-items: center;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ========== FOOTER BRAND ========== */
+.footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.footer-logo {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.2));
+  transition: var(--transition-smooth);
+}
+
+.footer-logo:hover {
+  filter: drop-shadow(0 4px 12px rgba(255, 215, 0, 0.4));
+  transform: scale(1.1);
+}
+
+.footer-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-gold);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* ========== FOOTER CONTENT ========== */
+.footer-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: center;
+}
+
+.footer-copyright {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.footer-links .link {
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+  transition: var(--transition-smooth);
+  font-size: 12px;
+  font-weight: 500;
+  border-bottom: 2px solid transparent;
+  padding-bottom: 2px;
+}
+
+.footer-links .link:hover {
+  color: var(--color-gold);
+  border-bottom-color: var(--color-gold);
+  transform: translateY(-1px);
+}
+
+.footer-links .separator {
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 300;
+}
+
+/* ========== FOOTER SOCIAL ========== */
+.footer-social {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.social-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-gold);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.social-links {
+  display: flex;
+  gap: 10px;
+}
+
+.social-links a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  color: var(--color-white);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 12px;
+  transition: var(--transition-smooth);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.social-links a:hover {
+  background: var(--color-gold);
+  color: var(--color-blue-dark);
+  border-color: var(--color-gold);
+  transform: translateY(-2px) scale(1.1);
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 1024px) {
+  .footer-inner {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    text-align: center;
+  }
+
+  .footer-brand {
+    justify-content: center;
+  }
+
+  .footer-social {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .akig-footer {
+    padding: 20px;
+  }
+
+  .footer-inner {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .footer-logo {
+    height: 28px;
+  }
+
+  .footer-title {
+    font-size: 14px;
+  }
+
+  .footer-copyright {
+    font-size: 12px;
+  }
+
+  .footer-links .link {
+    font-size: 11px;
+  }
+
+  .social-text {
+    font-size: 11px;
+  }
+
+  .social-links a {
+    width: 24px;
+    height: 24px;
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .akig-footer {
+    padding: 15px;
+  }
+
+  .footer-inner {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .footer-logo {
+    height: 24px;
+  }
+
+  .footer-title {
+    font-size: 12px;
+  }
+
+  .footer-copyright {
+    font-size: 11px;
+  }
+
+  .footer-links {
+    gap: 8px;
+  }
+
+  .footer-links .link {
+    font-size: 10px;
+  }
+
+  .footer-links .separator {
+    display: none;
+  }
+
+  .footer-links .link:not(:last-child)::after {
+    content: ' •';
+    margin-left: 8px;
+  }
+
+  .social-text {
+    font-size: 10px;
+  }
+
+  .social-links {
+    gap: 8px;
+  }
+
+  .social-links a {
+    width: 22px;
+    height: 22px;
+    font-size: 9px;
+  }
+}
+
+/* ========== PRINT ========== */
+@media print {
+  .akig-footer {
+    background: var(--color-white);
+    color: var(--color-blue-dark);
+    border-top: 2px solid var(--color-blue);
+    box-shadow: none;
+  }
+
+  .footer-copyright,
+  .footer-links .link {
+    color: var(--color-blue-dark);
+  }
+
+  .footer-title,
+  .social-text {
+    color: var(--color-red);
+  }
+}

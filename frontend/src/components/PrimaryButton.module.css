@@ -1,0 +1,177 @@
+/**
+ * Styles pour PrimaryButton
+ * Utilise CSS Modules pour l'isolation des styles
+ */
+
+.button {
+  /* Base */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease-in-out;
+  outline: none;
+
+  /* Couleurs */
+  background: linear-gradient(135deg, #0b5 0%, #089 100%);
+  color: #fff;
+
+  /* Texte */
+  font-family: inherit;
+  text-decoration: none;
+
+  /* Focus visible (accessibilité) */
+  &:focus-visible {
+    outline: 2px solid #0b5;
+    outline-offset: 2px;
+  }
+
+  /* Hover */
+  &:hover:not(:disabled) {
+    background: linear-gradient(135deg, #089 0%, #067 100%);
+    box-shadow: 0 4px 12px rgba(0, 181, 85, 0.3);
+    transform: translateY(-1px);
+  }
+
+  /* Active */
+  &:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(0, 181, 85, 0.2);
+  }
+
+  /* Disabled */
+  &:disabled {
+    background: #ccc;
+    color: #666;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+/* Tailles */
+.button--sm {
+  padding: 6px 12px;
+  font-size: 13px;
+  min-height: 32px;
+}
+
+.button--md {
+  padding: 10px 16px;
+  font-size: 16px;
+  min-height: 40px;
+}
+
+.button--lg {
+  padding: 12px 24px;
+  font-size: 18px;
+  min-height: 48px;
+}
+
+/* État désactivé */
+.button--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+
+  &:hover,
+  &:active,
+  &:focus-visible {
+    background: #ccc;
+    box-shadow: none;
+    transform: none;
+  }
+}
+
+/* État loading */
+.button--loading {
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+/* Largeur complète */
+.button--full-width {
+  width: 100%;
+}
+
+/* Spinner */
+.spinner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spinnerIcon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Icon */
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+}
+
+/* Label */
+.label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Screen reader only text */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Media queries pour mobile */
+@media (max-width: 768px) {
+  .button--md {
+    padding: 8px 12px;
+    font-size: 14px;
+    min-height: 36px;
+  }
+
+  .button--lg {
+    padding: 10px 18px;
+    font-size: 16px;
+    min-height: 44px;
+  }
+}
+
+/* Mode sombre (optionnel) */
+@media (prefers-color-scheme: dark) {
+  /* Styles mode sombre optionnels si nécessaire */
+}
+
+/* Mode réduit motion */
+@media (prefers-reduced-motion: reduce) {
+  .button {
+    transition: none;
+  }
+
+  .spinnerIcon {
+    animation: none;
+  }
+}

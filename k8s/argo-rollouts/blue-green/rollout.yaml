@@ -1,0 +1,68 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: solvency-api
+  namespace: solvency-ai
+spec:
+  replicas: 3
+  strategy:
+    blueGreen:
+      activeService: solvency-api-service
+      previewService: solvency-api-preview
+      autoPromotionEnabled: false
+      
+      prePromotionAnalysis:
+        templates:
+        - templateName: success-rate
+        args:
+        - name: service-name
+          value: solvency-api-preview
+      
+      postPromotionAnalysis:
+        templates:
+        - templateName: success-rate
+        args:
+        - name: service-name
+          value: solvency-api-service
+      
+      previewReplicaCount: 1
+    
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: solvency-api
+  template:
+    metadata:
+      labels:
+        app: solvency-api
+        version: v1
+    spec:
+      containers:
+      - name: api
+        image: solvency-api:latest
+        ports:
+        - containerPort: 8000
+        envFrom:
+        - configMapRef:
+            name: solvency-config
+        - secretRef:
+            name: solvency-secrets
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 5

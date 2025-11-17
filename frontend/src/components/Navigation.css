@@ -1,0 +1,452 @@
+/**
+ * Navigation.css - Styles Navigation avec thème Guinéen
+ * Bleu/Blanc/Rouge avec dégradés et animations sophistiquées
+ */
+
+:root {
+  /* Couleurs Guinéennes */
+  --color-guinea-blue: #004E89;
+  --color-guinea-white: #FFFFFF;
+  --color-guinea-red: #CE1126;
+  --color-gold: #FFD700;
+  --color-orange: #FF6B35;
+  --color-green: #06D6A0;
+  --color-purple: #6366f1;
+  --color-cyan: #00BCD4;
+  --color-gray-900: #1F2937;
+  --color-gray-800: #374151;
+  --color-gray-700: #4B5563;
+  --color-gray-200: #E5E7EB;
+  --color-gray-100: #F3F4F6;
+
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ============================================================================
+   NAVIGATION PRINCIPALE
+   ============================================================================ */
+
+.akig-navigation {
+  background: linear-gradient(135deg, var(--color-guinea-blue) 0%, #003861 100%);
+  border-right: 4px solid var(--color-guinea-red);
+  height: 100vh;
+  width: 280px;
+  padding: var(--spacing-lg) 0;
+  position: fixed;
+  left: 0;
+  top: 0;
+  overflow-y: auto;
+  box-shadow: var(--shadow-xl);
+  z-index: 100;
+  transition: all var(--transition-base);
+}
+
+.akig-navigation.guinean-nav {
+  background: linear-gradient(
+    135deg,
+    var(--color-guinea-blue) 0%,
+    #003861 50%,
+    #002840 100%
+  );
+}
+
+/* ============================================================================
+   MENU ITEMS
+   ============================================================================ */
+
+.nav-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.nav-item {
+  margin: 0;
+  padding: 0 var(--spacing-md);
+  transition: all var(--transition-fast);
+}
+
+.nav-item:hover {
+  background: rgba(206, 17, 38, 0.15);
+  border-left: 4px solid var(--color-guinea-red);
+  padding-left: calc(var(--spacing-md) - 4px);
+}
+
+/* ============================================================================
+   NAVIGATION LINKS
+   ============================================================================ */
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  border-radius: 8px;
+  transition: all var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+}
+
+.nav-link::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 4px;
+  background: var(--color-gold);
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: transform var(--transition-base);
+}
+
+.nav-link:hover {
+  background: rgba(206, 17, 38, 0.2);
+  color: var(--color-guinea-white);
+  padding-left: calc(var(--spacing-lg) + 8px);
+}
+
+.nav-link:hover::before {
+  transform: scaleY(1);
+}
+
+.nav-link.active {
+  background: linear-gradient(
+    90deg,
+    rgba(206, 17, 38, 0.3) 0%,
+    transparent 100%
+  );
+  color: var(--color-gold);
+  border-left: 4px solid var(--color-guinea-red);
+  padding-left: calc(var(--spacing-lg) - 4px);
+  font-weight: 600;
+  box-shadow: inset 0 0 10px rgba(206, 17, 38, 0.2);
+}
+
+.nav-link.active::before {
+  transform: scaleY(1);
+  background: var(--color-guinea-red);
+}
+
+/* Color variants */
+.nav-link.color-primary {
+  --icon-color: #FFD700;
+}
+
+.nav-link.color-secondary {
+  --icon-color: #00BCD4;
+}
+
+.nav-link.color-accent {
+  --icon-color: #FF6B35;
+}
+
+.nav-link.color-success {
+  --icon-color: #06D6A0;
+}
+
+.nav-link.color-warning {
+  --icon-color: #FFA500;
+}
+
+.nav-link.color-info {
+  --icon-color: #00BCD4;
+}
+
+.nav-link.color-text {
+  --icon-color: rgba(255, 255, 255, 0.7);
+}
+
+.nav-icon {
+  min-width: 20px;
+  color: var(--icon-color, rgba(255, 255, 255, 0.7));
+  transition: color var(--transition-fast);
+}
+
+.nav-link:hover .nav-icon {
+  color: var(--color-gold);
+  filter: drop-shadow(0 0 8px var(--color-gold));
+}
+
+.nav-label {
+  flex: 1;
+  font-size: 0.95rem;
+  letter-spacing: 0.3px;
+}
+
+/* Badge */
+.nav-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--color-guinea-red), #FF6B35);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(206, 17, 38, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(206, 17, 38, 0);
+  }
+}
+
+/* ============================================================================
+   DIVIDER & USER SECTION
+   ============================================================================ */
+
+.nav-divider {
+  margin: var(--spacing-md) 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+}
+
+.nav-user-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: rgba(206, 17, 38, 0.15);
+  border-radius: 8px;
+  margin: var(--spacing-md);
+  animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-gold), var(--color-orange));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-guinea-blue);
+  font-weight: 700;
+  font-size: 1.2rem;
+  box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.3);
+}
+
+.user-details {
+  flex: 1;
+}
+
+.user-name {
+  margin: 0;
+  color: var(--color-guinea-white);
+  font-weight: 600;
+  font-size: 0.9rem;
+  line-height: 1.2;
+}
+
+.user-role {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.8rem;
+  line-height: 1.2;
+}
+
+/* ============================================================================
+   LOGOUT BUTTON
+   ============================================================================ */
+
+.logout-item {
+  margin-top: auto;
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.logout-link {
+  background: linear-gradient(135deg, rgba(206, 17, 38, 0.3), transparent);
+  border-radius: 8px;
+  transition: all var(--transition-base);
+}
+
+.logout-link:hover {
+  background: linear-gradient(135deg, var(--color-guinea-red), #8B0000);
+  color: var(--color-guinea-white);
+  transform: translateX(4px);
+}
+
+.logout-link:hover .nav-icon {
+  animation: shake 0.5s;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+  20%, 40%, 60%, 80% { transform: translateX(2px); }
+}
+
+/* ============================================================================
+   MOBILE RESPONSIVE
+   ============================================================================ */
+
+.nav-mobile-toggle {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .akig-navigation {
+    width: 250px;
+  }
+
+  .nav-mobile-toggle {
+    display: flex;
+    justify-content: flex-end;
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: linear-gradient(135deg, var(--color-guinea-blue), #003861);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 101;
+    border-bottom: 2px solid var(--color-guinea-red);
+  }
+
+  .toggle-button {
+    background: none;
+    border: none;
+    color: var(--color-guinea-white);
+    cursor: pointer;
+    padding: var(--spacing-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nav-menu {
+    transform: translateX(-100%);
+    position: fixed;
+    top: 70px;
+    left: 0;
+    width: 100%;
+    height: calc(100vh - 70px);
+    background: linear-gradient(135deg, var(--color-guinea-blue), #003861);
+    transition: transform var(--transition-base);
+    padding: var(--spacing-md);
+  }
+
+  .nav-menu.open {
+    transform: translateX(0);
+  }
+}
+
+/* ============================================================================
+   SCROLLBAR STYLING
+   ============================================================================ */
+
+.akig-navigation::-webkit-scrollbar {
+  width: 6px;
+}
+
+.akig-navigation::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.akig-navigation::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--color-gold), var(--color-guinea-red));
+  border-radius: 3px;
+}
+
+.akig-navigation::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--color-guinea-red), var(--color-gold));
+}
+
+/* ============================================================================
+   ANIMATIONS & EFFECTS
+   ============================================================================ */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.nav-item {
+  animation: slideInRight var(--transition-slow) ease-out;
+}
+
+.nav-item:nth-child(1) { animation-delay: 0.05s; }
+.nav-item:nth-child(2) { animation-delay: 0.1s; }
+.nav-item:nth-child(3) { animation-delay: 0.15s; }
+.nav-item:nth-child(4) { animation-delay: 0.2s; }
+.nav-item:nth-child(5) { animation-delay: 0.25s; }
+
+/* ============================================================================
+   DARK MODE SUPPORT
+   ============================================================================ */
+
+@media (prefers-color-scheme: dark) {
+  .akig-navigation {
+    background: linear-gradient(135deg, #001a33 0%, #001e42 100%);
+    border-right: 4px solid var(--color-guinea-red);
+  }
+
+  .nav-link {
+    color: rgba(255, 255, 255, 0.9);
+  }
+}

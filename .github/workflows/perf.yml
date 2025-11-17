@@ -1,0 +1,10 @@
+name: Perf
+
+on: [push]
+
+jobs:
+  k6:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker run -e BASE_URL=${{ secrets.BASE_URL }} -e TOKEN=${{ secrets.TEST_TOKEN }} -i grafana/k6 run - < ops/k6/payments_load.js

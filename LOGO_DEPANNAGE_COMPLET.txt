@@ -1,0 +1,221 @@
+🔧 DÉPANNAGE COMPLET - ERREURS & SOLUTIONS
+═══════════════════════════════════════════════════════════════════════════════════
+
+
+❌ ERREUR 1: "Le fichier logo n'apparaît pas sur la page"
+═══════════════════════════════════════════════════════════════════════════════════
+
+CAUSES POSSIBLES:
+
+1️⃣ Le fichier n'est pas au bon endroit
+   ✓ Vérifier: C:\AKIG\frontend\public\assets\logos\logo.png existe vraiment
+   ✓ Ouvrir l'Explorateur et naviguer à ce chemin
+   ✓ Vous devriez voir votre fichier logo.png
+
+2️⃣ Le nom du fichier est incorrect
+   ✓ Vérifier le nom EXACTEMENT: logo.png
+   ✓ Pas de majuscule
+   ✓ Pas d'espace
+   ✓ Pas d'accents (pas de logo.PNG, pas de Logo.png)
+
+3️⃣ Le code n'a pas été modifié correctement
+   ✓ Ouvrir Login.jsx
+   ✓ Chercher: src="/assets/logos/logo.png"
+   ✓ Vérifier que ce texte EXACTE est présent
+   ✓ Vérifier les guillemets: " et pas '
+
+4️⃣ Le serveur n'a pas recompilé
+   ✓ Redémarrer npm: Ctrl+C puis npm start
+   ✓ Attendre le message "Compiled successfully"
+   ✓ Recharger le navigateur: F5
+   ✓ OU: Ctrl+Shift+R (vider cache)
+
+SOLUTIONS:
+──────────
+□ Vérifier chemin du fichier
+□ Vérifier nom du fichier (logo.png exactement)
+□ Vérifier code Login.jsx contient src="/assets/logos/logo.png"
+□ Redémarrer npm start
+□ Recharger navigateur Ctrl+Shift+R
+
+
+❌ ERREUR 2: "Le logo est déformé/écrasé/étiré"
+═══════════════════════════════════════════════════════════════════════════════════
+
+CAUSES POSSIBLES:
+
+1️⃣ L'image n'est pas carrée
+   ✓ Exemple: Image de 400x200 pixels au lieu de 200x200
+   ✓ Solution: Recadrer l'image pour la rendre carrée
+
+2️⃣ Les paramètres CSS ne conviennent pas
+   ✓ object-contain devrait garder les proportions
+   ✓ Si ça ne marche pas, essayer object-cover
+
+SOLUTIONS:
+──────────
+□ Vérifier que l'image est CARRÉE
+□ Si déformée: remplacer object-contain par object-cover
+□ Exemple:
+   className="w-14 h-14 object-cover drop-shadow-lg rounded-xl"
+
+
+❌ ERREUR 3: "Erreur dans le terminal PowerShell"
+═══════════════════════════════════════════════════════════════════════════════════
+
+MESSAGE COURANT:
+  "Cannot find module..." 
+  "Unexpected token..."
+  "Module not found..."
+
+CAUSES:
+
+1️⃣ Erreur de syntaxe dans le code
+   ✓ Guillemets mal fermés
+   ✓ Parenthèse manquante
+   ✓ Espace mal placé
+
+   EXEMPLE INCORRECT:
+   <img src="/assets/logos/logo.png  ← Guillemet pas fermé!
+   
+   EXEMPLE CORRECT:
+   <img src="/assets/logos/logo.png"  ← Guillemet fermé ✓
+
+2️⃣ Mauvais chemin
+   ✓ Doit être: /assets/logos/logo.png
+   ✓ Pas: C:\AKIG\frontend\public\assets\logos\logo.png
+   ✓ Pas: \assets\logos\logo.png (pas de backslash au début)
+
+3️⃣ Vous n'êtes pas dans le bon dossier
+   ✓ Vérifier: C:\AKIG\frontend> (dans PowerShell)
+   ✓ Doit afficher: C:\AKIG\frontend>
+   ✓ Si non, taper: cd C:\AKIG\frontend
+
+SOLUTIONS:
+──────────
+□ Vérifier guillemets fermés
+□ Vérifier pas d'espace bizarre
+□ Vérifier chemin: /assets/logos/logo.png
+□ Vérifier dossier correct dans PowerShell
+
+
+❌ ERREUR 4: "npm start ne fonctionne pas / Commande pas reconnue"
+═══════════════════════════════════════════════════════════════════════════════════
+
+CAUSES:
+
+1️⃣ PowerShell n'est pas dans le bon dossier
+   ✓ Taper: cd C:\AKIG\frontend
+   ✓ Vérifier que vous voyez: C:\AKIG\frontend>
+   ✓ Puis taper: npm start
+
+2️⃣ npm n'est pas installé
+   ✓ Vérifier installation Node.js
+   ✓ Taper: node --version
+   ✓ Si erreur: Réinstaller Node.js
+
+3️⃣ Dépendances manquantes
+   ✓ Taper: npm install
+   ✓ Attendre l'installation
+   ✓ Puis: npm start
+
+SOLUTIONS:
+──────────
+□ Vérifier dossier: cd C:\AKIG\frontend
+□ Vérifier Node.js: node --version
+□ Installer dépendances: npm install
+□ Démarrer serveur: npm start
+
+
+❌ ERREUR 5: "Erreur 404 - Fichier non trouvé"
+═══════════════════════════════════════════════════════════════════════════════════
+
+MESSAGE:
+  "Failed to load resource: the server responded with a status of 404"
+
+CAUSE:
+  Le navigateur ne trouve pas le fichier logo.png
+
+SOLUTIONS:
+──────────
+□ Vérifier chemin: /assets/logos/logo.png
+□ Vérifier fichier existe vraiment
+□ Vérifier nom: logo.png exactement
+□ Vérifier dossier: C:\AKIG\frontend\public\assets\logos\
+
+
+❌ ERREUR 6: "La page de connexion ne charge pas du tout"
+═══════════════════════════════════════════════════════════════════════════════════
+
+CAUSES:
+
+1️⃣ Erreur de syntaxe bloque le compilateur
+   ✓ Chercher erreur dans le terminal
+   ✓ Lire le message d'erreur
+   ✓ Corriger la syntaxe
+
+2️⃣ Serveur n'a pas compilé
+   ✓ Chercher: "Compiled successfully"
+   ✓ Si pas présent: attendre ou Ctrl+S (sauvegarder)
+
+SOLUTIONS:
+──────────
+□ Vérifier terminal pour les erreurs en rouge
+□ Vérifier: "Compiled successfully" s'affiche
+□ Relancer: Ctrl+C puis npm start
+□ Recharger navigateur
+
+
+❌ ERREUR 7: "Le logo apparaît un instant puis disparaît"
+═══════════════════════════════════════════════════════════════════════════════════
+
+CAUSE:
+  Probablement un conflit CSS ou une recompilation
+
+SOLUTIONS:
+──────────
+□ Vider cache navigateur: Ctrl+Shift+R (pas Ctrl+R!)
+□ Redémarrer npm: Ctrl+C puis npm start
+□ Attendre "Compiled successfully"
+□ Recharger page complètement
+
+
+═══════════════════════════════════════════════════════════════════════════════════
+✅ CHECKLIST DE VÉRIFICATION
+═══════════════════════════════════════════════════════════════════════════════════
+
+Avant de déclarer ça bloqué, vérifier:
+
+□ Fichier logo.png existe: C:\AKIG\frontend\public\assets\logos\logo.png
+□ Nom du fichier: EXACTEMENT "logo.png" (pas majuscule)
+□ Code modifié dans: C:\AKIG\frontend\src\pages\Login.jsx
+□ Chemin correct: /assets/logos/logo.png (pas C:\...)
+□ Guillemets fermés: src="/assets/logos/logo.png"
+□ Fichier sauvegardé: Ctrl+S
+□ Serveur redémarré: npm start
+□ Pas d'erreurs dans terminal PowerShell
+□ Page rechargée: Ctrl+Shift+R (pas seulement F5)
+□ Attendre 2-3 secondes que ça charge
+
+
+═══════════════════════════════════════════════════════════════════════════════════
+🆘 RIEN NE MARCHE? 
+═══════════════════════════════════════════════════════════════════════════════════
+
+Si vous avez tout essayé et ça ne marche pas:
+
+1. Prendre une CAPTURE D'ÉCRAN de:
+   - L'erreur dans le terminal PowerShell
+   - OU: L'erreur dans le navigateur
+   - OU: Le dossier avec le fichier logo.png
+
+2. Me montrer exactement où vous êtes bloqué
+
+3. Me dire:
+   - Quelle erreur vous voyez?
+   - Qu'avez-vous fait?
+   - Quel type de fichier logo? (PNG? JPG?)
+
+On va le résoudre ensemble! 💪
+
+═══════════════════════════════════════════════════════════════════════════════════

@@ -1,0 +1,82 @@
+{
+  "title": "Errors",
+  "http_errors": {
+    "400": "Bad Request",
+    "401": "Unauthorized",
+    "403": "Forbidden",
+    "404": "Not Found",
+    "409": "Conflict",
+    "422": "Unprocessable Entity",
+    "429": "Too Many Requests",
+    "500": "Internal Server Error",
+    "502": "Bad Gateway",
+    "503": "Service Unavailable",
+    "504": "Gateway Timeout"
+  },
+  "validation": {
+    "required": "This field is required",
+    "email": "Please enter a valid email address",
+    "phone": "Please enter a valid phone number",
+    "url": "Please enter a valid URL",
+    "number": "Please enter a valid number",
+    "integer": "Please enter a valid integer",
+    "positive": "The number must be positive",
+    "min": "The minimum value is {{min}}",
+    "max": "The maximum value is {{max}}",
+    "min_length": "The minimum length is {{min}} characters",
+    "max_length": "The maximum length is {{max}} characters",
+    "pattern": "The format is invalid",
+    "match": "The fields do not match",
+    "unique": "This value already exists",
+    "date": "Please enter a valid date",
+    "date_range": "The end date must be after the start date"
+  },
+  "authentication": {
+    "invalid_credentials": "Invalid credentials",
+    "session_expired": "Your session has expired",
+    "unauthorized": "You are not authorized to access this resource",
+    "permission_denied": "Permission denied",
+    "account_locked": "Your account is locked",
+    "account_disabled": "Your account is disabled",
+    "account_not_verified": "Your account has not been verified",
+    "password_reset_required": "Password reset is required"
+  },
+  "payment": {
+    "insufficient_funds": "Insufficient funds",
+    "invalid_card": "Invalid card",
+    "card_expired": "Card expired",
+    "cvv_invalid": "Invalid CVV",
+    "transaction_failed": "Transaction failed",
+    "transaction_declined": "Transaction declined",
+    "duplicate_transaction": "Duplicate transaction detected",
+    "amount_exceeds_limit": "Amount exceeds limit"
+  },
+  "contract": {
+    "contract_not_found": "Contract not found",
+    "contract_expired": "Contract has expired",
+    "cannot_renew": "Cannot renew this contract",
+    "cannot_terminate": "Cannot terminate this contract",
+    "invalid_dates": "The dates are invalid",
+    "tenant_not_assigned": "No tenant assigned"
+  },
+  "tenant": {
+    "tenant_not_found": "Tenant not found",
+    "duplicate_tenant": "This tenant already exists",
+    "invalid_document": "Invalid document",
+    "document_upload_failed": "Failed to upload document"
+  },
+  "property": {
+    "property_not_found": "Property not found",
+    "property_unavailable": "Property unavailable",
+    "occupancy_limit_reached": "Occupancy limit reached"
+  },
+  "general": {
+    "something_went_wrong": "Something went wrong",
+    "operation_failed": "Operation failed",
+    "please_try_again": "Please try again",
+    "contact_support": "Please contact support",
+    "network_error": "Network error. Please check your connection",
+    "timeout": "Request timeout",
+    "server_error": "Server error. Please try again later"
+  }
+}

@@ -1,0 +1,7 @@
+﻿{
+    "host":  "localhost",
+    "database":  "immobilier",
+    "user":  "root",
+    "password":  "",
+    "table":  "historique"
+}

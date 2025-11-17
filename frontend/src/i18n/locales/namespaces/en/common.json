@@ -1,0 +1,60 @@
+{
+  "navigation": {
+    "dashboard": "Dashboard",
+    "payments": "Payments",
+    "contracts": "Contracts",
+    "tenants": "Tenants",
+    "properties": "Properties",
+    "invoices": "Invoices",
+    "reports": "Reports",
+    "settings": "Settings",
+    "admin": "Administration"
+  },
+  "common": {
+    "agency": "Agency",
+    "property": "Property",
+    "tenant": "Tenant",
+    "owner": "Owner",
+    "address": "Address",
+    "email": "Email",
+    "phone": "Phone",
+    "date": "Date",
+    "amount": "Amount",
+    "status": "Status",
+    "actions": "Actions",
+    "active": "Active",
+    "inactive": "Inactive",
+    "pending": "Pending",
+    "completed": "Completed",
+    "failed": "Failed",
+    "archived": "Archived"
+  },
+  "breadcrumb": {
+    "home": "Home",
+    "back_to_home": "Back to home"
+  },
+  "pagination": {
+    "showing": "Showing {{from}} to {{to}} of {{total}}",
+    "no_items": "No items to display",
+    "items_per_page": "Items per page"
+  },
+  "validation": {
+    "required_field": "This field is required",
+    "invalid_email": "Invalid email address",
+    "invalid_phone": "Invalid phone number",
+    "min_length": "Minimum {{count}} characters",
+    "max_length": "Maximum {{count}} characters",
+    "match_fields": "Fields do not match"
+  },
+  "messages": {
+    "confirm_delete": "Are you sure you want to delete this item?",
+    "confirm_action": "Are you sure you want to perform this action?",
+    "saved_successfully": "Successfully saved",
+    "deleted_successfully": "Successfully deleted",
+    "updated_successfully": "Successfully updated",
+    "operation_failed": "Operation failed",
+    "try_again": "Please try again",
+    "loading": "Loading...",
+    "no_internet": "No internet connection"
+  }
+}
