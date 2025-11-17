@@ -1,0 +1,34 @@
+{
+  "project": "AKIG - Système de Gestion Immobilière",
+  "version": "1.0.0",
+  "description": "Plateforme complète de gestion immobilière avec backend Node.js et frontend React",
+  "urls": {
+    "frontend": "http://localhost:3000",
+    "backend": "http://localhost:4000",
+    "github": "https://github.com/kalou906/AKIG",
+    "api_docs": "http://localhost:4000/api/health"
+  },
+  "technologies": {
+    "backend": "Node.js, Express, PostgreSQL",
+    "frontend": "React, HTML5, CSS3",
+    "deployment": "Docker, Kubernetes"
+  },
+  "features": {
+    "dashboard": "Tableau de bord immobilier",
+    "tenants": "Gestion des locataires",
+    "contracts": "Gestion des contrats",
+    "payments": "Suivi des paiements",
+    "properties": "Gestion des biens immobiliers"
+  },
+  "api_endpoints": {
+    "health": "GET /api/health",
+    "auth": "POST /api/auth/login",
+    "contracts": "GET /api/contracts",
+    "payments": "GET /api/payments"
+  },
+  "quick_start": {
+    "1_frontend": "npm start (dans c:\\AKIG\\frontend)",
+    "2_backend": "npm start (dans c:\\AKIG\\backend)",
+    "3_access": "http://localhost:3000"
+  }
+}
